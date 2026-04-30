@@ -1225,7 +1225,7 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
   const apiKey = getApiKey();
   if (!apiKey) {
     output.classList.remove('loading');
-    output.textContent = '🔑 Primero configurá tu API Key de Groq. Hacé clic en "🔑 API Key" arriba a la derecha.';
+    output.textContent = '🔑 Primero configurá tu API Key de OpenRouter. Hacé clic en "🔑 API Key" arriba a la derecha.';
     container.style.display = 'block';
     showApiKeyModal();
     return;
@@ -1286,7 +1286,7 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
     output.classList.remove('loading');
     const errMsg = err.message || '';
     if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('CORS')) {
-      output.textContent = '🔑 Primero configurá tu API Key de Groq. Tocá el botón "🔑 API Key" arriba a la derecha.';
+      output.textContent = '🔑 Primero configurá tu API Key de OpenRouter. Tocá el botón "🔑 API Key" arriba a la derecha.';
     } else {
       output.textContent = '⚠️ Error: ' + errMsg + '. Verificá tu API Key y conexión.';
     }
@@ -1757,15 +1757,15 @@ function saveApiKey() {
     document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
     return;
   }
-  if (!key.startsWith('gsk_')) {
-    document.getElementById('apikey-error').textContent = '⚠️ La key de Groq debe empezar con gsk_ — verificá que copiaste la correcta.';
+  if (!key.startsWith('sk-or-')) {
+    document.getElementById('apikey-error').textContent = '⚠️ La key de OpenRouter debe empezar con gsk_ — verificá que copiaste la correcta.';
     return;
   }
   // Guardar en AMBOS sessionStorage y localStorage para mayor persistencia
   sessionStorage.setItem('if_apikey', key);
   localStorage.setItem('if_apikey', key);
   document.getElementById('apikey-modal').style.display = 'none';
-  document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
+  document.getElementById('apikey-btn').textContent = '🔑 OpenRouter ✓';
   document.getElementById('apikey-btn').style.color = '#34d399';
   document.getElementById('apikey-btn').style.borderColor = '#34d399';
   document.getElementById('apikey-error').textContent = '';
@@ -1781,7 +1781,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const saved = sessionStorage.getItem('if_apikey') || localStorage.getItem('if_apikey');
   if (saved) {
     sessionStorage.setItem('if_apikey', saved);
-    document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
+    document.getElementById('apikey-btn').textContent = '🔑 OpenRouter ✓';
     document.getElementById('apikey-btn').style.color = '#34d399';
     document.getElementById('apikey-btn').style.borderColor = '#34d399';
     document.getElementById('apikey-input').value = saved;
@@ -1866,20 +1866,20 @@ window.addEventListener('appinstalled', dismissBanner);
 <div id="apikey-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;">
   <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
     <div style="font-size:28px;margin-bottom:8px">🔑</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">🔑 API Key de Groq</h2>
-    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS — funciona desde Argentina sin pagar nada</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">🔑 API Key de OpenRouter</h2>
+    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS — funciona desde GitHub Pages sin restricciones</div>
     <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:12px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.6">
       <strong>¿Dónde conseguir tu API Key?</strong><br>
-      1. Abrí <strong style="color:#a78bfa">console.groq.com</strong><br>
-      2. Registrate gratis con tu Gmail<br>
-      3. Menú → <strong>API Keys</strong> → <strong>Create API Key</strong><br>
-      4. Copiá la key → empieza con <strong>gsk_...</strong>
+      1. Abrí <strong style="color:#a78bfa">openrouter.ai</strong><br>
+      2. Clic en <strong>Sign In</strong> → con tu Google<br>
+      3. Menú → <strong>Keys</strong> → <strong>Create Key</strong><br>
+      4. Copiá la key → empieza con <strong>sk-or-...</strong>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin:0">TU API KEY DE GROQ</label>
       <button onclick="toggleKeyVisibility()" id="toggle-key-btn" style="background:none;border:none;color:#6b5f8a;font-size:12px;cursor:pointer;padding:2px 6px">👁 Ver</button>
     </div>
-    <input id="apikey-input" type="password" placeholder="gsk_..." 
+    <input id="apikey-input" type="password" placeholder="sk-or-..." 
       style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
       onkeydown="if(event.key==='Enter')saveApiKey()">
     <div id="apikey-error" style="color:#f87171;font-size:12px;margin-bottom:12px;min-height:18px"></div>
