@@ -1232,31 +1232,31 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
   }
   
   // Mostrar que está procesando
-  output.textContent = '⏳ Conectando con Groq AI...';
+  output.textContent = '⏳ Conectando con OpenRouter...';
   output.classList.add('loading');
   
   try {
-    const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    const API_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions');
     
     
     const response = await fetch(API_URL, {
-      method: "POST",
+      method: 'POST',
       headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://leosclaudia.github.io',
+        'X-Title': 'InfoForge'
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: prompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
         ],
         max_tokens: 2048,
         temperature: 0.8
       })
     });
-
-    if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       const msg = errData?.error?.message || response.statusText || 'Error desconocido';
       throw new Error(msg);
