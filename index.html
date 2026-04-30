@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="InfoForge">
+<meta name="theme-color" content="#7c3aed">
+<meta name="description" content="Creá tu infoproducto completo con IA en 16 pasos automatizados.">
+<link rel="manifest" href="manifest.json">
+<!-- Apple touch icon inline SVG -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%237c3aed'/%3E%3Ctext x='256' y='340' font-family='serif' font-weight='bold' font-size='260' text-anchor='middle' fill='white'%3EIF%3C/text%3E%3C/svg%3E">
+<title>InfoForge — Fábrica de Infoproductos IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --v1: #7c3aed; --v2: #6d28d9; --v3: #5b21b6; --v4: #4c1d95;
+  --va: #a78bfa; --vb: #c4b5fd; --vc: #ede9fe;
+  --accent: #f0abfc; --accent2: #e879f9;
+  --bg: #09070f; --bg2: #0f0b1a; --bg3: #140f20;
+  --surface: #1a1229; --surface2: #221a35;
+  --border: #2d2245; --border2: #3d3060;
+  --text: #f1eeff; --text2: #a89ec4; --text3: #6b5f8a;
+  --green: #34d399; --yellow: #fbbf24;
+  --glow: rgba(124,58,237,0.4);
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 72px;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0; gap: 8px; z-index: 50;
+  transition: width .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar:hover { width: 200px; }
+.logo-mark {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--v1), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  color: white; margin-bottom: 16px; flex-shrink: 0;
+  box-shadow: 0 0 20px var(--glow);
+}
+.logo-text {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+  white-space: nowrap; overflow: hidden; width: 0;
+  transition: width .3s; color: var(--text);
+}
+.sidebar:hover .logo-text { width: 120px; }
+.logo-row { display: flex; align-items: center; gap: 10px; padding: 0 16px; margin-bottom: 8px; }
+
+.nav-item {
+  width: calc(100% - 16px); display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-radius: 8px; cursor: pointer;
+  transition: background .15s, color .15s; color: var(--text3);
+  border: none; background: none; text-align: left;
+}
+.nav-item:hover { background: var(--surface); color: var(--va); }
+.nav-item.active { background: linear-gradient(90deg, rgba(124,58,237,0.25), transparent); color: var(--va); border-left: 2px solid var(--v1); }
+.nav-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+.nav-label { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; width: 0; transition: width .3s; }
+.sidebar:hover .nav-label { width: 120px; }
+.nav-item .step-badge {
+  margin-left: auto; background: var(--v3); color: var(--vb);
+  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+  display: none;
+}
+.sidebar:hover .step-badge { display: block; }
+.nav-item.done .nav-icon::after { content: ' ✓'; font-size: 11px; color: var(--green); }
+.nav-item.done { color: var(--text2); }
+
+.sidebar-divider { width: 40px; height: 1px; background: var(--border); margin: 8px 0; }
+
+/* ── MAIN ── */
+.main { margin-left: 72px; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(9,7,15,0.85); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 32px; display: flex; align-items: center; justify-content: space-between;
+}
+.topbar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.progress-ring { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+.progress-bar-wrap { width: 120px; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--v1), var(--accent2)); border-radius: 4px; transition: width .5s; }
+.btn-reset {
+  background: transparent; border: 1px solid var(--border2); color: var(--text2);
+  font-size: 12px; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all .15s;
+}
+.btn-reset:hover { border-color: var(--va); color: var(--va); }
+
+/* ── CONTENT AREA ── */
+.content { padding: 40px 32px; max-width: 860px; }
+
+/* ── STEP HEADER ── */
+.step-header { margin-bottom: 32px; }
+.step-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.step-num {
+  background: linear-gradient(135deg, var(--v1), var(--accent2));
+  color: white; font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 11px; padding: 4px 10px; border-radius: 20px; letter-spacing: 1px;
+}
+.step-tag { font-size: 12px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; }
+.step-header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(24px,4vw,36px); line-height: 1.15; margin-bottom: 10px; }
+.step-header h1 em { color: var(--va); font-style: normal; }
+.step-header p { color: var(--text2); font-size: 15px; line-height: 1.65; max-width: 600px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px; margin-bottom: 16px;
+}
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--va); margin-bottom: 16px; letter-spacing: 0.5px; }
+
+/* ── INPUTS ── */
+label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+input[type=text], input[type=number], textarea, select {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  padding: 12px 16px; border-radius: 8px; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--v1); box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+select { appearance: none; cursor: pointer; }
+.input-group { margin-bottom: 16px; }
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ── CHIPS ── */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--border2); color: var(--text2); background: transparent;
+  transition: all .15s; font-family: 'DM Sans', sans-serif;
+}
+.chip:hover { border-color: var(--va); color: var(--va); }
+.chip.selected { background: var(--v3); border-color: var(--v1); color: var(--vb); }
+
+/* ── OUTPUT BOX ── */
+.output-box {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 20px; font-size: 14px; line-height: 1.75;
+  color: var(--text); white-space: pre-wrap; word-break: break-word;
+  min-height: 120px; position: relative; overflow: hidden;
+}
+.output-box.loading { color: transparent; }
+.output-box.loading::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.15) 50%, transparent 100%);
+  background-size: 200% 100%; animation: sweep 1.4s infinite;
+}
+@keyframes sweep { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.typing-cursor { display: inline-block; width: 2px; height: 1em; background: var(--va); margin-left: 2px; animation: blink .7s infinite; vertical-align: text-bottom; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.output-label { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; }
+.copy-btn {
+  font-size: 11px; color: var(--text3); background: none; border: none;
+  cursor: pointer; padding: 4px 8px; border-radius: 4px; font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+}
+.copy-btn:hover { color: var(--va); background: var(--surface2); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--v1), var(--v2));
+  color: white; font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 15px; padding: 14px 28px; border: none; border-radius: 10px;
+  cursor: pointer; transition: all .2s; box-shadow: 0 4px 20px var(--glow);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 32px var(--glow); filter: brightness(1.1); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: transparent; color: var(--va); font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 14px; padding: 12px 24px;
+  border: 1px solid var(--border2); border-radius: 10px; cursor: pointer;
+  transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-secondary:hover { border-color: var(--v1); background: rgba(124,58,237,0.08); }
+
+.btn-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+
+/* ── STEP NAV ── */
+.step-nav {
+  position: fixed; bottom: 0; left: 72px; right: 0; z-index: 40;
+  background: rgba(9,7,15,0.92); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border); padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.step-nav-info { font-size: 13px; color: var(--text3); }
+.step-nav-info strong { color: var(--text2); }
+.btn-next {
+  background: linear-gradient(135deg, var(--v1), var(--accent2));
+  color: white; font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 14px; padding: 12px 28px; border: none; border-radius: 10px;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px var(--glow); transition: all .2s;
+}
+.btn-next:hover { filter: brightness(1.1); transform: translateX(2px); }
+.btn-prev {
+  background: transparent; color: var(--text2); border: 1px solid var(--border);
+  font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px;
+  padding: 12px 20px; border-radius: 10px; cursor: pointer; transition: all .15s;
+}
+.btn-prev:hover { border-color: var(--border2); color: var(--text); }
+.btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── GRID CARDS ── */
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.feat-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; cursor: pointer; transition: all .2s;
+}
+.feat-card:hover { border-color: var(--v1); background: rgba(124,58,237,0.06); }
+.feat-card.selected { border-color: var(--v1); background: rgba(124,58,237,0.12); }
+.feat-card .feat-icon { font-size: 24px; margin-bottom: 8px; }
+.feat-card .feat-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.feat-card .feat-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ── EXPORT PANEL ── */
+.export-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.export-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; text-align: center; cursor: pointer;
+  transition: all .2s;
+}
+.export-card:hover { border-color: var(--v1); box-shadow: 0 4px 20px var(--glow); }
+.export-icon { font-size: 32px; margin-bottom: 10px; }
+.export-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.export-desc { font-size: 12px; color: var(--text3); }
+
+/* ── WELCOME SCREEN ── */
+.welcome {
+  min-height: calc(100vh - 140px); display: flex;
+  flex-direction: column; justify-content: center; padding: 40px 32px;
+}
+.welcome-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.welcome h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(36px, 6vw, 64px); line-height: 1.05;
+  margin-bottom: 20px; max-width: 700px;
+}
+.welcome h1 span { color: var(--va); }
+.welcome p { font-size: 16px; color: var(--text2); line-height: 1.7; max-width: 520px; margin-bottom: 36px; }
+.steps-overview {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px;
+}
+.step-pill {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; text-align: center;
+}
+.step-pill .pill-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--va); }
+.step-pill .pill-label { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── TOOLTIP ── */
+.tip {
+  background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25);
+  border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--text2);
+  display: flex; gap: 10px; margin-bottom: 16px; line-height: 1.6;
+}
+.tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── RESULT SECTIONS ── */
+.result-section { margin-bottom: 24px; }
+.result-section h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--va); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+/* ── TAG ── */
+.tag {
+  display: inline-block; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text2); margin: 3px;
+}
+
+/* ── PROGRESS STEPS ── */
+.pipeline {
+  display: flex; flex-direction: column; gap: 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 24px;
+}
+.pipeline-step {
+  display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+  border-bottom: 1px solid var(--border); font-size: 13px;
+  transition: background .2s;
+}
+.pipeline-step:last-child { border-bottom: none; }
+.pipeline-step.active { background: rgba(124,58,237,0.08); }
+.pipeline-step.done { color: var(--text2); }
+.ps-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.ps-icon.pending { background: var(--surface2); color: var(--text3); }
+.ps-icon.active { background: var(--v1); color: white; animation: pulse-ring .8s infinite; }
+.ps-icon.done { background: rgba(52,211,153,0.15); color: var(--green); }
+@keyframes pulse-ring { 0%{box-shadow:0 0 0 0 rgba(124,58,237,0.5)} 100%{box-shadow:0 0 0 8px transparent} }
+.ps-label { font-weight: 500; flex: 1; }
+.ps-time { font-size: 11px; color: var(--text3); }
+
+/* ── SCROLLABLE CONTENT ── */
+.content-wrap { padding-bottom: 100px; }
+
+/* ── ADS GRID ── */
+.ads-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.ad-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.ad-header { background: var(--surface); padding: 10px 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--text2); border-bottom: 1px solid var(--border); }
+.ad-body { padding: 16px; }
+.ad-hook { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.ad-copy { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+.ad-cta { display: inline-block; background: var(--v1); color: white; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .sidebar { width: 56px; }
+  .main { margin-left: 56px; }
+  .step-nav { left: 56px; }
+  .content { padding: 24px 16px; }
+  .input-row { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .steps-overview { grid-template-columns: repeat(2, 1fr); }
+  .export-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="logo-row">
+    <div class="logo-mark">IF</div>
+    <div class="logo-text">InfoForge</div>
+  </div>
+
+  <div class="nav-item active" onclick="goToStep(0)" id="nav-0">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </div>
+  <div class="sidebar-divider"></div>
+
+  <div class="nav-item" onclick="goToStep(1)" id="nav-1">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Tu Producto</span>
+    <span class="step-badge">1-2</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(3)" id="nav-3">
+    <span class="nav-icon">🔍</span>
+    <span class="nav-label">Investigación</span>
+    <span class="step-badge">3-4</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(5)" id="nav-5">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Avatar</span>
+    <span class="step-badge">5-6</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(7)" id="nav-7">
+    <span class="nav-icon">💎</span>
+    <span class="nav-label">Oferta</span>
+    <span class="step-badge">7-8</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(9)" id="nav-9">
+    <span class="nav-icon">📚</span>
+    <span class="nav-label">Ebook</span>
+    <span class="step-badge">9-10</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(11)" id="nav-11">
+    <span class="nav-icon">🌐</span>
+    <span class="nav-label">Landing Page</span>
+    <span class="step-badge">11-12</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(13)" id="nav-13">
+    <span class="nav-icon">📢</span>
+    <span class="nav-label">Ads Creativos</span>
+    <span class="step-badge">13-14</span>
+  </div>
+  <div class="nav-item" onclick="goToStep(15)" id="nav-15">
+    <span class="nav-icon">🚀</span>
+    <span class="nav-label">Lanzamiento</span>
+    <span class="step-badge">15-16</span>
+  </div>
+
+  <div class="sidebar-divider" style="margin-top:auto"></div>
+  <div class="nav-item" onclick="exportAll()">
+    <span class="nav-icon">📦</span>
+    <span class="nav-label">Exportar Todo</span>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">InfoForge — Fábrica de Infoproductos</div>
+    <div class="topbar-right">
+      <button class="btn-reset" onclick="showApiKeyModal()" id="apikey-btn" style="border-color:#7c3aed;color:#a78bfa">🔑 API Key</button>
+      <div class="progress-ring">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <span id="progress-text">0/16</span>
+      </div>
+      <button class="btn-reset" onclick="confirmReset()">Nueva sesión</button>
+    </div>
+  </div>
+
+  <!-- CONTENT PAGES -->
+  <div class="content-wrap">
+
+    <!-- ═══ STEP 0: WELCOME ═══ -->
+    <div id="step-0" class="step-page">
+      <div class="welcome">
+        <div class="welcome-glow"></div>
+        <div style="position:relative">
+          <div style="font-size:12px;letter-spacing:3px;color:var(--text3);margin-bottom:16px;text-transform:uppercase">Sistema automatizado IA</div>
+          <h1>Tu <span>infoproducto</span> ganador.<br>De la idea al testeo.</h1>
+          <p>InfoForge te lleva de 0 a producto listo para vender en Hotmart o Shopify, con 16 pasos completamente automatizados por IA. Investigación, oferta, ebook, landing y ads — todo en una sola sesión.</p>
+
+          <div class="steps-overview">
+            <div class="step-pill"><div class="pill-num">🎯</div><div class="pill-label">Tu nicho y producto</div></div>
+            <div class="step-pill"><div class="pill-num">👤</div><div class="pill-label">Avatar & mercado</div></div>
+            <div class="step-pill"><div class="pill-num">📚</div><div class="pill-label">Ebook completo</div></div>
+            <div class="step-pill"><div class="pill-num">🚀</div><div class="pill-label">Landing + Ads</div></div>
+          </div>
+
+          <div class="pipeline">
+            <div class="pipeline-step"><div class="ps-icon pending">1</div><div class="ps-label">Definición del producto</div><div class="ps-time">2 min</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">2</div><div class="ps-label">Plataforma de venta</div><div class="ps-time">1 min</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">3</div><div class="ps-label">Investigación de mercado IA</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">4</div><div class="ps-label">Análisis de competencia</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">5</div><div class="ps-label">Avatar del cliente ideal</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">6</div><div class="ps-label">Dolores y deseos profundos</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">7</div><div class="ps-label">Oferta irresistible</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">8</div><div class="ps-label">Precio y garantía</div><div class="ps-time">2 min</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">9</div><div class="ps-label">Estructura del ebook</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">10</div><div class="ps-label">Contenido completo IA</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">11</div><div class="ps-label">Copy de la landing page</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">12</div><div class="ps-label">Secciones y estructura</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">13</div><div class="ps-label">Creativos para Meta Ads</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">14</div><div class="ps-label">Scripts para video ads</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">15</div><div class="ps-label">Email de lanzamiento</div><div class="ps-time">auto</div></div>
+            <div class="pipeline-step"><div class="ps-icon pending">16</div><div class="ps-label">Kit de exportación completo</div><div class="ps-time">auto</div></div>
+          </div>
+
+          <button class="btn-primary" onclick="goToStep(1)" style="font-size:16px;padding:16px 36px">
+            ⚡ Empezar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 1: DEFINICIÓN DEL PRODUCTO ═══ -->
+    <div id="step-1" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 01</span>
+          <span class="step-tag">Definición del producto</span>
+        </div>
+        <h1>¿De qué trata tu <em>infoproducto</em>?</h1>
+        <p>Describí brevemente tu idea. No necesita ser perfecta — la IA va a investigar y mejorarla.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">NICHO Y TEMA</div>
+        <div class="input-group">
+          <label>¿Sobre qué tema querés crear el infoproducto?</label>
+          <input type="text" id="s1-topic" placeholder="Ej: nutrición para mujeres de 40+, trading para principiantes, fitness en casa..." oninput="saveField('topic', this.value)">
+        </div>
+        <div class="input-group">
+          <label>¿Cuál es el resultado principal que promete tu producto?</label>
+          <input type="text" id="s1-result" placeholder="Ej: perder 10kg en 2 meses, generar ingresos con cripto, tonificar sin gym..." oninput="saveField('result', this.value)">
+        </div>
+        <div class="input-group">
+          <label>¿Qué tipo de infoproducto vas a crear?</label>
+          <div class="feature-grid">
+            <div class="feat-card" onclick="selectType('ebook', this)">
+              <div class="feat-icon">📖</div>
+              <div class="feat-title">Ebook / Guía</div>
+              <div class="feat-desc">PDF descargable con contenido paso a paso</div>
+            </div>
+            <div class="feat-card" onclick="selectType('curso', this)">
+              <div class="feat-icon">🎓</div>
+              <div class="feat-title">Curso en video</div>
+              <div class="feat-desc">Script y estructura para grabar clases</div>
+            </div>
+            <div class="feat-card" onclick="selectType('plantilla', this)">
+              <div class="feat-icon">📋</div>
+              <div class="feat-title">Plantillas / Sistema</div>
+              <div class="feat-desc">Templates y frameworks aplicables</div>
+            </div>
+            <div class="feat-card" onclick="selectType('coaching', this)">
+              <div class="feat-icon">🧑‍💼</div>
+              <div class="feat-title">Programa / Coaching</div>
+              <div class="feat-desc">Programa con sesiones y seguimiento</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 2: PLATAFORMA ═══ -->
+    <div id="step-2" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 02</span>
+          <span class="step-tag">Plataforma y precio</span>
+        </div>
+        <h1>¿Dónde vas a <em>vender</em>?</h1>
+        <p>Elegí la plataforma y rango de precio. Esto afecta cómo se genera el copy y la estrategia.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">PLATAFORMA DE VENTA</div>
+        <div class="feature-grid">
+          <div class="feat-card" onclick="selectPlat('hotmart', this)">
+            <div class="feat-icon">🟧</div>
+            <div class="feat-title">Hotmart</div>
+            <div class="feat-desc">Infoproductos digitales, cursos, ebooks</div>
+          </div>
+          <div class="feat-card" onclick="selectPlat('shopify', this)">
+            <div class="feat-icon">🟩</div>
+            <div class="feat-title">Shopify</div>
+            <div class="feat-desc">Tienda digital con checkout propio</div>
+          </div>
+          <div class="feat-card" onclick="selectPlat('gumroad', this)">
+            <div class="feat-icon">🟣</div>
+            <div class="feat-title">Gumroad</div>
+            <div class="feat-desc">Venta simple de archivos digitales</div>
+          </div>
+          <div class="feat-card" onclick="selectPlat('propio', this)">
+            <div class="feat-icon">🌐</div>
+            <div class="feat-title">Sitio propio</div>
+            <div class="feat-desc">WordPress, Webflow, custom</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">RANGO DE PRECIO</div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Precio en USD</label>
+            <input type="number" id="s2-price" placeholder="Ej: 27" oninput="saveField('price', this.value)">
+          </div>
+          <div class="input-group">
+            <label>Moneda de referencia</label>
+            <select id="s2-currency" onchange="saveField('currency', this.value)">
+              <option value="USD">USD — Dólar</option>
+              <option value="ARS">ARS — Peso argentino</option>
+              <option value="MXN">MXN — Peso mexicano</option>
+              <option value="BRL">BRL — Real brasileño</option>
+              <option value="COP">COP — Peso colombiano</option>
+            </select>
+          </div>
+        </div>
+        <div class="tip"><div class="tip-icon">💡</div> Para infoproductos de entrada, los precios entre $17–$49 USD tienen mejor conversión en cold traffic de Meta Ads.</div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3: INVESTIGACIÓN DE MERCADO ═══ -->
+    <div id="step-3" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 03</span>
+          <span class="step-tag">Investigación de mercado IA</span>
+        </div>
+        <h1>Analizando tu <em>mercado</em></h1>
+        <p>La IA va a investigar tendencias, demanda y oportunidades en tu nicho.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">INFORMACIÓN ADICIONAL (opcional)</div>
+        <div class="input-group">
+          <label>¿Conocés competidores o referentes en tu nicho?</label>
+          <input type="text" id="s3-competitors" placeholder="Ej: nombres de cursos, influencers, marcas del nicho..." oninput="saveField('competitors', this.value)">
+        </div>
+        <div class="input-group">
+          <label>¿En qué países o región querés vender?</label>
+          <div class="chip-group">
+            <div class="chip" onclick="toggleChip(this)">🇦🇷 Argentina</div>
+            <div class="chip" onclick="toggleChip(this)">🇲🇽 México</div>
+            <div class="chip" onclick="toggleChip(this)">🇪🇸 España</div>
+            <div class="chip" onclick="toggleChip(this)">🇨🇴 Colombia</div>
+            <div class="chip" onclick="toggleChip(this)">🇨🇱 Chile</div>
+            <div class="chip" onclick="toggleChip(this)">🇺🇸 LATAM general</div>
+            <div class="chip" onclick="toggleChip(this)">🌎 Todo hispanohablante</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateMarketResearch()" id="btn-market">
+          🔍 Investigar mercado con IA
+        </button>
+      </div>
+
+      <div id="market-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">📊 Investigación de mercado</div>
+          <button class="copy-btn" onclick="copyOutput('market-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="market-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4: COMPETENCIA ═══ -->
+    <div id="step-4" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 04</span>
+          <span class="step-tag">Análisis de competencia</span>
+        </div>
+        <h1>¿Qué hace diferente <em>tu propuesta</em>?</h1>
+        <p>La IA analiza el mercado para encontrar tu ventaja competitiva y ángulo diferenciador.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">TU DIFERENCIADOR</div>
+        <div class="input-group">
+          <label>¿Qué tiene tu producto que NO tienen los demás? (podés dejarlo en blanco)</label>
+          <textarea id="s4-diff" placeholder="Ej: mi método es más rápido, tengo experiencia propia, incluyo soporte, es más barato..." oninput="saveField('differentiator', this.value)"></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateCompetitiveAnalysis()" id="btn-comp">
+          ⚡ Analizar competencia con IA
+        </button>
+      </div>
+
+      <div id="comp-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">🏆 Análisis competitivo + diferenciador</div>
+          <button class="copy-btn" onclick="copyOutput('comp-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="comp-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 5: AVATAR ═══ -->
+    <div id="step-5" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 05</span>
+          <span class="step-tag">Avatar del cliente ideal</span>
+        </div>
+        <h1>¿A quién le vendés <em>exactamente</em>?</h1>
+        <p>Definir el avatar con precisión es la diferencia entre ads que venden y ads que queman plata.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">DATOS DEL AVATAR</div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Género principal</label>
+            <select id="s5-gender" onchange="saveField('gender', this.value)">
+              <option value="">Indiferente / Ambos</option>
+              <option value="mujer">Mujer</option>
+              <option value="hombre">Hombre</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Rango de edad</label>
+            <select id="s5-age" onchange="saveField('age', this.value)">
+              <option value="18-25">18–25 años</option>
+              <option value="25-35">25–35 años</option>
+              <option value="35-45">35–45 años</option>
+              <option value="45-55">45–55 años</option>
+              <option value="55+">55+ años</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>¿Qué situación vive hoy tu cliente? (antes de comprarte)</label>
+          <textarea id="s5-situation" placeholder="Ej: es empleada en relación de dependencia, tiene hijos, no tiene tiempo para hacer dieta, probó todo y no le funcionó..." oninput="saveField('situation', this.value)"></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateAvatar()" id="btn-avatar">
+          👤 Crear avatar con IA
+        </button>
+      </div>
+
+      <div id="avatar-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">👤 Avatar del cliente ideal</div>
+          <button class="copy-btn" onclick="copyOutput('avatar-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="avatar-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 6: DOLORES Y DESEOS ═══ -->
+    <div id="step-6" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 06</span>
+          <span class="step-tag">Dolores y deseos profundos</span>
+        </div>
+        <h1>Los <em>dolores reales</em> que mueven la compra</h1>
+        <p>La gente no compra lo que quiere. Compra para escapar de lo que sufre. Vamos a encontrar eso.</p>
+      </div>
+
+      <div class="card">
+        <button class="btn-primary" onclick="generatePainPoints()" id="btn-pain">
+          💊 Generar dolores y deseos con IA
+        </button>
+        <div class="tip" style="margin-top:16px"><div class="tip-icon">🎯</div> Basado en tu avatar del paso anterior. Este análisis alimenta el copy de tu landing y tus ads.</div>
+      </div>
+
+      <div id="pain-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">💊 Dolores, miedos y deseos</div>
+          <button class="copy-btn" onclick="copyOutput('pain-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="pain-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 7: OFERTA ═══ -->
+    <div id="step-7" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 07</span>
+          <span class="step-tag">Oferta irresistible</span>
+        </div>
+        <h1>Construí una <em>oferta</em> que nadie pueda decir que no</h1>
+        <p>Una oferta no es un precio. Es el conjunto de todo lo que recibe el cliente y por qué vale más de lo que paga.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>¿Qué bonos o extras podés agregar? (opcional)</label>
+          <textarea id="s7-bonuses" placeholder="Ej: plantillas de Excel, grupo privado de WhatsApp, sesión de consultoría 1:1, acceso a comunidad..." oninput="saveField('bonuses', this.value)"></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateOffer()" id="btn-offer">
+          💎 Crear oferta irresistible con IA
+        </button>
+      </div>
+
+      <div id="offer-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">💎 Tu oferta completa</div>
+          <button class="copy-btn" onclick="copyOutput('offer-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="offer-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 8: PRECIO Y GARANTÍA ═══ -->
+    <div id="step-8" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 08</span>
+          <span class="step-tag">Precio y garantía</span>
+        </div>
+        <h1>El precio justo y la <em>garantía</em> que elimina el riesgo</h1>
+        <p>Una buena garantía puede duplicar tu conversión. La IA te ayuda a redactarla para que genere confianza sin exponerte.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-row">
+          <div class="input-group">
+            <label>Días de garantía</label>
+            <select id="s8-guarantee" onchange="saveField('guarantee', this.value)">
+              <option value="7">7 días</option>
+              <option value="14">14 días</option>
+              <option value="30" selected>30 días</option>
+              <option value="60">60 días</option>
+              <option value="90">90 días</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Precio tachado (precio viejo)</label>
+            <input type="number" id="s8-oldprice" placeholder="Ej: 97" oninput="saveField('oldprice', this.value)">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generatePricing()" id="btn-pricing">
+          🛡️ Generar estrategia de precio y garantía
+        </button>
+      </div>
+
+      <div id="pricing-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">🛡️ Precio + garantía + urgencia</div>
+          <button class="copy-btn" onclick="copyOutput('pricing-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="pricing-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 9: ESTRUCTURA EBOOK ═══ -->
+    <div id="step-9" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 09</span>
+          <span class="step-tag">Estructura del ebook</span>
+        </div>
+        <h1>El esqueleto de tu <em>ebook masivo</em></h1>
+        <p>La IA crea la estructura completa: índice, capítulos, módulos y subtemas. Listo para que se genere el contenido.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-row">
+          <div class="input-group">
+            <label>Extensión deseada</label>
+            <select id="s9-length" onchange="saveField('length', this.value)">
+              <option value="corto">Corto (20-30 páginas)</option>
+              <option value="medio" selected>Medio (40-60 páginas)</option>
+              <option value="largo">Largo (70-100 páginas)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Estilo de escritura</label>
+            <select id="s9-style" onchange="saveField('style', this.value)">
+              <option value="practico">Práctico y directo</option>
+              <option value="narrativo">Narrativo con historias</option>
+              <option value="academico">Académico / formal</option>
+              <option value="coach">Estilo coach / motivacional</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateEbookStructure()" id="btn-ebook-struct">
+          📚 Crear estructura con IA
+        </button>
+      </div>
+
+      <div id="ebook-struct-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">📋 Índice y estructura del ebook</div>
+          <button class="copy-btn" onclick="copyOutput('ebook-struct-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="ebook-struct-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 10: CONTENIDO EBOOK ═══ -->
+    <div id="step-10" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 10</span>
+          <span class="step-tag">Contenido completo del ebook</span>
+        </div>
+        <h1>La IA escribe el <em>contenido completo</em></h1>
+        <p>Basado en la estructura anterior, la IA genera la introducción, capítulos clave y conclusión de tu ebook.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>¿Qué sección querés generar primero?</label>
+          <select id="s10-section" onchange="saveField('section', this.value)">
+            <option value="intro">Introducción + Historia del autor</option>
+            <option value="cap1">Capítulo 1 — El problema principal</option>
+            <option value="cap2">Capítulo 2 — El método central</option>
+            <option value="cap3">Capítulo 3 — Aplicación paso a paso</option>
+            <option value="conclusion">Conclusión + Llamada a la acción</option>
+            <option value="todo">Generar todo (puede tardar)</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="generateEbookContent()" id="btn-ebook-content">
+          ✍️ Generar contenido con IA
+        </button>
+      </div>
+
+      <div id="ebook-content-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">📖 Contenido del ebook</div>
+          <button class="copy-btn" onclick="copyOutput('ebook-content-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="ebook-content-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 11: COPY LANDING ═══ -->
+    <div id="step-11" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 11</span>
+          <span class="step-tag">Copy de la landing page</span>
+        </div>
+        <h1>La landing que <em>convierte</em> visitas en ventas</h1>
+        <p>Headline, subheadline, bullets, testimoniales, CTA — todo el copy de tu página de ventas generado con IA.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>¿Tenés testimoniales reales? (opcional)</label>
+          <textarea id="s11-testimonials" placeholder="Pegar aquí reseñas reales o describirlas brevemente. Si no tenés, la IA crea placeholders." oninput="saveField('testimonials', this.value)"></textarea>
+        </div>
+        <button class="btn-primary" onclick="generateLandingCopy()" id="btn-landing">
+          🌐 Generar copy de landing con IA
+        </button>
+      </div>
+
+      <div id="landing-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">🌐 Copy completo de la landing</div>
+          <button class="copy-btn" onclick="copyOutput('landing-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="landing-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 12: ESTRUCTURA LANDING ═══ -->
+    <div id="step-12" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 12</span>
+          <span class="step-tag">Estructura de secciones</span>
+        </div>
+        <h1>El <em>diseño</em> y estructura de tu landing</h1>
+        <p>La IA te da el wireframe textual y las instrucciones para armar la landing en cualquier plataforma.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>¿En qué herramienta vas a construir la landing?</label>
+          <div class="chip-group">
+            <div class="chip" onclick="toggleChip(this)">Shopify</div>
+            <div class="chip" onclick="toggleChip(this)">Hotmart Pages</div>
+            <div class="chip" onclick="toggleChip(this)">WordPress</div>
+            <div class="chip" onclick="toggleChip(this)">Webflow</div>
+            <div class="chip" onclick="toggleChip(this)">Lovable</div>
+            <div class="chip" onclick="toggleChip(this)">Framer</div>
+            <div class="chip" onclick="toggleChip(this)">Notion</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateLandingStructure()" id="btn-landing-struct">
+          🗂️ Generar estructura y wireframe
+        </button>
+      </div>
+
+      <div id="landing-struct-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">🗂️ Wireframe y estructura de la landing</div>
+          <button class="copy-btn" onclick="copyOutput('landing-struct-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="landing-struct-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 13: META ADS ═══ -->
+    <div id="step-13" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 13</span>
+          <span class="step-tag">Creativos para Meta Ads</span>
+        </div>
+        <h1>Ads que <em>paran el scroll</em> y venden</h1>
+        <p>La IA genera múltiples creativos para Facebook e Instagram — texto, hook, copy y CTA para cada ángulo.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>¿Cuántos creativos querés generar?</label>
+          <div class="chip-group">
+            <div class="chip selected" onclick="selectAdCount(3, this)">3 creativos</div>
+            <div class="chip" onclick="selectAdCount(5, this)">5 creativos</div>
+            <div class="chip" onclick="selectAdCount(8, this)">8 creativos</div>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Ángulos creativos a incluir</label>
+          <div class="chip-group">
+            <div class="chip selected" onclick="toggleChip(this)">🔥 Dolor / Problema</div>
+            <div class="chip selected" onclick="toggleChip(this)">✨ Transformación</div>
+            <div class="chip" onclick="toggleChip(this)">🎯 Resultado específico</div>
+            <div class="chip" onclick="toggleChip(this)">🆚 Comparación</div>
+            <div class="chip" onclick="toggleChip(this)">❓ Pregunta/curiosidad</div>
+            <div class="chip" onclick="toggleChip(this)">📊 Social proof</div>
+            <div class="chip" onclick="toggleChip(this)">🚨 Urgencia/escasez</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateAds()" id="btn-ads">
+          📢 Generar creativos con IA
+        </button>
+      </div>
+
+      <div id="ads-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">📢 Creativos para Meta Ads</div>
+          <button class="copy-btn" onclick="copyOutput('ads-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="ads-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 14: VIDEO SCRIPTS ═══ -->
+    <div id="step-14" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 14</span>
+          <span class="step-tag">Scripts para video ads</span>
+        </div>
+        <h1>Guiones para videos que <em>convierten</em></h1>
+        <p>Scripts para Reels, Stories y video ads de 15, 30 y 60 segundos. Listos para grabar.</p>
+      </div>
+
+      <div class="card">
+        <div class="input-group">
+          <label>Formato de video</label>
+          <div class="chip-group">
+            <div class="chip selected" onclick="toggleChip(this)">📱 Reel / TikTok (15-30s)</div>
+            <div class="chip selected" onclick="toggleChip(this)">📖 Story (15s)</div>
+            <div class="chip" onclick="toggleChip(this)">🎬 VSL largo (2-5 min)</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateScripts()" id="btn-scripts">
+          🎬 Generar scripts con IA
+        </button>
+      </div>
+
+      <div id="scripts-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">🎬 Scripts para videos</div>
+          <button class="copy-btn" onclick="copyOutput('scripts-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="scripts-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 15: EMAIL LANZAMIENTO ═══ -->
+    <div id="step-15" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 15</span>
+          <span class="step-tag">Email de lanzamiento</span>
+        </div>
+        <h1>El email que <em>abre wallets</em> el día del lanzamiento</h1>
+        <p>Secuencia de 3 emails: anuncio, recordatorio y último aviso. Listos para enviar.</p>
+      </div>
+
+      <div class="card">
+        <button class="btn-primary" onclick="generateEmails()" id="btn-emails">
+          📧 Generar secuencia de emails con IA
+        </button>
+        <div class="tip" style="margin-top:16px"><div class="tip-icon">📧</div> La IA genera 3 emails: Email 1 (anuncio de lanzamiento), Email 2 (recordatorio de beneficios), Email 3 (última hora + escasez).</div>
+      </div>
+
+      <div id="emails-output" style="display:none">
+        <div class="output-header">
+          <div class="output-label">📧 Secuencia de lanzamiento</div>
+          <button class="copy-btn" onclick="copyOutput('emails-result')">Copiar</button>
+        </div>
+        <div class="output-box" id="emails-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 16: EXPORT ═══ -->
+    <div id="step-16" class="step-page content" style="display:none">
+      <div class="step-header">
+        <div class="step-eyebrow">
+          <span class="step-num">PASO 16</span>
+          <span class="step-tag">Kit de exportación</span>
+        </div>
+        <h1>Tu infoproducto está <em>listo para lanzar</em> 🚀</h1>
+        <p>Exportá todo el contenido generado en distintos formatos.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">RESUMEN DEL PROYECTO</div>
+        <div id="final-summary" style="font-size:14px;line-height:1.8;color:var(--text2)"></div>
+      </div>
+
+      <div class="export-grid">
+        <div class="export-card" onclick="exportDoc('ebook')">
+          <div class="export-icon">📖</div>
+          <div class="export-title">Ebook completo</div>
+          <div class="export-desc">Contenido listo en texto</div>
+        </div>
+        <div class="export-card" onclick="exportDoc('landing')">
+          <div class="export-icon">🌐</div>
+          <div class="export-title">Copy de landing</div>
+          <div class="export-desc">Todas las secciones</div>
+        </div>
+        <div class="export-card" onclick="exportDoc('ads')">
+          <div class="export-icon">📢</div>
+          <div class="export-title">Pack de ads</div>
+          <div class="export-desc">Creativos + scripts</div>
+        </div>
+        <div class="export-card" onclick="exportDoc('full')">
+          <div class="export-icon">📦</div>
+          <div class="export-title">Kit completo</div>
+          <div class="export-desc">Todo en un archivo</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content-wrap -->
+
+  <!-- STEP NAV BAR -->
+  <div class="step-nav" id="step-nav" style="display:none">
+    <button class="btn-prev" id="btn-prev" onclick="prevStep()">← Anterior</button>
+    <div class="step-nav-info">Paso <strong id="current-step-display">1</strong> de <strong>16</strong></div>
+    <button class="btn-next" id="btn-next" onclick="nextStep()">Siguiente →</button>
+  </div>
+
+</div><!-- end main -->
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  currentStep: 0,
+  completedSteps: new Set(),
+  data: {},
+  results: {}
+};
+
+const TOTAL_STEPS = 16;
+const NAV_MAP = {1:'nav-1',2:'nav-1',3:'nav-3',4:'nav-3',5:'nav-5',6:'nav-5',7:'nav-7',8:'nav-7',9:'nav-9',10:'nav-9',11:'nav-11',12:'nav-11',13:'nav-13',14:'nav-13',15:'nav-15',16:'nav-15'};
+
+function saveField(key, val) { state.data[key] = val; }
+function selectType(type, el) { state.data.type = type; document.querySelectorAll('[onclick^="selectType"]').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
+function selectPlat(plat, el) { state.data.platform = plat; document.querySelectorAll('[onclick^="selectPlat"]').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
+function selectAdCount(n, el) { state.data.adCount = n; document.querySelectorAll('[onclick^="selectAdCount"]').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+function goToStep(n) {
+  document.getElementById(`step-${state.currentStep}`).style.display = 'none';
+  if(state.currentStep > 0) state.completedSteps.add(state.currentStep);
+  state.currentStep = n;
+  document.getElementById(`step-${n}`).style.display = 'block';
+  updateUI();
+  window.scrollTo(0,0);
+}
+
+function nextStep() {
+  if(state.currentStep < TOTAL_STEPS) goToStep(state.currentStep + 1);
+  if(state.currentStep === 16) buildFinalSummary();
+}
+function prevStep() { if(state.currentStep > 1) goToStep(state.currentStep - 1); }
+
+function updateUI() {
+  const s = state.currentStep;
+  document.getElementById('step-nav').style.display = s === 0 ? 'none' : 'flex';
+  document.getElementById('btn-prev').disabled = s <= 1;
+  document.getElementById('current-step-display').textContent = s;
+  document.getElementById('btn-next').textContent = s >= TOTAL_STEPS ? '✅ Finalizar' : 'Siguiente →';
+
+  const pct = Math.round((state.completedSteps.size / TOTAL_STEPS) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${state.completedSteps.size}/${TOTAL_STEPS}`;
+
+  document.querySelectorAll('[id^="nav-"]').forEach(el => el.classList.remove('active'));
+  const navId = s === 0 ? 'nav-0' : (NAV_MAP[s] || null);
+  if(navId) { const el = document.getElementById(navId); if(el) el.classList.add('active'); }
+
+  const titles = {
+    0:'InfoForge — Bienvenido',1:'Paso 01 — Tu producto',2:'Paso 02 — Plataforma',
+    3:'Paso 03 — Investigación de mercado',4:'Paso 04 — Análisis de competencia',
+    5:'Paso 05 — Avatar del cliente',6:'Paso 06 — Dolores y deseos',
+    7:'Paso 07 — Oferta irresistible',8:'Paso 08 — Precio y garantía',
+    9:'Paso 09 — Estructura del ebook',10:'Paso 10 — Contenido del ebook',
+    11:'Paso 11 — Copy de la landing',12:'Paso 12 — Estructura landing',
+    13:'Paso 13 — Meta Ads creativos',14:'Paso 14 — Video scripts',
+    15:'Paso 15 — Emails de lanzamiento',16:'Paso 16 — Exportar'
+  };
+  document.getElementById('topbar-title').textContent = titles[s] || 'InfoForge';
+}
+
+// ═══════════════════════════════════════════════
+// AI GENERATION (Anthropic API)
+// ═══════════════════════════════════════════════
+async function callClaude(prompt, outputId, containerId, resultKey) {
+  const container = document.getElementById(containerId);
+  const output = document.getElementById(outputId);
+  container.style.display = 'block';
+  output.classList.add('loading');
+  output.textContent = '';
+
+  const d = state.data;
+  const context = `
+Producto: ${d.topic || 'no especificado'}
+Resultado prometido: ${d.result || ''}
+Tipo: ${d.type || 'ebook'}
+Plataforma: ${d.platform || 'hotmart'}
+Precio: ${d.price || '27'} USD
+Avatar: ${d.gender || 'ambos'}, ${d.age || '25-35'} años
+Situación del avatar: ${d.situation || ''}
+Diferenciador: ${d.differentiator || ''}
+Bonos: ${d.bonuses || 'ninguno especificado'}
+Garantía: ${d.guarantee || '30'} días
+`.trim();
+
+  const systemPrompt = `Sos un experto en marketing digital, copywriting y creación de infoproductos para el mercado hispanohablante. 
+Escribís en español latinoamericano natural (vos, tenés, etc). 
+Generás contenido concreto, accionable y específico — NUNCA genérico.
+Basá todo en este contexto del proyecto:
+
+${context}
+
+Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé específico, profundo y útil.`;
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    output.classList.remove('loading');
+    output.textContent = '🔑 Primero configurá tu API Key de Groq. Hacé clic en "🔑 API Key" arriba a la derecha.';
+    container.style.display = 'block';
+    showApiKeyModal();
+    return;
+  }
+  
+  try {
+    const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+    
+    
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 2048,
+        temperature: 0.8
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.choices?.[0]?.message?.content || 'Error al generar. Intentá de nuevo.';
+
+
+
+    const interval = setInterval(() => {
+      if(i < text.length) {
+        output.insertBefore(document.createTextNode(text[i]), cursor);
+        i++;
+        if(i % 30 === 0) output.scrollTop = output.scrollHeight;
+      } else {
+        cursor.remove();
+        clearInterval(interval);
+        state.completedSteps.add(state.currentStep);
+        updateUI();
+      }
+    }, 8);
+
+  } catch(err) {
+    output.classList.remove('loading');
+    const errMsg = err.message || '';
+    if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('CORS')) {
+      output.textContent = '🔑 Para usar la IA necesitás ingresar tu API Key de Anthropic. Hacé clic en el botón "Configurar API Key" arriba a la derecha.';
+    } else {
+      output.textContent = '⚠️ Error: ' + errMsg + '. Verificá tu API Key y conexión.';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// GENERATION FUNCTIONS
+// ═══════════════════════════════════════════════
+function generateMarketResearch() {
+  const d = state.data;
+  const prompt = `Hacé una investigación de mercado completa para un infoproducto sobre "${d.topic}" cuyo resultado prometido es "${d.result}".
+
+Incluí:
+1. TAMAÑO Y DEMANDA: ¿Es un nicho con demanda real? ¿Está creciendo o declinando?
+2. PROBLEMAS MÁS BUSCADOS: Top 5 búsquedas o preguntas que hace este público
+3. TENDENCIAS ACTUALES: ¿Qué está funcionando en este nicho ahora mismo?
+4. BARRERAS DE ENTRADA: ¿Por qué la gente no resuelve su problema sola?
+5. OPORTUNIDAD: ¿Hay espacio para un producto nuevo? ¿Qué ángulo tiene más potencial?
+6. CONCLUSIÓN: Veredicto sobre la viabilidad del nicho (del 1 al 10) con justificación.
+
+Sé específico y evitá generalidades.`;
+  callClaude(prompt, 'market-result', 'market-output', 'market');
+  document.getElementById('btn-market').disabled = true;
+  document.getElementById('btn-market').textContent = '⏳ Investigando...';
+  setTimeout(() => { document.getElementById('btn-market').disabled = false; document.getElementById('btn-market').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateCompetitiveAnalysis() {
+  const d = state.data;
+  const prompt = `Analizá la competencia para un infoproducto de "${d.topic}" con diferenciador: "${d.differentiator || 'no especificado aún'}".
+
+Incluí:
+1. QUÉ OFRECEN LOS COMPETIDORES TÍPICOS: Sus promesas, precios y formatos más comunes
+2. DEBILIDADES DEL MERCADO: ¿Qué quejas comunes tienen los compradores de productos similares?
+3. GAPS DEL MERCADO: ¿Qué NO está siendo cubierto bien?
+4. TU VENTAJA COMPETITIVA: Basado en los datos, tu diferenciador más poderoso sería...
+5. POSICIONAMIENTO RECOMENDADO: Frase de posicionamiento única (tipo tagline) para diferenciarte
+6. ÁNGULO DE ATAQUE: ¿Qué decirle al público para que te elija a vos y no al resto?
+
+Sé directo y muy específico.`;
+  callClaude(prompt, 'comp-result', 'comp-output', 'competitive');
+  document.getElementById('btn-comp').disabled = true;
+  document.getElementById('btn-comp').textContent = '⏳ Analizando...';
+  setTimeout(() => { document.getElementById('btn-comp').disabled = false; document.getElementById('btn-comp').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateAvatar() {
+  const d = state.data;
+  const prompt = `Creá el avatar completo del cliente ideal para un infoproducto de "${d.topic}".
+
+Formato:
+👤 NOMBRE DEL AVATAR: (nombre ficticio representativo)
+📍 PERFIL: ${d.gender || 'ambos géneros'}, ${d.age || '25-35'} años
+🏠 SITUACIÓN ACTUAL: ${d.situation || 'describila basada en el nicho'}
+
+DESCRIBÍ CON DETALLE:
+1. DÍA A DÍA: Cómo es su rutina, trabajo, familia
+2. FRUSTRACIONES: Las 3 cosas que más le molestan en relación al problema
+3. QUÉ YA INTENTÓ: Soluciones que probó antes y por qué fallaron
+4. EL SUEÑO: Cómo se imagina su vida después de resolver el problema
+5. OBJECIONES: Las 3 razones por las que NO compraría (y cómo rebatirlas)
+6. DÓNDE ESTÁ: Redes que usa, tipo de contenido que consume, a quién sigue
+7. FRASE QUE DIRÍA: Una cita textual que resumiría perfectamente cómo se siente hoy
+
+Sé muy específico, evitá vaguedades.`;
+  callClaude(prompt, 'avatar-result', 'avatar-output', 'avatar');
+  document.getElementById('btn-avatar').disabled = true;
+  document.getElementById('btn-avatar').textContent = '⏳ Creando avatar...';
+  setTimeout(() => { document.getElementById('btn-avatar').disabled = false; document.getElementById('btn-avatar').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generatePainPoints() {
+  const d = state.data;
+  const prompt = `Basado en el avatar de "${d.topic}", generá un análisis profundo de dolores, miedos y deseos para usar en el copy de ventas.
+
+🔴 TOP 5 DOLORES ESPECÍFICOS (físicos, emocionales o prácticos que sufre HOY):
+Para cada uno: el dolor + cómo lo vive internamente + qué frase lo representaría
+
+😨 TOP 3 MIEDOS PROFUNDOS (lo que teme que pase si NO resuelve esto):
+
+💛 TOP 5 DESEOS Y SUEÑOS (lo que realmente quiere lograr):
+
+💬 FRASES TEXTUALES QUE DIRÍA EL AVATAR:
+(mínimo 5 frases como si fueran mensajes de WhatsApp reales)
+
+🎯 MOMENTO DE QUIEBRE: ¿Cuál es la gota que rebosa el vaso? ¿Qué evento lo hace buscar una solución?
+
+⚡ COPY TRIGGER: La frase de una línea que más duele y más convierte para este avatar.`;
+  callClaude(prompt, 'pain-result', 'pain-output', 'pain');
+  document.getElementById('btn-pain').disabled = true;
+  document.getElementById('btn-pain').textContent = '⏳ Analizando...';
+  setTimeout(() => { document.getElementById('btn-pain').disabled = false; document.getElementById('btn-pain').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateOffer() {
+  const d = state.data;
+  const prompt = `Creá una oferta irresistible completa para el infoproducto "${d.topic}" al precio de ${d.price || '27'} USD.
+
+1. NOMBRE DEL PRODUCTO: (3 opciones de nombre poderoso para el infoproducto)
+
+2. PROMESA PRINCIPAL: Una frase que resume el resultado en menos de 15 palabras
+
+3. QUÉ INCLUYE (el stack de valor):
+   - Producto principal + descripción
+   - ${d.bonuses ? `Bonos mencionados por el cliente: ${d.bonuses}` : 'Sugerí 3-4 bonos ideales'}
+   - Cada ítem con valor percibido en USD
+
+4. VALOR TOTAL PERCIBIDO: Suma de todo con precio de referencia
+
+5. JUSTIFICACIÓN DEL PRECIO: Por qué ${d.price || '27'} USD es una obviedad
+
+6. ESCASEZ Y URGENCIA: Mecanismos de urgencia recomendados (reales, no falsos)
+
+7. HEADLINE DE LA OFERTA: La frase que encabeza la sección de precio en la landing
+
+8. BULLET POINTS DE VENTA: 5 bullets en formato "Descubrí cómo..." o "El secreto de..."`;
+  callClaude(prompt, 'offer-result', 'offer-output', 'offer');
+  document.getElementById('btn-offer').disabled = true;
+  document.getElementById('btn-offer').textContent = '⏳ Creando oferta...';
+  setTimeout(() => { document.getElementById('btn-offer').disabled = false; document.getElementById('btn-offer').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generatePricing() {
+  const d = state.data;
+  const prompt = `Desarrollá la estrategia completa de precio, garantía y copy asociado para el infoproducto "${d.topic}".
+
+Precio: ${d.price || '27'} USD (precio tachado: ${d.oldprice || 'el doble'} USD)
+Garantía: ${d.guarantee || '30'} días
+
+1. REDACCIÓN DE LA GARANTÍA: Texto listo para pegar en la landing (50-80 palabras). Que transmita seguridad sin sonar a fine print.
+
+2. COPY DEL BLOQUE DE PRECIO: Texto completo para la sección de precio de la landing (incluir precio tachado, precio actual, badge de descuento, urgencia)
+
+3. MANEJO DE OBJECIONES DE PRECIO:
+   - "Es muy caro" → respuesta
+   - "No sé si funciona para mí" → respuesta
+   - "Lo pienso y después compro" → respuesta
+
+4. TEXTO DE URGENCIA: 2 versiones de texto de countdown/urgencia (breve y contundente)
+
+5. MICRO-COPY DEL BOTÓN: 5 opciones de texto para el botón de compra
+
+6. FAQ DE PRECIO: 3 preguntas frecuentes sobre el precio + respuestas`;
+  callClaude(prompt, 'pricing-result', 'pricing-output', 'pricing');
+  document.getElementById('btn-pricing').disabled = true;
+  document.getElementById('btn-pricing').textContent = '⏳ Generando...';
+  setTimeout(() => { document.getElementById('btn-pricing').disabled = false; document.getElementById('btn-pricing').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateEbookStructure() {
+  const d = state.data;
+  const prompt = `Creá la estructura completa de un ${d.length || 'medio'} (${d.length === 'corto' ? '20-30 pág' : d.length === 'largo' ? '70-100 pág' : '40-60 pág'}) sobre "${d.topic}" con resultado "${d.result}".
+
+Estilo de escritura: ${d.style || 'práctico y directo'}
+
+Incluí:
+
+📖 TÍTULO DEL EBOOK: (3 opciones — con subtítulo)
+
+📋 ÍNDICE COMPLETO:
+Para cada capítulo/módulo incluí:
+- Título del capítulo
+- Objetivo de ese capítulo (qué aprende el lector)
+- 3-4 subtemas/secciones que lo componen
+- Ejercicio o recurso práctico al final
+
+ESTRUCTURA SUGERIDA:
+- Introducción (el problema y la promesa)
+- Capítulos 1-N (el método o sistema)
+- Conclusión (próximos pasos)
+- Anexos o recursos adicionales (si aplica)
+
+📌 HILO CONDUCTOR: ¿Cuál es la transformación narrativa del lector a lo largo del ebook?`;
+  callClaude(prompt, 'ebook-struct-result', 'ebook-struct-output', 'ebookStruct');
+  document.getElementById('btn-ebook-struct').disabled = true;
+  document.getElementById('btn-ebook-struct').textContent = '⏳ Estructurando...';
+  setTimeout(() => { document.getElementById('btn-ebook-struct').disabled = false; document.getElementById('btn-ebook-struct').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateEbookContent() {
+  const d = state.data;
+  const section = d.section || 'intro';
+  const sectionNames = {
+    intro: 'Introducción y presentación del autor/método',
+    cap1: 'Capítulo 1 — El problema principal y por qué persiste',
+    cap2: 'Capítulo 2 — El método o sistema central',
+    cap3: 'Capítulo 3 — Aplicación paso a paso',
+    conclusion: 'Conclusión, próximos pasos y llamada a la acción',
+    todo: 'Introducción + Capítulo 1 + Capítulo 2 resumidos'
+  };
+
+  const prompt = `Escribí el contenido completo de la sección: "${sectionNames[section]}" para el ebook sobre "${d.topic}".
+
+Resultado que promete el ebook: "${d.result}"
+Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años, ${d.situation || 'busca solución al problema'}
+Estilo: ${d.style || 'práctico, directo, en segunda persona (vos)'}
+
+Escribí el contenido real y completo de esta sección:
+- Mínimo 600-800 palabras
+- Incluí ejemplos concretos, datos o anécdotas
+- Usá subtítulos internos para dividir el contenido
+- Terminá con un resumen o ejercicio práctico
+- Tono: hablarle directamente al lector usando "vos"
+
+Escribí el contenido directamente, sin introducirlo.`;
+  callClaude(prompt, 'ebook-content-result', 'ebook-content-output', 'ebookContent');
+  document.getElementById('btn-ebook-content').disabled = true;
+  document.getElementById('btn-ebook-content').textContent = '⏳ Escribiendo...';
+  setTimeout(() => { document.getElementById('btn-ebook-content').disabled = false; document.getElementById('btn-ebook-content').textContent = '🔄 Generar otra sección'; }, 5000);
+}
+
+function generateLandingCopy() {
+  const d = state.data;
+  const prompt = `Escribí el copy COMPLETO de una landing page de ventas para el infoproducto "${d.topic}" a ${d.price || '27'} USD en ${d.platform || 'Hotmart'}.
+
+Resultado prometido: "${d.result}"
+Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
+
+Incluí TODAS estas secciones con copy listo para usar:
+
+1. 🎯 HEADLINE + SUBHEADLINE (3 opciones de headline)
+2. 📣 LEAD (párrafo de apertura que engancha, 3-4 oraciones)
+3. 😤 SECCIÓN DE DOLOR (texto que describe el problema que vive el avatar)
+4. ✨ SECCIÓN DE TRANSFORMACIÓN (la vida después de comprar)
+5. 📦 QUÉ INCLUYE (bullets de los módulos/capítulos)
+6. 💎 SECCIÓN DE OFERTA Y BONOS
+7. 👥 PARA QUIÉN ES / NO ES
+8. ❓ PREGUNTAS FRECUENTES (4 Q&A)
+9. 🛡️ GARANTÍA
+10. 🚨 CIERRE + URGENCIA + CTA final
+
+${d.testimonials ? `Testimoniales para incluir: ${d.testimonials}` : ''}
+
+Escribí el copy en español latinoamericano, directo, emocional y que vende.`;
+  callClaude(prompt, 'landing-result', 'landing-output', 'landing');
+  document.getElementById('btn-landing').disabled = true;
+  document.getElementById('btn-landing').textContent = '⏳ Escribiendo copy...';
+  setTimeout(() => { document.getElementById('btn-landing').disabled = false; document.getElementById('btn-landing').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateLandingStructure() {
+  const d = state.data;
+  const prompt = `Creá el wireframe y estructura de la landing page para el infoproducto "${d.topic}" en ${d.platform || 'Hotmart'}.
+
+Para cada sección de la landing, describí:
+- NOMBRE DE LA SECCIÓN
+- COMPONENTES VISUALES: qué elementos UI contiene (imagen, video, lista, tabla, etc)
+- COPY PRINCIPAL: qué dice (ya generado en el paso anterior)
+- COLOR Y ESTILO: tono visual recomendado
+- INSTRUCCIÓN DE DISEÑO: cómo armarla paso a paso
+- CONVERSIÓN: por qué esta sección importa para la venta
+
+SECCIONES A CUBRIR:
+1. Hero section (above the fold)
+2. Sección del problema
+3. Video de ventas o demo (si aplica)
+4. Qué incluye / beneficios
+5. Para quién es
+6. Testimoniales
+7. Sección de precio y oferta
+8. Garantía
+9. FAQ
+10. Footer con CTA final
+
+Al final: CHECKLIST de conversión — 10 puntos para revisar antes de publicar.`;
+  callClaude(prompt, 'landing-struct-result', 'landing-struct-output', 'landingStruct');
+  document.getElementById('btn-landing-struct').disabled = true;
+  document.getElementById('btn-landing-struct').textContent = '⏳ Estructurando...';
+  setTimeout(() => { document.getElementById('btn-landing-struct').disabled = false; document.getElementById('btn-landing-struct').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateAds() {
+  const d = state.data;
+  const count = d.adCount || 3;
+  const prompt = `Creá ${count} creativos completos para Meta Ads (Facebook e Instagram) para el infoproducto "${d.topic}" a ${d.price || '27'} USD.
+
+Cada creativo debe incluir:
+📌 ÁNGULO: (nombre del ángulo creativo)
+🔥 HOOK (primeras 3 palabras o frase de apertura — lo que para el scroll)
+📝 COPY PRINCIPAL: (texto del ad — 80-150 palabras, en primera o segunda persona)
+📣 HEADLINE: (título que aparece debajo de la imagen — máx 40 caracteres)
+🔗 DESCRIPCIÓN: (subtítulo del ad — máx 30 caracteres)
+✅ CTA BUTTON: (cual usar: Comprar, Más información, Registrarse, etc)
+🖼️ SUGERENCIA VISUAL: (qué imagen o video se recomienda usar)
+
+Ángulos a cubrir: dolor, transformación, resultado específico, urgencia y social proof.
+
+Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años, nicho: ${d.topic}
+Todos los copies en español latinoamericano, naturales, que no suenen a publicidad genérica.`;
+  callClaude(prompt, 'ads-result', 'ads-output', 'ads');
+  document.getElementById('btn-ads').disabled = true;
+  document.getElementById('btn-ads').textContent = '⏳ Generando ads...';
+  setTimeout(() => { document.getElementById('btn-ads').disabled = false; document.getElementById('btn-ads').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateScripts() {
+  const d = state.data;
+  const prompt = `Escribí scripts de video para promocionar el infoproducto "${d.topic}".
+
+📱 SCRIPT 1 — REEL/TIKTOK (30 segundos, ~80 palabras)
+Formato: Hook visual (qué hace en pantalla) + texto hablado palabra por palabra
+Técnica: PAS (Problema-Agitación-Solución)
+
+📖 SCRIPT 2 — STORY de 15 segundos
+Formato: Texto en pantalla + voz + sugerencia de sticker o elemento interactivo
+
+🎬 SCRIPT 3 — VIDEO AD largo (60-90 segundos)
+Formato: VSL corta con estructura AIDA (Atención-Interés-Deseo-Acción)
+Incluí: hook, problema, credencial, solución, oferta, garantía, CTA
+
+Para cada script incluí:
+- Las palabras exactas a decir
+- Instrucciones de producción (qué mostrar en pantalla)
+- Notas de edición (cuando cortar, qué texto superponer)
+
+Tono: natural, conversacional, no publicitario.`;
+  callClaude(prompt, 'scripts-result', 'scripts-output', 'scripts');
+  document.getElementById('btn-scripts').disabled = true;
+  document.getElementById('btn-scripts').textContent = '⏳ Escribiendo scripts...';
+  setTimeout(() => { document.getElementById('btn-scripts').disabled = false; document.getElementById('btn-scripts').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+function generateEmails() {
+  const d = state.data;
+  const prompt = `Escribí una secuencia de 3 emails de lanzamiento para el infoproducto "${d.topic}" a ${d.price || '27'} USD.
+
+📧 EMAIL 1 — ANUNCIO DE LANZAMIENTO (enviar día 1)
+Asunto: (3 opciones de subject line con alto open rate)
+Cuerpo: Anuncio del producto, qué es, para quién, precio especial de lanzamiento, CTA.
+Extensión: 200-250 palabras
+
+📧 EMAIL 2 — RECORDATORIO DE BENEFICIOS (enviar día 2)
+Asunto: (3 opciones)
+Cuerpo: Enfocado en los beneficios y transformación. Historia o testimonial. Recordatorio de precio. CTA urgente.
+Extensión: 200-250 palabras
+
+📧 EMAIL 3 — ÚLTIMO AVISO / CIERRE (enviar día 3 o último día de oferta)
+Asunto: (3 opciones — con urgencia real)
+Cuerpo: Urgencia real, qué pierden si no compran, reafirmar garantía, CTA final.
+Extensión: 150-200 palabras
+
+Para cada email:
+- Subject lines probadas (curiosidad, beneficio directo, urgencia)
+- Texto listo para copiar y pegar
+- Notas de personalización
+- P.S. al final (siempre convierten)`;
+  callClaude(prompt, 'emails-result', 'emails-output', 'emails');
+  document.getElementById('btn-emails').disabled = true;
+  document.getElementById('btn-emails').textContent = '⏳ Escribiendo emails...';
+  setTimeout(() => { document.getElementById('btn-emails').disabled = false; document.getElementById('btn-emails').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function copyOutput(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = 'Copiar', 2000);
+  });
+}
+
+function buildFinalSummary() {
+  const d = state.data;
+  const el = document.getElementById('final-summary');
+  el.innerHTML = `
+    <p><strong>Tema:</strong> ${d.topic || '—'}</p>
+    <p><strong>Resultado:</strong> ${d.result || '—'}</p>
+    <p><strong>Tipo:</strong> ${d.type || 'ebook'}</p>
+    <p><strong>Plataforma:</strong> ${d.platform || '—'}</p>
+    <p><strong>Precio:</strong> ${d.price || '—'} ${d.currency || 'USD'}</p>
+    <p><strong>Garantía:</strong> ${d.guarantee || '30'} días</p>
+    <p style="margin-top:12px;color:var(--green)">✅ ${state.completedSteps.size} pasos completados de 16</p>
+  `;
+}
+
+function exportDoc(type) {
+  const d = state.data;
+  const r = state.results;
+  let content = '';
+  const now = new Date().toLocaleDateString('es-AR');
+
+  if(type === 'full' || type === 'ebook') {
+    content += `═══════════════════════════════\n📖 EBOOK — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.ebookStruct) content += `ESTRUCTURA:\n${r.ebookStruct}\n\n`;
+    if(r.ebookContent) content += `CONTENIDO:\n${r.ebookContent}\n\n`;
+  }
+  if(type === 'full' || type === 'landing') {
+    content += `═══════════════════════════════\n🌐 LANDING PAGE — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.landing) content += `COPY COMPLETO:\n${r.landing}\n\n`;
+    if(r.landingStruct) content += `ESTRUCTURA Y WIREFRAME:\n${r.landingStruct}\n\n`;
+  }
+  if(type === 'full' || type === 'ads') {
+    content += `═══════════════════════════════\n📢 META ADS + SCRIPTS — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.ads) content += `CREATIVOS:\n${r.ads}\n\n`;
+    if(r.scripts) content += `SCRIPTS:\n${r.scripts}\n\n`;
+  }
+  if(type === 'full') {
+    content += `═══════════════════════════════\n📊 INVESTIGACIÓN Y ESTRATEGIA\n═══════════════════════════════\n\n`;
+    if(r.market) content += `INVESTIGACIÓN DE MERCADO:\n${r.market}\n\n`;
+    if(r.competitive) content += `ANÁLISIS COMPETITIVO:\n${r.competitive}\n\n`;
+    if(r.avatar) content += `AVATAR:\n${r.avatar}\n\n`;
+    if(r.pain) content += `DOLORES Y DESEOS:\n${r.pain}\n\n`;
+    if(r.offer) content += `OFERTA:\n${r.offer}\n\n`;
+    if(r.pricing) content += `PRECIO Y GARANTÍA:\n${r.pricing}\n\n`;
+    if(r.emails) content += `EMAILS DE LANZAMIENTO:\n${r.emails}\n\n`;
+  }
+
+  if(!content.trim()) {
+    alert('Todavía no hay contenido generado para exportar. Completá algunos pasos primero.');
+    return;
+  }
+
+  const header = `InfoForge — Kit de Lanzamiento\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n${'─'.repeat(50)}\n\n`;
+  const blob = new Blob([header + content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `infoforge-${type}-${Date.now()}.txt`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportAll() { exportDoc('full'); }
+
+function confirmReset() {
+  if(confirm('¿Seguro que querés empezar una nueva sesión? Se perderá todo el contenido generado.')) {
+    state = { currentStep: 0, completedSteps: new Set(), data: {}, results: {} };
+    document.querySelectorAll('.step-page').forEach(p => p.style.display = 'none');
+    document.getElementById('step-0').style.display = 'block';
+    document.querySelectorAll('.output-box').forEach(el => { el.textContent = ''; el.parentElement.style.display = 'none'; });
+    updateUI();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.step-page').forEach((p,i) => { if(i > 0) p.style.display = 'none'; });
+updateUI();
+
+
+// ═══ API KEY MANAGEMENT ═══
+function showApiKeyModal() {
+  document.getElementById('apikey-modal').style.display = 'flex';
+}
+function saveApiKey() {
+  const key = document.getElementById('apikey-input').value.trim();
+  if (key.length < 20) {
+    document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
+    return;
+  }
+  sessionStorage.setItem('if_apikey', key);
+  document.getElementById('apikey-modal').style.display = 'none';
+  document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
+  document.getElementById('apikey-btn').style.color = '#34d399';
+  document.getElementById('apikey-btn').style.borderColor = '#34d399';
+  document.getElementById('apikey-error').textContent = '';
+}
+function getApiKey() {
+  return sessionStorage.getItem('if_apikey') || '';
+}
+// Cargar key guardada al inicio
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('if_apikey');
+  if (saved) {
+    document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
+    document.getElementById('apikey-btn').style.color = '#34d399';
+    document.getElementById('apikey-btn').style.borderColor = '#34d399';
+    document.getElementById('apikey-input').value = saved;
+  }
+});
+
+// ═══════════════════════════════════════════════
+// PWA — SERVICE WORKER + INSTALL PROMPT
+// ═══════════════════════════════════════════════
+let deferredPrompt = null;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('SW registrado:', reg.scope))
+    .catch(err => console.log('SW error:', err));
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('install-banner');
+  if (banner) { banner.style.display = 'flex'; setTimeout(() => banner.style.opacity = '1', 100); }
+});
+
+function installApp() {
+  if (!deferredPrompt) {
+    document.getElementById('install-manual').style.display = 'flex';
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') dismissBanner();
+    deferredPrompt = null;
+  });
+}
+
+function dismissBanner() {
+  const banner = document.getElementById('install-banner');
+  if (banner) { banner.style.opacity = '0'; setTimeout(() => banner.style.display = 'none', 300); }
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  document.body.classList.add('is-pwa');
+}
+
+window.addEventListener('appinstalled', dismissBanner);
+
+</script>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner" style="display:none;opacity:0;transition:opacity .3s;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 48px);max-width:420px;background:linear-gradient(135deg,#1a1229,#221a35);border:1px solid #7c3aed;border-radius:16px;padding:16px 20px;box-shadow:0 8px 40px rgba(124,58,237,0.4);align-items:center;gap:14px;">
+  <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#e879f9);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:serif;color:white;font-size:16px;flex-shrink:0">IF</div>
+  <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#f1eeff">Instalá InfoForge</div><div style="font-size:12px;color:#a89ec4;margin-top:2px">Funciona offline · como app nativa</div></div>
+  <button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:8px;padding:8px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button>
+  <button onclick="dismissBanner()" style="background:none;border:none;color:#6b5f8a;cursor:pointer;font-size:20px;line-height:1;padding:2px 6px">×</button>
+</div>
+
+<!-- MANUAL INSTALL -->
+<div id="install-manual" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:16px;padding:28px;max-width:400px;width:100%">
+    <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:16px;color:#f1eeff">📲 Cómo instalar InfoForge</h3>
+    <div style="font-size:14px;color:#a89ec4;line-height:1.9">
+      <p style="margin-bottom:12px"><strong style="color:#a78bfa">📱 Android (Chrome):</strong><br>Menú ⋮ → "Agregar a pantalla de inicio"</p>
+      <p style="margin-bottom:12px"><strong style="color:#a78bfa">🍎 iPhone/iPad (Safari):</strong><br>Botón compartir □↑ → "Añadir a inicio"</p>
+      <p style="margin-bottom:20px"><strong style="color:#a78bfa">💻 PC (Chrome / Edge):</strong><br>Ícono ⊕ en la barra de URL → "Instalar"<br><span style="font-size:12px">O menú ⋮ → "Instalar InfoForge"</span></p>
+    </div>
+    <button onclick="document.getElementById('install-manual').style.display='none'" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Entendido ✓</button>
+  </div>
+</div>
+
+<style>
+#install-fab{position:fixed;bottom:90px;right:16px;z-index:100;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:50px;padding:10px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.5);display:flex;align-items:center;gap:6px;transition:all .2s;}
+#install-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,0.6);}
+.is-pwa #install-fab{display:none!important;}
+@media(min-width:768px){#install-fab{bottom:24px;right:24px;}}
+</style>
+<button id="install-fab" onclick="installApp()" title="Instalar InfoForge como app">⬇ Instalar app</button>
+
+
+<!-- API KEY MODAL -->
+<div id="apikey-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
+    <div style="font-size:28px;margin-bottom:8px">🔑</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">API Key de Groq (Gratis)</h2>
+    <p style="font-size:14px;color:#a89ec4;margin-bottom:6px;line-height:1.6">InfoForge usa la API de Anthropic directamente desde tu navegador. Tu key nunca se guarda en ningún servidor.</p>
+    <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:12px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.6">
+      <strong>¿Dónde conseguir tu API Key?</strong><br>
+      1. Entrá a <strong>console.groq.com</strong><br>
+      2. Menú → API Keys → Create Key<br>
+      4. Copiá la key (empieza con gsk_...)
+    </div>
+    <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin-bottom:8px">TU API KEY DE GROQ (gsk_...)</label>
+    <input id="apikey-input" type="password" placeholder="gsk_..." 
+      style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
+      onkeydown="if(event.key==='Enter')saveApiKey()">
+    <div id="apikey-error" style="color:#f87171;font-size:12px;margin-bottom:12px;min-height:18px"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="document.getElementById('apikey-modal').style.display='none'" 
+        style="flex:1;background:transparent;color:#6b5f8a;border:1px solid #2d2245;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">
+        Cancelar
+      </button>
+      <button onclick="saveApiKey()" 
+        style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
+        Guardar y continuar ✓
+      </button>
+    </div>
+    <p style="font-size:11px;color:#3d3060;text-align:center;margin-top:14px">Tu key se guarda solo en esta sesión del navegador. No se envía a ningún servidor — va directo a Google.</p>
+  </div>
+</div>
+
+</body>
+</html>
+
