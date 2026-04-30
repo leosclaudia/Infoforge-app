@@ -1757,7 +1757,7 @@ function saveApiKey() {
     document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
     return;
   }
-  if (!key.startsWith('sk-or-')) {
+  if (!key.startsWith('sk-or-') && !key.startsWith('sk-or-v1-')) {
     document.getElementById('apikey-error').textContent = '⚠️ La key de OpenRouter debe empezar con gsk_ — verificá que copiaste la correcta.';
     return;
   }
