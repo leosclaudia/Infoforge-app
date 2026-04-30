@@ -9,10 +9,13 @@
 <meta name="apple-mobile-web-app-title" content="InfoForge">
 <meta name="theme-color" content="#7c3aed">
 <meta name="description" content="Creá tu infoproducto completo con IA en 16 pasos automatizados.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="manifest" href="manifest.json">
 <!-- Apple touch icon inline SVG -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%237c3aed'/%3E%3Ctext x='256' y='340' font-family='serif' font-weight='bold' font-size='260' text-anchor='middle' fill='white'%3EIF%3C/text%3E%3C/svg%3E">
-<title>InfoForge — Fábrica de Infoproductos IA</title>
+<title>InfoForge v3 — Fábrica de Infoproductos IA</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1228,6 +1231,10 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
     return;
   }
   
+  // Mostrar que está procesando
+  output.textContent = '⏳ Conectando con Groq AI...';
+  output.classList.add('loading');
+  
   try {
     const API_URL = "https://api.groq.com/openai/v1/chat/completions";
     
@@ -1290,6 +1297,10 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
 // GENERATION FUNCTIONS
 // ═══════════════════════════════════════════════
 function generateMarketResearch() {
+  const output = document.getElementById('market-result');
+  const container = document.getElementById('market-output');
+  container.style.display = 'block';
+  output.textContent = '⏳ Conectando con Groq...';
   const d = state.data;
   const prompt = `Hacé una investigación de mercado completa para un infoproducto sobre "${d.topic}" cuyo resultado prometido es "${d.result}".
 
@@ -1782,10 +1793,11 @@ window.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════
 let deferredPrompt = null;
 
+// Service Worker deshabilitado para evitar caché
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log('SW registrado:', reg.scope))
-    .catch(err => console.log('SW error:', err));
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  });
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
