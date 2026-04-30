@@ -1724,6 +1724,19 @@ updateUI();
 
 
 // ═══ API KEY MANAGEMENT ═══
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('apikey-input');
+  const btn = document.getElementById('toggle-key-btn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈 Ocultar';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁 Ver';
+  }
+}
+
 function showApiKeyModal() {
   document.getElementById('apikey-modal').style.display = 'flex';
 }
@@ -1733,20 +1746,30 @@ function saveApiKey() {
     document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
     return;
   }
+  if (!key.startsWith('gsk_')) {
+    document.getElementById('apikey-error').textContent = '⚠️ La key de Groq debe empezar con gsk_ — verificá que copiaste la correcta.';
+    return;
+  }
+  // Guardar en AMBOS sessionStorage y localStorage para mayor persistencia
   sessionStorage.setItem('if_apikey', key);
+  localStorage.setItem('if_apikey', key);
   document.getElementById('apikey-modal').style.display = 'none';
   document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
   document.getElementById('apikey-btn').style.color = '#34d399';
   document.getElementById('apikey-btn').style.borderColor = '#34d399';
   document.getElementById('apikey-error').textContent = '';
+  // Mostrar confirmación
+  const preview = key.substring(0, 8) + '...' + key.substring(key.length - 4);
+  console.log('Key guardada:', preview);
 }
 function getApiKey() {
-  return sessionStorage.getItem('if_apikey') || '';
+  return sessionStorage.getItem('if_apikey') || localStorage.getItem('if_apikey') || '';
 }
 // Cargar key guardada al inicio
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = sessionStorage.getItem('if_apikey');
+  const saved = sessionStorage.getItem('if_apikey') || localStorage.getItem('if_apikey');
   if (saved) {
+    sessionStorage.setItem('if_apikey', saved);
     document.getElementById('apikey-btn').textContent = '🔑 Groq ✓';
     document.getElementById('apikey-btn').style.color = '#34d399';
     document.getElementById('apikey-btn').style.borderColor = '#34d399';
@@ -1840,7 +1863,10 @@ window.addEventListener('appinstalled', dismissBanner);
       3. Menú → <strong>API Keys</strong> → <strong>Create API Key</strong><br>
       4. Copiá la key → empieza con <strong>gsk_...</strong>
     </div>
-    <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin-bottom:8px">TU API KEY DE GROQ (gsk_...)</label>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin:0">TU API KEY DE GROQ</label>
+      <button onclick="toggleKeyVisibility()" id="toggle-key-btn" style="background:none;border:none;color:#6b5f8a;font-size:12px;cursor:pointer;padding:2px 6px">👁 Ver</button>
+    </div>
     <input id="apikey-input" type="password" placeholder="gsk_..." 
       style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
       onkeydown="if(event.key==='Enter')saveApiKey()">
@@ -1861,4 +1887,3 @@ window.addEventListener('appinstalled', dismissBanner);
 
 </body>
 </html>
-
