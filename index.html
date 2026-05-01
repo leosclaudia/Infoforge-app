@@ -1236,34 +1236,71 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
   output.classList.add('loading');
   
   try {
-    const API_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions');
+    // Intentar múltiples proxies hasta que uno funcione
+    const proxies = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
+      'https://corsproxy.io/?' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
+      'https://proxy.cors.sh/https://openrouter.ai/api/v1/chat/completions'
+    ];
     
-    
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://leosclaudia.github.io',
-        'X-Title': 'InfoForge'
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 2048,
-        temperature: 0.8
-      })
+    const body = JSON.stringify({
+      model: 'meta-llama/llama-3.3-70b-instruct:free',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 2048,
+      temperature: 0.8
     });
-      const errData = await response.json().catch(() => ({}));
-      const msg = errData?.error?.message || response.statusText || 'Error desconocido';
-      throw new Error(msg);
+
+    let response = null;
+    let lastError = '';
+    for (const proxyUrl of proxies) {
+      try {
+        response = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://infoforge-app.vercel.app',
+            'X-Title': 'InfoForge',
+            'x-requested-with': 'XMLHttpRequest'
+          },
+          body: body
+        });
+        if (response.ok) break;
+        lastError = response.statusText;
+      } catch(e) { lastError = e.message; response = null; }
     }
-    const data = await response.json();
+    if (!response || !response.ok) throw new Error('No se pudo conectar: ' + lastError);
+    const fakeResponse = response;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const data = await fakeResponse.json();
     if (data.error) throw new Error(data.error.message);
-    const rawText = data.choices?.[0]?.message?.content;
+
+
+
+
+
     if (!rawText) throw new Error('Respuesta vacía de Groq. Intentá de nuevo.');
     const text = rawText;
 
