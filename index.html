@@ -1232,17 +1232,10 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
   }
   
   // Mostrar que está procesando
-  output.textContent = '⏳ Conectando con OpenRouter...';
+  output.textContent = '⏳ Conectando...';
   output.classList.add('loading');
   
   try {
-    // Intentar múltiples proxies hasta que uno funcione
-    const proxies = [
-      'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
-      'https://corsproxy.io/?' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
-      'https://proxy.cors.sh/https://openrouter.ai/api/v1/chat/completions'
-    ];
-    
     const body = JSON.stringify({
       model: 'meta-llama/llama-3.3-70b-instruct:free',
       messages: [
@@ -1253,64 +1246,51 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
       temperature: 0.8
     });
 
-    let response = null;
-    let lastError = '';
-    for (const proxyUrl of proxies) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey,
+      'HTTP-Referer': 'https://infoforge-app.vercel.app',
+      'X-Title': 'InfoForge'
+    };
+
+    // Probar proxies en orden
+    const urls = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
+      'https://corsproxy.io/?' + encodeURIComponent('https://openrouter.ai/api/v1/chat/completions'),
+      'https://openrouter.ai/api/v1/chat/completions'
+    ];
+
+    let data = null;
+    for (let i = 0; i < urls.length; i++) {
       try {
-        response = await fetch(proxyUrl, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://infoforge-app.vercel.app',
-            'X-Title': 'InfoForge',
-            'x-requested-with': 'XMLHttpRequest'
-          },
-          body: body
-        });
-        if (response.ok) break;
-        lastError = response.statusText;
-      } catch(e) { lastError = e.message; response = null; }
+        const res = await fetch(urls[i], { method: 'POST', headers: headers, body: body });
+        const json = await res.json();
+        if (json.choices && json.choices[0]) { data = json; break; }
+        if (json.error) throw new Error(json.error.message);
+      } catch(e) {
+        if (i === urls.length - 1) throw e;
+      }
     }
-    if (!response || !response.ok) throw new Error('No se pudo conectar: ' + lastError);
-    const fakeResponse = response;
 
+    if (!data) throw new Error('Sin respuesta. Verificá tu API Key de OpenRouter.');
+    const text = data.choices[0].message.content;
+    if (!text) throw new Error('Respuesta vacía. Intentá de nuevo.');
 
+    // Mostrar el texto con efecto typewriter
+    output.classList.remove('loading');
+    output.textContent = '';
+    state.results[resultKey] = text;
 
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    output.appendChild(cursor);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const data = await fakeResponse.json();
-    if (data.error) throw new Error(data.error.message);
-
-
-
-
-
-    if (!rawText) throw new Error('Respuesta vacía de Groq. Intentá de nuevo.');
-    const text = rawText;
-
-
-
+    let i = 0;
     const interval = setInterval(() => {
-      if(i < text.length) {
+      if (i < text.length) {
         output.insertBefore(document.createTextNode(text[i]), cursor);
         i++;
-        if(i % 30 === 0) output.scrollTop = output.scrollHeight;
+        if (i % 30 === 0) output.scrollTop = output.scrollHeight;
       } else {
         cursor.remove();
         clearInterval(interval);
