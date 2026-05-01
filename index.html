@@ -17,6 +17,8 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%237c3aed'/%3E%3Ctext x='256' y='340' font-family='serif' font-weight='bold' font-size='260' text-anchor='middle' fill='white'%3EIF%3C/text%3E%3C/svg%3E">
 <title>InfoForge v3 — Fábrica de Infoproductos IA</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -864,20 +866,28 @@ select { appearance: none; cursor: pointer; }
         <p>Basado en la estructura anterior, la IA genera la introducción, capítulos clave y conclusión de tu ebook.</p>
       </div>
 
+      <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(232,121,249,0.1));border-color:#7c3aed">
+        <div class="card-title" style="color:#f1eeff">🚀 GENERAR EBOOK COMPLETO (automático)</div>
+        <p style="font-size:14px;color:#c4b5fd;margin-bottom:16px;line-height:1.6">Un solo click y la IA genera TODO el ebook: introducción + capítulos 1, 2, 3 + conclusión. Tarda 2-3 minutos.</p>
+        <button class="btn-primary" onclick="generateFullEbook()" id="btn-full-ebook" style="width:100%">
+          ⚡ Generar ebook completo automático
+        </button>
+      </div>
+
       <div class="card">
+        <div class="card-title">O generar sección por sección</div>
         <div class="input-group">
-          <label>¿Qué sección querés generar primero?</label>
+          <label>Elegí qué sección generar</label>
           <select id="s10-section" onchange="saveField('section', this.value)">
             <option value="intro">Introducción + Historia del autor</option>
             <option value="cap1">Capítulo 1 — El problema principal</option>
             <option value="cap2">Capítulo 2 — El método central</option>
             <option value="cap3">Capítulo 3 — Aplicación paso a paso</option>
             <option value="conclusion">Conclusión + Llamada a la acción</option>
-            <option value="todo">Generar todo (puede tardar)</option>
           </select>
         </div>
         <button class="btn-primary" onclick="generateEbookContent()" id="btn-ebook-content">
-          ✍️ Generar contenido con IA
+          ✍️ Generar esta sección
         </button>
       </div>
 
@@ -947,6 +957,15 @@ select { appearance: none; cursor: pointer; }
         <button class="btn-primary" onclick="generateLandingStructure()" id="btn-landing-struct">
           🗂️ Generar estructura y wireframe
         </button>
+      </div>
+
+      <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(232,121,249,0.1));border-color:#7c3aed;margin-top:16px">
+        <div class="card-title" style="color:#f1eeff">🌐 LANDING PAGE LISTA PARA PUBLICAR</div>
+        <p style="font-size:14px;color:#c4b5fd;margin-bottom:16px;line-height:1.6">Genera una página web completa en HTML con diseño profesional, lista para subir a cualquier hosting (GitHub Pages, Netlify, Vercel, hosting propio).</p>
+        <button class="btn-primary" onclick="generateLandingHTML()" id="btn-landing-html" style="width:100%">
+          ⚡ Generar landing HTML descargable
+        </button>
+        <p style="font-size:12px;color:#a89ec4;margin-top:10px;text-align:center">Después podés abrirla en cualquier navegador o subirla a tu hosting</p>
       </div>
 
       <div id="landing-struct-output" style="display:none">
@@ -1083,9 +1102,14 @@ select { appearance: none; cursor: pointer; }
 
       <div class="export-grid">
         <div class="export-card" onclick="exportDoc('ebook')">
-          <div class="export-icon">📖</div>
-          <div class="export-title">Ebook completo</div>
-          <div class="export-desc">Contenido listo en texto</div>
+          <div class="export-icon">📄</div>
+          <div class="export-title">Ebook (texto)</div>
+          <div class="export-desc">.txt para editar</div>
+        </div>
+        <div class="export-card" onclick="exportEbookPDF()" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:#7c3aed">
+          <div class="export-icon">📕</div>
+          <div class="export-title" style="color:#f1eeff">PDF Profesional</div>
+          <div class="export-desc">Con diseño + imágenes IA</div>
         </div>
         <div class="export-card" onclick="exportDoc('landing')">
           <div class="export-icon">🌐</div>
@@ -1102,6 +1126,15 @@ select { appearance: none; cursor: pointer; }
           <div class="export-title">Kit completo</div>
           <div class="export-desc">Todo en un archivo</div>
         </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(232,121,249,0.1));border-color:#7c3aed">
+        <div class="card-title" style="color:#f1eeff">🚀 EXPORTAR PARA CADA PLATAFORMA</div>
+        <p style="font-size:14px;color:#c4b5fd;margin-bottom:16px;line-height:1.6">Generá un archivo separado optimizado para cada plataforma que elegiste, con tips específicos para publicar en cada una.</p>
+        <button class="btn-primary" onclick="exportDoc('multi')" style="width:100%">
+          📤 Generar archivos por plataforma
+        </button>
+        <p style="font-size:12px;color:#a89ec4;margin-top:10px;text-align:center">Te descarga 1 archivo por cada plataforma seleccionada en el Paso 02</p>
       </div>
     </div>
 
@@ -1271,6 +1304,12 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
         clearInterval(interval);
         state.completedSteps.add(state.currentStep);
         updateUI();
+        // Si la respuesta parece cortada, mostrar botón continuar
+        const lastChar = text.trim().slice(-1);
+        const looksTruncated = !'.!?"\'`)'.includes(lastChar) && text.length > 500;
+        if (looksTruncated) {
+          showContinueButton(prompt, outputId, containerId, resultKey, text);
+        }
       }
     }, 8);
 
@@ -1283,6 +1322,78 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
       output.textContent = '⚠️ Error: ' + errMsg + '. Verificá tu API Key y conexión.';
     }
   }
+}
+
+
+function showContinueButton(originalPrompt, outputId, containerId, resultKey, previousText) {
+  const container = document.getElementById(containerId);
+  // Evitar duplicar botones
+  if (container.querySelector('.continue-btn')) return;
+  
+  const btnWrap = document.createElement('div');
+  btnWrap.style.marginTop = '12px';
+  btnWrap.style.textAlign = 'center';
+  
+  const btn = document.createElement('button');
+  btn.className = 'continue-btn btn-primary';
+  btn.textContent = '➕ Continuar generando';
+  btn.style.fontSize = '13px';
+  btn.style.padding = '10px 20px';
+  
+  btn.onclick = async () => {
+    btn.disabled = true;
+    btn.textContent = '⏳ Continuando...';
+    
+    const continuePrompt = 'Continuá exactamente donde te cortaste. NO repitas lo anterior. Seguí desde aquí: "' + previousText.slice(-200) + '"';
+    
+    try {
+      const apiKey = getApiKey ? getApiKey() : '';
+      const response = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'user', content: originalPrompt },
+            { role: 'assistant', content: previousText },
+            { role: 'user', content: continuePrompt }
+          ],
+          model: 'openai',
+          seed: Math.floor(Math.random() * 100000)
+        })
+      });
+      
+      const data = await response.json();
+      const moreText = data.choices?.[0]?.message?.content || '';
+      
+      if (moreText) {
+        const output = document.getElementById(outputId);
+        const fullText = previousText + '\n\n' + moreText;
+        state.results[resultKey] = fullText;
+        
+        // Agregar el texto nuevo al final
+        const textNode = document.createTextNode('\n\n' + moreText);
+        output.appendChild(textNode);
+        output.scrollTop = output.scrollHeight;
+        
+        btnWrap.remove();
+        
+        // Si el nuevo también está cortado, agregar otro botón
+        const lastChar = moreText.trim().slice(-1);
+        if (!'.!?"\'`)'.includes(lastChar) && moreText.length > 300) {
+          showContinueButton(originalPrompt, outputId, containerId, resultKey, fullText);
+        }
+      } else {
+        btn.textContent = '⚠️ Sin respuesta — reintentar';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      btn.textContent = '⚠️ Error — reintentar';
+      btn.disabled = false;
+    }
+  };
+  
+  btnWrap.appendChild(btn);
+  container.appendChild(btnWrap);
 }
 
 // ═══════════════════════════════════════════════
@@ -1463,6 +1574,92 @@ ESTRUCTURA SUGERIDA:
   setTimeout(() => { document.getElementById('btn-ebook-struct').disabled = false; document.getElementById('btn-ebook-struct').textContent = '🔄 Regenerar'; }, 5000);
 }
 
+async function generateFullEbook() {
+  const btn = document.getElementById('btn-full-ebook');
+  const output = document.getElementById('ebook-content-result');
+  const container = document.getElementById('ebook-content-output');
+  
+  btn.disabled = true;
+  container.style.display = 'block';
+  output.textContent = '';
+  output.classList.remove('loading');
+  
+  const sections = [
+    { id: 'intro', name: '📖 INTRODUCCIÓN', desc: 'Introducción y presentación del método' },
+    { id: 'cap1', name: '📘 CAPÍTULO 1', desc: 'El problema principal y por qué persiste' },
+    { id: 'cap2', name: '📗 CAPÍTULO 2', desc: 'El método o sistema central' },
+    { id: 'cap3', name: '📙 CAPÍTULO 3', desc: 'Aplicación paso a paso' },
+    { id: 'conclusion', name: '🎯 CONCLUSIÓN', desc: 'Próximos pasos y llamada a la acción' }
+  ];
+  
+  const d = state.data;
+  let fullEbook = '';
+  
+  for (let idx = 0; idx < sections.length; idx++) {
+    const section = sections[idx];
+    btn.textContent = `⏳ Generando ${idx + 1}/5: ${section.name}...`;
+    
+    output.textContent = fullEbook + '\n\n[' + section.name + ' - generando...]';
+    output.scrollTop = output.scrollHeight;
+    
+    const prompt = `Escribí el contenido completo de la sección: "${section.desc}" para el ebook sobre "${d.topic}".
+
+Resultado que promete el ebook: "${d.result}"
+Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
+Estilo: ${d.style || 'práctico, directo, en segunda persona (vos)'}
+
+Escribí el contenido real y completo de esta sección:
+- Mínimo 800-1000 palabras
+- Incluí ejemplos concretos, datos o anécdotas
+- Usá subtítulos internos para dividir el contenido
+- Terminá con un resumen o ejercicio práctico
+- Tono: hablarle directamente al lector usando "vos"
+- IMPORTANTE: Terminá la sección completa, no la dejes a medias
+
+Escribí el contenido directamente, sin introducirlo.`;
+
+    const systemPrompt = `Sos un experto en marketing digital, copywriting y creación de infoproductos para el mercado hispanohablante. Escribís en español latinoamericano natural (vos, tenés, etc). Generás contenido concreto, accionable y específico — NUNCA genérico. Producto: ${d.topic}. Resultado: ${d.result}. Avatar: ${d.gender || 'ambos'}, ${d.age || '25-35'} años. Respondé directamente sin introducciones del tipo "¡Claro que sí!".`;
+
+    try {
+      const response = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          model: 'openai',
+          seed: Math.floor(Math.random() * 100000)
+        })
+      });
+      
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content || data.text || '';
+      
+      if (text) {
+        fullEbook += '\n\n═══════════════════════════════════\n' + section.name + '\n═══════════════════════════════════\n\n' + text;
+        output.textContent = fullEbook;
+        output.scrollTop = output.scrollHeight;
+      }
+      
+      // Esperar 1 segundo entre secciones para no saturar
+      await new Promise(r => setTimeout(r, 1000));
+      
+    } catch(err) {
+      fullEbook += '\n\n[⚠️ Error en ' + section.name + ': ' + err.message + ']';
+      output.textContent = fullEbook;
+    }
+  }
+  
+  state.results.ebookContent = fullEbook;
+  state.completedSteps.add(state.currentStep);
+  updateUI();
+  
+  btn.disabled = false;
+  btn.textContent = '✅ Ebook completo generado — Regenerar';
+}
+
 function generateEbookContent() {
   const d = state.data;
   const section = d.section || 'intro';
@@ -1553,6 +1750,320 @@ Al final: CHECKLIST de conversión — 10 puntos para revisar antes de publicar.
   document.getElementById('btn-landing-struct').disabled = true;
   document.getElementById('btn-landing-struct').textContent = '⏳ Estructurando...';
   setTimeout(() => { document.getElementById('btn-landing-struct').disabled = false; document.getElementById('btn-landing-struct').textContent = '🔄 Regenerar'; }, 5000);
+}
+
+async function generateLandingHTML() {
+  const d = state.data;
+  const r = state.results;
+  const btn = document.getElementById('btn-landing-html');
+  
+  if (!r.landing && !r.offer) {
+    alert('Primero generá el copy de la landing en el Paso 11 y la oferta en el Paso 7');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando landing HTML...';
+  
+  // Modal de progreso
+  const progress = document.createElement('div');
+  progress.id = 'html-progress';
+  progress.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:24px;';
+  progress.innerHTML = `
+    <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:480px;width:100%;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🌐</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;margin-bottom:8px;color:#f1eeff">Creando tu landing page</h2>
+      <p id="html-status" style="font-size:14px;color:#a89ec4;line-height:1.6">Generando imagen del producto con IA...</p>
+    </div>
+  `;
+  document.body.appendChild(progress);
+  
+  try {
+    // Generar imagen hero con IA
+    document.getElementById('html-status').textContent = '🎨 Generando imagen hero con IA...';
+    const heroPrompt = encodeURIComponent(`product mockup for "${d.topic}", professional, modern, clean background, high quality marketing photo`);
+    const heroImg = `https://image.pollinations.ai/prompt/${heroPrompt}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
+    
+    // Generar imagen del autor/testimonios
+    const peoplePrompt = encodeURIComponent(`happy person using product, lifestyle photo, modern, professional`);
+    const peopleImg = `https://image.pollinations.ai/prompt/${peoplePrompt}?width=600&height=400&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
+    
+    document.getElementById('html-status').textContent = '✍️ Construyendo HTML profesional...';
+    
+    // Extraer datos
+    const title = d.topic || 'Mi Producto';
+    const result = d.result || 'Transformá tu vida hoy';
+    const price = d.price || '27';
+    const oldPrice = d.oldprice || (parseInt(price) * 2);
+    const guarantee = d.guarantee || '30';
+    const landingCopy = r.landing || '';
+    const offerCopy = r.offer || '';
+    const pricingCopy = r.pricing || '';
+    
+    // Construir HTML completo
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} — ${result}</title>
+<meta name="description" content="${result}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#7c3aed;--primary-dark:#6d28d9;--accent:#e879f9;--bg:#fafafa;--text:#0f172a;--text-light:#64748b;--white:#fff;--green:#10b981}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);line-height:1.6}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1a1229 0%,#2d1b4e 100%);color:#fff;padding:60px 0;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;right:0;width:600px;height:600px;background:radial-gradient(circle,rgba(232,121,249,0.2),transparent 70%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative}
+.hero-badge{display:inline-block;background:rgba(124,58,237,0.2);border:1px solid #7c3aed;padding:6px 16px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:20px;color:#c4b5fd}
+.hero h1{font-size:54px;font-weight:900;line-height:1.05;margin-bottom:20px;letter-spacing:-1px}
+.hero h1 span{background:linear-gradient(135deg,#e879f9,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:19px;color:#cbd5e1;margin-bottom:30px;line-height:1.6}
+.hero-img{width:100%;border-radius:16px;box-shadow:0 25px 60px rgba(124,58,237,0.4)}
+.btn-cta{display:inline-block;background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;padding:18px 36px;border-radius:12px;font-size:18px;font-weight:700;text-decoration:none;box-shadow:0 10px 30px rgba(124,58,237,0.4);transition:transform .2s;border:none;cursor:pointer}
+.btn-cta:hover{transform:translateY(-2px)}
+.hero-meta{display:flex;align-items:center;gap:20px;margin-top:24px;font-size:14px;color:#94a3b8}
+.hero-meta span{display:flex;align-items:center;gap:6px}
+
+/* SECTIONS */
+section{padding:80px 0}
+.section-tag{display:inline-block;color:#7c3aed;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+h2{font-size:42px;font-weight:800;line-height:1.15;margin-bottom:20px;letter-spacing:-0.5px}
+.section-intro{font-size:18px;color:var(--text-light);max-width:680px;margin-bottom:50px;line-height:1.7}
+
+/* PROBLEM */
+.problem{background:#0f172a;color:#fff}
+.problem h2{color:#fff}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:50px}
+.problem-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:30px;backdrop-filter:blur(10px)}
+.problem-card .icon{font-size:36px;margin-bottom:16px}
+.problem-card h3{font-size:18px;margin-bottom:10px;font-weight:700}
+.problem-card p{color:#94a3b8;font-size:14px}
+
+/* SOLUTION */
+.solution{background:#fff}
+.solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.solution-img{width:100%;border-radius:16px;box-shadow:0 20px 50px rgba(124,58,237,0.15)}
+.benefits-list{list-style:none}
+.benefits-list li{display:flex;align-items:start;gap:14px;padding:14px 0;border-bottom:1px solid #f1f5f9;font-size:16px}
+.benefits-list li:last-child{border:none}
+.benefits-list li::before{content:'✓';width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:14px}
+
+/* OFFER */
+.offer{background:linear-gradient(135deg,#1a1229,#2d1b4e);color:#fff;text-align:center}
+.offer h2{color:#fff;margin-bottom:14px}
+.offer-card{background:#fff;color:var(--text);max-width:540px;margin:50px auto 0;border-radius:24px;padding:50px 40px;box-shadow:0 30px 80px rgba(0,0,0,0.3);position:relative}
+.offer-card::before{content:'OFERTA POR TIEMPO LIMITADO';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;padding:8px 24px;border-radius:30px;font-size:11px;font-weight:700;letter-spacing:2px}
+.price-old{font-size:22px;color:#94a3b8;text-decoration:line-through;margin-bottom:6px}
+.price-now{font-size:64px;font-weight:900;color:var(--primary);line-height:1;margin-bottom:8px}
+.price-now span{font-size:24px;color:var(--text-light)}
+.offer-list{list-style:none;text-align:left;margin:30px 0;padding:30px 0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
+.offer-list li{padding:8px 0;display:flex;gap:10px;font-size:15px}
+.offer-list li::before{content:'✓';color:var(--green);font-weight:700}
+.guarantee-box{background:#f8fafc;border-radius:12px;padding:20px;margin-top:24px;display:flex;align-items:center;gap:16px;text-align:left}
+.guarantee-box .shield{font-size:36px}
+.guarantee-box p{font-size:13px;color:var(--text-light);margin:0}
+.guarantee-box strong{color:var(--text);font-size:14px;display:block;margin-bottom:2px}
+
+/* FAQ */
+.faq{background:#fff}
+.faq-list{max-width:780px;margin:0 auto}
+.faq-item{border-bottom:1px solid #e2e8f0;padding:24px 0}
+.faq-item h3{font-size:18px;font-weight:700;margin-bottom:10px;color:var(--primary)}
+.faq-item p{color:var(--text-light);font-size:15px}
+
+/* FINAL CTA */
+.final-cta{background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;text-align:center;padding:100px 0}
+.final-cta h2{color:#fff;font-size:48px;margin-bottom:20px}
+.final-cta p{font-size:18px;color:rgba(255,255,255,0.9);margin-bottom:30px}
+.final-cta .btn-cta{background:#fff;color:var(--primary)}
+
+/* FOOTER */
+footer{background:#0f172a;color:#94a3b8;padding:40px 0;text-align:center;font-size:13px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .hero{padding:40px 0}
+  .hero-grid,.solution-grid{grid-template-columns:1fr;gap:40px}
+  .hero h1{font-size:36px}
+  h2{font-size:30px}
+  .problem-grid{grid-template-columns:1fr}
+  section{padding:50px 0}
+  .offer-card{padding:35px 24px}
+  .price-now{font-size:48px}
+  .final-cta h2{font-size:32px}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <span class="hero-badge">⚡ NUEVO LANZAMIENTO</span>
+        <h1>${title}<br><span>${result.split(' ').slice(0,3).join(' ')}</span></h1>
+        <p>${result}</p>
+        <a href="#oferta" class="btn-cta">Quiero empezar ahora →</a>
+        <div class="hero-meta">
+          <span>⭐⭐⭐⭐⭐ 4.9/5</span>
+          <span>🛡️ Garantía ${guarantee} días</span>
+          <span>🔒 Pago seguro</span>
+        </div>
+      </div>
+      <div>
+        <img src="${heroImg}" alt="${title}" class="hero-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="container">
+    <div class="section-tag">¿TE PASA ESTO?</div>
+    <h2>El problema que estás viviendo<br>tiene solución</h2>
+    <p class="section-intro" style="color:#cbd5e1">Sabemos que probaste de todo. Que estás cansado/a de promesas vacías. Por eso creamos esto.</p>
+    <div class="problem-grid">
+      <div class="problem-card"><div class="icon">😰</div><h3>Frustración constante</h3><p>Sentís que probás cosas y nada termina de funcionar como te prometen.</p></div>
+      <div class="problem-card"><div class="icon">⏰</div><h3>Tiempo perdido</h3><p>Pasaste meses (o años) buscando la solución correcta sin encontrarla.</p></div>
+      <div class="problem-card"><div class="icon">💸</div><h3>Plata tirada</h3><p>Invertiste en cursos, productos y mentores que no te llevaron a destino.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution">
+  <div class="container">
+    <div class="solution-grid">
+      <div>
+        <img src="${peopleImg}" alt="Solución" class="solution-img" loading="lazy">
+      </div>
+      <div>
+        <div class="section-tag">LA SOLUCIÓN</div>
+        <h2>${title}</h2>
+        <p style="font-size:18px;color:var(--text-light);margin-bottom:30px;line-height:1.7">${result}</p>
+        <ul class="benefits-list">
+          <li>Sistema paso a paso comprobado</li>
+          <li>Resultados desde la primera semana</li>
+          <li>Sin necesidad de experiencia previa</li>
+          <li>Soporte directo cuando lo necesites</li>
+          <li>Garantía total de ${guarantee} días</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFFER -->
+<section class="offer" id="oferta">
+  <div class="container">
+    <div class="section-tag" style="color:#e879f9">⚡ OFERTA DE LANZAMIENTO</div>
+    <h2>Empezá hoy con un descuento especial</h2>
+    <p style="color:#cbd5e1;font-size:17px">Por tiempo limitado, accedé a todo por:</p>
+    
+    <div class="offer-card">
+      <div class="price-old">Antes USD ${oldPrice}</div>
+      <div class="price-now">$${price}<span> USD</span></div>
+      <p style="color:var(--text-light);font-size:14px">pago único · acceso inmediato</p>
+      
+      <ul class="offer-list">
+        <li>Acceso completo al ${d.type === 'curso' ? 'curso' : 'producto'}</li>
+        <li>Material descargable en PDF</li>
+        <li>Bonos exclusivos incluidos</li>
+        <li>Actualizaciones gratis de por vida</li>
+        <li>Comunidad privada de soporte</li>
+      </ul>
+      
+      <a href="#" onclick="alert('Conectá tu link de pago aquí (Hotmart, MercadoPago, Shopify, etc)')" class="btn-cta" style="display:block;width:100%;text-align:center;font-size:18px">🚀 Quiero acceder ahora</a>
+      
+      <div class="guarantee-box">
+        <div class="shield">🛡️</div>
+        <div>
+          <strong>Garantía total ${guarantee} días</strong>
+          <p>Si no te sirve te devolvemos el 100% sin preguntas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="container">
+    <div class="section-tag">PREGUNTAS FRECUENTES</div>
+    <h2 style="text-align:center;margin-bottom:50px">Lo que querés saber antes de empezar</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>¿Cómo recibo el producto después de comprar?</h3>
+        <p>Apenas confirmás el pago, te llega un email con el acceso inmediato. Podés empezar en menos de 5 minutos.</p>
+      </div>
+      <div class="faq-item">
+        <h3>¿Sirve si soy principiante?</h3>
+        <p>Sí, está diseñado para que cualquier persona pueda aplicarlo, sin experiencia previa. Te guiamos paso a paso.</p>
+      </div>
+      <div class="faq-item">
+        <h3>¿Qué pasa si no me sirve?</h3>
+        <p>Tenés ${guarantee} días para probarlo. Si no te convence, te devolvemos cada centavo sin preguntas.</p>
+      </div>
+      <div class="faq-item">
+        <h3>¿Puedo pagar en cuotas o con MercadoPago?</h3>
+        <p>Sí, podés pagar con tarjeta, MercadoPago, transferencia o efectivo según tu país.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Tu transformación empieza hoy</h2>
+    <p>No esperes más. Empezá ahora mismo.</p>
+    <a href="#oferta" class="btn-cta">Quiero mi acceso por $${price} →</a>
+    <p style="margin-top:20px;font-size:13px;opacity:0.8">🔒 Pago seguro · 🛡️ Garantía ${guarantee} días</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© ${new Date().getFullYear()} ${title}. Todos los derechos reservados.</p>
+    <p style="margin-top:6px;opacity:0.6;font-size:11px">Generado con InfoForge</p>
+  </div>
+</footer>
+
+</body>
+</html>`;
+    
+    // Descargar
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fileName = (d.topic || 'landing').toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 30);
+    a.href = url;
+    a.download = `landing-${fileName}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    document.getElementById('html-status').textContent = '✅ ¡Landing descargada!';
+    setTimeout(() => {
+      document.getElementById('html-progress').remove();
+      btn.disabled = false;
+      btn.textContent = '⚡ Generar landing HTML descargable';
+    }, 1500);
+    
+  } catch(err) {
+    document.getElementById('html-status').textContent = '❌ Error: ' + err.message;
+    setTimeout(() => {
+      document.getElementById('html-progress').remove();
+      btn.disabled = false;
+      btn.textContent = '⚡ Generar landing HTML descargable';
+    }, 3000);
+  }
 }
 
 function generateAds() {
@@ -1662,9 +2173,303 @@ function buildFinalSummary() {
   `;
 }
 
+
+async function exportEbookPDF() {
+  const r = state.results;
+  const d = state.data;
+  
+  if (!r.ebookContent && !r.ebookStruct) {
+    alert('Primero generá el contenido del ebook en el Paso 10');
+    return;
+  }
+  
+  // Crear modal de progreso
+  const progress = document.createElement('div');
+  progress.id = 'pdf-progress';
+  progress.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:24px;';
+  progress.innerHTML = `
+    <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:480px;width:100%;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">📕</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;margin-bottom:8px;color:#f1eeff">Creando tu ebook PDF</h2>
+      <p style="font-size:14px;color:#a89ec4;margin-bottom:20px;line-height:1.6">Generando imágenes con IA, diseñando páginas y armando el PDF...</p>
+      <div style="background:#09070f;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div id="pdf-status" style="font-size:13px;color:#c4b5fd;margin-bottom:10px">⏳ Iniciando...</div>
+        <div style="background:#221a35;height:6px;border-radius:3px;overflow:hidden">
+          <div id="pdf-bar" style="background:linear-gradient(90deg,#7c3aed,#e879f9);height:100%;width:0%;transition:width .5s"></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:#6b5f8a">No cierres esta ventana. Tarda 1-2 minutos.</p>
+    </div>
+  `;
+  document.body.appendChild(progress);
+  
+  const setStatus = (txt, pct) => {
+    document.getElementById('pdf-status').textContent = txt;
+    document.getElementById('pdf-bar').style.width = pct + '%';
+  };
+  
+  try {
+    // Paso 1: Generar imagen de portada con IA
+    setStatus('🎨 Generando portada con IA...', 10);
+    const coverPrompt = encodeURIComponent(`book cover for "${d.topic}", professional, modern, ${d.style || 'minimalist'}, no text, illustration, artistic`);
+    const coverImgUrl = `https://image.pollinations.ai/prompt/${coverPrompt}?width=600&height=900&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
+    
+    const coverImg = await loadImageAsBase64(coverImgUrl);
+    setStatus('✅ Portada lista', 25);
+    
+    // Paso 2: Generar imágenes para cada capítulo
+    setStatus('🖼️ Generando ilustraciones de capítulos...', 30);
+    const chapterImages = [];
+    const chapterTopics = ['introduction concept', 'problem analysis', 'solution method', 'practical application', 'conclusion success'];
+    
+    for (let i = 0; i < 3; i++) {
+      const imgPrompt = encodeURIComponent(`${chapterTopics[i]} for "${d.topic}", abstract, modern illustration, no text, vibrant colors`);
+      const imgUrl = `https://image.pollinations.ai/prompt/${imgPrompt}?width=600&height=400&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
+      try {
+        const img = await loadImageAsBase64(imgUrl);
+        chapterImages.push(img);
+      } catch(e) { chapterImages.push(null); }
+      setStatus(`🖼️ Imagen ${i+1}/3 lista`, 30 + (i+1) * 15);
+    }
+    
+    // Paso 3: Crear el PDF
+    setStatus('📄 Diseñando el PDF...', 80);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, H = 297;
+    
+    // PORTADA
+    pdf.setFillColor(15, 11, 26);
+    pdf.rect(0, 0, W, H, 'F');
+    
+    if (coverImg) {
+      pdf.addImage(coverImg, 'JPEG', 30, 30, 150, 180, '', 'FAST');
+    }
+    
+    pdf.setFillColor(124, 58, 237);
+    pdf.rect(0, 220, W, 77, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(28);
+    const title = (d.topic || 'Mi Ebook').toUpperCase();
+    const titleLines = pdf.splitTextToSize(title, 170);
+    pdf.text(titleLines, W/2, 240, { align: 'center' });
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(13);
+    const subtitle = d.result || '';
+    const subLines = pdf.splitTextToSize(subtitle, 170);
+    pdf.text(subLines, W/2, 270, { align: 'center' });
+    
+    pdf.setFontSize(9);
+    pdf.setTextColor(200, 200, 200);
+    pdf.text('Una guía práctica · ' + new Date().getFullYear(), W/2, 290, { align: 'center' });
+    
+    // ÍNDICE
+    pdf.addPage();
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, W, H, 'F');
+    
+    pdf.setTextColor(124, 58, 237);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(32);
+    pdf.text('Índice', 20, 35);
+    
+    pdf.setDrawColor(124, 58, 237);
+    pdf.setLineWidth(0.5);
+    pdf.line(20, 42, 60, 42);
+    
+    const tocItems = [
+      { num: '01', name: 'Introducción' },
+      { num: '02', name: 'Capítulo 1: El problema' },
+      { num: '03', name: 'Capítulo 2: El método' },
+      { num: '04', name: 'Capítulo 3: Aplicación' },
+      { num: '05', name: 'Conclusión' }
+    ];
+    
+    let yPos = 70;
+    tocItems.forEach(item => {
+      pdf.setTextColor(232, 121, 249);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(20);
+      pdf.text(item.num, 20, yPos);
+      
+      pdf.setTextColor(40, 40, 40);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(14);
+      pdf.text(item.name, 50, yPos);
+      
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.2);
+      pdf.line(20, yPos + 5, 190, yPos + 5);
+      
+      yPos += 25;
+    });
+    
+    setStatus('✍️ Agregando contenido...', 90);
+    
+    // CONTENIDO - Dividir el texto del ebook por secciones
+    const fullText = r.ebookContent || r.ebookStruct || '';
+    const sections = fullText.split(/═══+/).filter(s => s.trim().length > 50);
+    
+    let imgIdx = 0;
+    sections.forEach((section, sIdx) => {
+      pdf.addPage();
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, W, H, 'F');
+      
+      // Header decorativo
+      pdf.setFillColor(124, 58, 237);
+      pdf.rect(0, 0, W, 8, 'F');
+      
+      // Número de capítulo grande
+      pdf.setTextColor(245, 240, 250);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(80);
+      pdf.text(String(sIdx + 1).padStart(2, '0'), W - 50, 60);
+      
+      // Procesar contenido
+      const lines = section.trim().split('\n').filter(l => l.trim());
+      const sectionTitle = lines[0] || 'Sección';
+      const sectionContent = lines.slice(1).join('\n').trim();
+      
+      // Título de capítulo
+      pdf.setTextColor(124, 58, 237);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.text('CAPÍTULO ' + (sIdx + 1), 20, 30);
+      
+      pdf.setTextColor(20, 20, 20);
+      pdf.setFontSize(22);
+      const titleClean = sectionTitle.replace(/[📖📘📗📙🎯═]/g, '').trim();
+      const tLines = pdf.splitTextToSize(titleClean, 140);
+      pdf.text(tLines, 20, 45);
+      
+      // Línea separadora
+      pdf.setDrawColor(124, 58, 237);
+      pdf.setLineWidth(1);
+      pdf.line(20, 70, 50, 70);
+      
+      // Imagen del capítulo
+      let textStartY = 85;
+      if (sIdx > 0 && sIdx <= 3 && chapterImages[sIdx - 1]) {
+        try {
+          pdf.addImage(chapterImages[sIdx - 1], 'JPEG', 20, 80, 170, 60, '', 'FAST');
+          textStartY = 150;
+        } catch(e) {}
+      }
+      
+      // Contenido del capítulo
+      pdf.setTextColor(50, 50, 50);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      
+      const contentLines = pdf.splitTextToSize(sectionContent, 170);
+      let currentY = textStartY;
+      
+      contentLines.forEach(line => {
+        if (currentY > 270) {
+          pdf.addPage();
+          pdf.setFillColor(255, 255, 255);
+          pdf.rect(0, 0, W, H, 'F');
+          pdf.setFillColor(124, 58, 237);
+          pdf.rect(0, 0, W, 8, 'F');
+          currentY = 25;
+        }
+        
+        // Detectar subtítulos (mayúsculas o que empiezan con #)
+        if (line.length < 80 && (line === line.toUpperCase() || line.startsWith('#') || line.match(/^[A-Z][^.]+:$/))) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(124, 58, 237);
+          pdf.setFontSize(13);
+          pdf.text(line.replace(/^#+\s*/, ''), 20, currentY);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(50, 50, 50);
+          pdf.setFontSize(11);
+          currentY += 7;
+        } else {
+          pdf.text(line, 20, currentY);
+          currentY += 6;
+        }
+      });
+      
+      // Footer con número de página
+      pdf.setTextColor(150, 150, 150);
+      pdf.setFontSize(9);
+      pdf.text(d.topic || 'InfoForge', 20, 285);
+      pdf.text('Página ' + (sIdx + 3), W - 20, 285, { align: 'right' });
+    });
+    
+    // Página final - CTA
+    pdf.addPage();
+    pdf.setFillColor(124, 58, 237);
+    pdf.rect(0, 0, W, H, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(36);
+    pdf.text('¡Empezá hoy!', W/2, 130, { align: 'center' });
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(14);
+    pdf.text('Ya tenés todas las herramientas que necesitás.', W/2, 150, { align: 'center' });
+    pdf.text('El próximo paso es tuyo.', W/2, 160, { align: 'center' });
+    
+    pdf.setFontSize(11);
+    pdf.setTextColor(220, 220, 255);
+    pdf.text('Gracias por leer este ebook 💜', W/2, 200, { align: 'center' });
+    
+    setStatus('✅ ¡PDF listo!', 100);
+    
+    // Descargar
+    const fileName = (d.topic || 'ebook').toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 30);
+    pdf.save(`infoforge-${fileName}-${Date.now()}.pdf`);
+    
+    setTimeout(() => {
+      document.getElementById('pdf-progress').remove();
+    }, 1500);
+    
+  } catch(err) {
+    setStatus('❌ Error: ' + err.message, 0);
+    setTimeout(() => {
+      const p = document.getElementById('pdf-progress');
+      if (p) p.remove();
+    }, 3000);
+  }
+}
+
+function loadImageAsBase64(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch(e) { reject(e); }
+    };
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+    setTimeout(() => reject(new Error('Timeout cargando imagen')), 30000);
+    img.src = url;
+  });
+}
+
 function exportDoc(type) {
   const d = state.data;
   const r = state.results;
+  const platforms = d.platforms && d.platforms.length ? d.platforms : ['general'];
+  
+  // Si exportamos a múltiples plataformas, generar un archivo por cada una
+  if (type === 'multi' && platforms.length > 1) {
+    platforms.forEach(plat => exportForPlatform(plat));
+    return;
+  }
+  
   let content = '';
   const now = new Date().toLocaleDateString('es-AR');
 
@@ -1708,6 +2513,59 @@ function exportDoc(type) {
 }
 
 function exportAll() { exportDoc('full'); }
+
+function exportForPlatform(platform) {
+  const d = state.data;
+  const r = state.results;
+  const now = new Date().toLocaleDateString('es-AR');
+  
+  const platformNames = {
+    'hotmart': '🟧 HOTMART',
+    'shopify': '🟩 SHOPIFY',
+    'tiendanube': '☁️ TIENDA NUBE',
+    'mercadopago': '💙 MERCADOPAGO',
+    'gumroad': '🟣 GUMROAD',
+    'instagram': '📸 INSTAGRAM DM',
+    'whatsapp': '💬 WHATSAPP',
+    'propio': '🌐 SITIO PROPIO'
+  };
+  
+  const platformTips = {
+    'hotmart': '\n💡 TIPS PARA HOTMART:\n• Usar título corto y poderoso (máx 60 chars)\n• Agregar descripción larga con bullets\n• Subir 5-7 imágenes del producto\n• Configurar afiliados con 50% comisión\n• Activar Order Bump y Upsell',
+    'shopify': '\n💡 TIPS PARA SHOPIFY:\n• Usar tema gratis Dawn o pago como Impulse\n• Instalar app de reviews (Loox, Judge.me)\n• Configurar checkout en 1 paso\n• Activar abandoned cart emails\n• Agregar trust badges',
+    'tiendanube': '\n💡 TIPS PARA TIENDA NUBE:\n• Configurar MercadoPago como pasarela\n• Activar Mercado Envíos\n• Usar plantilla Atlas o Astro\n• Configurar cupones de bienvenida\n• Conectar con Instagram Shopping',
+    'mercadopago': '\n💡 TIPS PARA MERCADOPAGO:\n• Crear link de pago directo\n• Permitir pago en cuotas sin interés\n• Habilitar pago con efectivo (Rapipago/Pago Fácil)\n• Configurar checkout pro para tu landing\n• Activar suscripciones si es recurrente',
+    'gumroad': '\n💡 TIPS PARA GUMROAD:\n• Precio sugerido vs precio fijo\n• Permitir "pay what you want"\n• Subir mockups del producto\n• Configurar variantes de precio\n• Habilitar afiliados',
+    'instagram': '\n💡 TIPS PARA INSTAGRAM DM:\n• Usar Stories con sticker de pregunta\n• Configurar respuestas rápidas\n• Crear destacados con info del producto\n• Usar Manychat para automatizar\n• Agregar link de pago en bio',
+    'whatsapp': '\n💡 TIPS PARA WHATSAPP:\n• Crear catálogo de productos\n• Configurar mensaje de bienvenida\n• Usar etiquetas para clasificar leads\n• Activar respuestas automáticas\n• Conectar con CRM si tenés muchos leads',
+    'propio': '\n💡 TIPS PARA SITIO PROPIO:\n• Configurar Google Analytics\n• Instalar Pixel de Meta\n• Optimizar velocidad (PageSpeed >80)\n• Agregar SSL\n• Configurar email marketing'
+  };
+  
+  let content = `═══════════════════════════════════════\nINFOFORGE - PUBLICACIÓN PARA ${platformNames[platform] || platform.toUpperCase()}\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n═══════════════════════════════════════\n`;
+  
+  content += platformTips[platform] || '';
+  content += '\n\n═══════════════════════════════════════\n📋 INFORMACIÓN DEL PRODUCTO\n═══════════════════════════════════════\n';
+  content += `Tema: ${d.topic}\nResultado: ${d.result}\nTipo: ${d.type}\nPrecio: ${d.price} ${d.currency || 'USD'}\nGarantía: ${d.guarantee || '30'} días\n`;
+  
+  if (r.offer) content += '\n\n═══════════════════════════════════════\n💎 OFERTA Y COPY DE VENTA\n═══════════════════════════════════════\n' + r.offer;
+  if (r.landing) content += '\n\n═══════════════════════════════════════\n🌐 COPY DE LANDING / DESCRIPCIÓN\n═══════════════════════════════════════\n' + r.landing;
+  if (r.pricing) content += '\n\n═══════════════════════════════════════\n🛡️ PRECIO Y GARANTÍA\n═══════════════════════════════════════\n' + r.pricing;
+  if (r.ads) content += '\n\n═══════════════════════════════════════\n📢 ADS PARA PROMOCIONAR\n═══════════════════════════════════════\n' + r.ads;
+  if (r.emails) content += '\n\n═══════════════════════════════════════\n📧 EMAILS DE LANZAMIENTO\n═══════════════════════════════════════\n' + r.emails;
+  
+  if (!content.includes('═══')) {
+    alert('Todavía no hay contenido suficiente. Generá los pasos primero.');
+    return;
+  }
+  
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; 
+  a.download = `infoforge-${platform}-${Date.now()}.txt`;
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
 
 function confirmReset() {
   if(confirm('¿Seguro que querés empezar una nueva sesión? Se perderá todo el contenido generado.')) {
