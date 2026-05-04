@@ -1246,14 +1246,22 @@ Bonos: ${d.bonuses || 'ninguno especificado'}
 Garantía: ${d.guarantee || '30'} días
 `.trim();
 
-  const systemPrompt = `Sos un experto en marketing digital, copywriting y creación de infoproductos para el mercado hispanohablante. 
-Escribís en español latinoamericano natural (vos, tenés, etc). 
-Generás contenido concreto, accionable y específico — NUNCA genérico.
-Basá todo en este contexto del proyecto:
+  const systemPrompt = `Eres un escritor profesional experto en marketing digital, copywriting y creación de infoproductos premium para el mercado hispanohablante.
 
+REGLAS DE ESCRITURA OBLIGATORIAS:
+1. Escribe en español rioplatense natural (vos, tenés, querés, sabés, etc.)
+2. SIN errores ortográficos, SIN palabras inventadas, SIN spanglish
+3. Frases claras, directas y bien construidas — nada de palabras raras como "Julís" o "vislumbrá"
+4. Estructura impecable con introducción, desarrollo y cierre
+5. Datos concretos, ejemplos reales, números específicos
+6. Tono cálido y profesional, como un experto que habla de igual a igual
+7. NUNCA uses lenguaje confuso, jerga rara o expresiones traducidas literalmente del inglés
+8. Cuando uses términos técnicos, explicalos brevemente
+
+CONTEXTO DEL PROYECTO:
 ${context}
 
-Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé específico, profundo y útil.`;
+REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o "Aquí tienes". Sé específico, claro, profundo y revisá tu propio texto antes de entregarlo. Calidad de libro publicado.`;
 
   // Pollinations no requiere API key
   
@@ -1273,7 +1281,7 @@ Respondé directamente sin introducciones del tipo "¡Claro que sí!". Sé espec
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        model: 'openai',
+        model: 'openai-large',
         seed: Math.floor(Math.random() * 100000)
       })
     });
@@ -1357,7 +1365,7 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
             { role: 'assistant', content: previousText },
             { role: 'user', content: continuePrompt }
           ],
-          model: 'openai',
+          model: 'openai-large',
           seed: Math.floor(Math.random() * 100000)
         })
       });
@@ -1602,23 +1610,44 @@ async function generateFullEbook() {
     output.textContent = fullEbook + '\n\n[' + section.name + ' - generando...]';
     output.scrollTop = output.scrollHeight;
     
-    const prompt = `Escribí el contenido completo de la sección: "${section.desc}" para el ebook sobre "${d.topic}".
+    const prompt = `Escribí el capítulo "${section.desc}" para el libro "${d.topic}" (resultado: "${d.result}").
 
-Resultado que promete el ebook: "${d.result}"
-Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
-Estilo: ${d.style || 'práctico, directo, en segunda persona (vos)'}
+ESTRUCTURA OBLIGATORIA del capítulo:
+1. Apertura (1 párrafo): conectá emocionalmente con el problema del lector
+2. Desarrollo (3-5 secciones con subtítulos): explicá el concepto con ejemplos REALES y datos concretos
+3. Caso práctico: una historia breve o ejemplo aplicable
+4. Cierre con acción: 3-5 pasos específicos que el lector puede aplicar HOY
 
-Escribí el contenido real y completo de esta sección:
-- Mínimo 800-1000 palabras
-- Incluí ejemplos concretos, datos o anécdotas
-- Usá subtítulos internos para dividir el contenido
-- Terminá con un resumen o ejercicio práctico
-- Tono: hablarle directamente al lector usando "vos"
-- IMPORTANTE: Terminá la sección completa, no la dejes a medias
+REGLAS DE ESCRITURA:
+- Mínimo 1000 palabras
+- Español rioplatense correcto (vos, tenés, sabés) — sin errores ortográficos
+- Subtítulos en negrita usando ** **
+- Listas claras cuando sea útil
+- Datos verificables, números específicos, ejemplos reales
+- Terminá la sección completa, NO la dejes a medias
+- Calidad de libro editorial publicado
+- NO uses palabras raras como "Julís", "vislumbrá" — usá lenguaje claro y natural
+- NO mezcles dialectos (no uses "tú" si estás usando "vos")
 
-Escribí el contenido directamente, sin introducirlo.`;
+Empezá con el subtítulo principal del capítulo. No saludes, no introduzcas, no escribas "Aquí tienes". Solo el contenido del capítulo.`;
 
-    const systemPrompt = `Sos un experto en marketing digital, copywriting y creación de infoproductos para el mercado hispanohablante. Escribís en español latinoamericano natural (vos, tenés, etc). Generás contenido concreto, accionable y específico — NUNCA genérico. Producto: ${d.topic}. Resultado: ${d.result}. Avatar: ${d.gender || 'ambos'}, ${d.age || '25-35'} años. Respondé directamente sin introducciones del tipo "¡Claro que sí!".`;
+    const systemPrompt = `Eres un escritor profesional especializado en libros prácticos para el mercado hispanohablante.
+
+REGLAS OBLIGATORIAS:
+- Español rioplatense natural y correcto (vos, tenés, sabés)
+- CERO errores ortográficos, palabras inventadas o spanglish
+- Frases claras, oraciones bien construidas
+- Información precisa, datos reales, ejemplos concretos
+- Tono profesional y cercano, calidad de libro publicado en editorial
+- Estructura impecable: introducción, desarrollo, cierre
+- Si das ejercicios, números o pasos, deben ser claros y aplicables
+- NUNCA uses palabras raras, traducciones literales del inglés, ni mezcles dialectos
+
+LIBRO: ${d.topic}
+PROMESA: ${d.result}
+LECTOR: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
+
+Escribí directamente, sin saludos. Revisá tu texto antes de entregarlo. Calidad editorial profesional.`;
 
     try {
       const response = await fetch('https://text.pollinations.ai/openai', {
@@ -1629,7 +1658,7 @@ Escribí el contenido directamente, sin introducirlo.`;
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }
           ],
-          model: 'openai',
+          model: 'openai-large',
           seed: Math.floor(Math.random() * 100000)
         })
       });
