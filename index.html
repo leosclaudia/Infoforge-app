@@ -49,7 +49,13 @@ body::before {
   display: flex; flex-direction: column; align-items: center;
   padding: 20px 0; gap: 8px; z-index: 50;
   transition: width .3s cubic-bezier(.4,0,.2,1);
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .sidebar:hover { width: 200px; }
 .logo-mark {
   width: 40px; height: 40px; border-radius: 10px;
@@ -342,7 +348,14 @@ select { appearance: none; cursor: pointer; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  .sidebar { width: 56px; }
+  .sidebar { 
+    width: 56px;
+    padding: 12px 0;
+    gap: 4px;
+  }
+  .sidebar .nav-item { padding: 8px 12px; }
+  .sidebar .nav-icon { font-size: 16px; }
+  .sidebar .logo-mark { width: 36px; height: 36px; font-size: 16px; margin-bottom: 8px; }
   .main { margin-left: 56px; }
   .step-nav { left: 56px; }
   .content { padding: 24px 16px; }
@@ -410,7 +423,7 @@ select { appearance: none; cursor: pointer; }
     <span class="step-badge">15-16</span>
   </div>
 
-  <div class="sidebar-divider" style="margin-top:auto"></div>
+  <div class="sidebar-divider" style="margin-top:16px"></div>
   <div class="nav-item" onclick="exportAll()">
     <span class="nav-icon">📦</span>
     <span class="nav-label">Exportar Todo</span>
