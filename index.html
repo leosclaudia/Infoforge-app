@@ -1392,26 +1392,64 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
   
   try {
     // Usar Pollinations AI - gratis, sin key, sin restricciones
-    const fullPrompt = systemPrompt + '\n\n' + prompt;
+    // Probamos varios modelos por si uno está caído
+    const models = ['openai-large', 'openai', 'mistral', 'llama'];
+    let text = null;
+    let lastError = null;
     
-    const response = await fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        model: 'openai-large',
-        seed: Math.floor(Math.random() * 100000)
-      })
-    });
+    for (const model of models) {
+      try {
+        output.textContent = `⏳ Conectando con IA (${model})...`;
+        
+        const response = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: prompt }
+            ],
+            model: model,
+            seed: Math.floor(Math.random() * 100000)
+          })
+        });
+        
+        if (!response.ok) {
+          lastError = `HTTP ${response.status}`;
+          continue; // probar siguiente modelo
+        }
+        
+        const data = await response.json();
+        const candidateText = data.choices?.[0]?.message?.content || data.text;
+        
+        if (candidateText && typeof candidateText === 'string' && candidateText.length > 10) {
+          text = candidateText;
+          break; // tenemos respuesta válida
+        } else {
+          lastError = 'Respuesta vacía';
+          continue;
+        }
+      } catch(e) {
+        lastError = e.message;
+        continue;
+      }
+    }
     
-    if (!response.ok) throw new Error('Error de conexión: ' + response.status);
+    // Si falló todos los modelos, intentar versión simple GET
+    if (!text) {
+      try {
+        output.textContent = '⏳ Probando método alternativo...';
+        const simplePrompt = encodeURIComponent(systemPrompt + '\n\n' + prompt);
+        const altResponse = await fetch(`https://text.pollinations.ai/${simplePrompt}`);
+        if (altResponse.ok) {
+          text = await altResponse.text();
+        }
+      } catch(e) {
+        lastError = e.message;
+      }
+    }
     
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || data.text || data;
-    if (!text || typeof text !== 'string') throw new Error('Respuesta inesperada de la IA');
+    if (!text) throw new Error(lastError || 'Servicio temporalmente no disponible');
 
     // Mostrar el texto con efecto typewriter
     output.classList.remove('loading');
@@ -1446,11 +1484,14 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
   } catch(err) {
     output.classList.remove('loading');
     const errMsg = err.message || '';
-    if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('CORS')) {
-      output.textContent = '🔑 Primero configurá tu API Key de OpenRouter. Tocá el botón "🔑 API Key" arriba a la derecha.';
-    } else {
-      output.textContent = '⚠️ Error: ' + errMsg + '. Verificá tu API Key y conexión.';
-    }
+    output.innerHTML = '<div style="color:#fbbf24;padding:12px;line-height:1.6">' +
+      '⚠️ <strong>El servicio de IA está temporalmente caído.</strong><br><br>' +
+      'Esto pasa a veces con servicios gratuitos. Probá:<br>' +
+      '1️⃣ Esperá 30 segundos y tocá <strong>🔄 Regenerar</strong><br>' +
+      '2️⃣ Si sigue, esperá 5 minutos y volvé a intentar<br>' +
+      '3️⃣ Si nada funciona, recargá la página (cerrá y abrí la app)<br><br>' +
+      '<em style="color:#9ca3af;font-size:12px">Detalle técnico: ' + errMsg + '</em>' +
+      '</div>';
   }
 }
 
@@ -2821,7 +2862,7 @@ function saveApiKey() {
   sessionStorage.setItem('if_apikey', key);
   localStorage.setItem('if_apikey', key);
   document.getElementById('apikey-modal').style.display = 'none';
-  document.getElementById('apikey-btn').textContent = '🔑 OpenRouter ✓';
+  document.getElementById('apikey-btn').textContent = '✅ IA Lista';
   document.getElementById('apikey-btn').style.color = '#34d399';
   document.getElementById('apikey-btn').style.borderColor = '#34d399';
   document.getElementById('apikey-error').textContent = '';
@@ -2834,13 +2875,12 @@ function getApiKey() {
 }
 // Cargar key guardada al inicio
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = sessionStorage.getItem('if_apikey') || localStorage.getItem('if_apikey');
-  if (saved) {
-    sessionStorage.setItem('if_apikey', saved);
-    document.getElementById('apikey-btn').textContent = '🔑 OpenRouter ✓';
-    document.getElementById('apikey-btn').style.color = '#34d399';
-    document.getElementById('apikey-btn').style.borderColor = '#34d399';
-    document.getElementById('apikey-input').value = saved;
+  // Asegurar que el botón siempre diga "IA Lista" (Pollinations no necesita key)
+  const btn = document.getElementById('apikey-btn');
+  if (btn) {
+    btn.textContent = '✅ IA Lista';
+    btn.style.color = '#34d399';
+    btn.style.borderColor = '#34d399';
   }
 });
 
