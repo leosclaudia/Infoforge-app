@@ -1401,9 +1401,12 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
       try {
         output.textContent = `⏳ Conectando con IA (${model})...`;
         
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
         const response = await fetch('https://text.pollinations.ai/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             messages: [
               { role: 'system', content: systemPrompt },
@@ -1413,6 +1416,7 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
             seed: Math.floor(Math.random() * 100000)
           })
         });
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
           lastError = `HTTP ${response.status}`;
@@ -1440,7 +1444,10 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
       try {
         output.textContent = '⏳ Probando método alternativo...';
         const simplePrompt = encodeURIComponent(systemPrompt + '\n\n' + prompt);
-        const altResponse = await fetch(`https://text.pollinations.ai/${simplePrompt}`);
+        const altCtrl = new AbortController();
+        const altTid = setTimeout(() => altCtrl.abort(), 20000);
+        const altResponse = await fetch(`https://text.pollinations.ai/${simplePrompt}`, { signal: altCtrl.signal });
+        clearTimeout(altTid);
         if (altResponse.ok) {
           text = await altResponse.text();
         }
@@ -1485,12 +1492,12 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
     output.classList.remove('loading');
     const errMsg = err.message || '';
     output.innerHTML = '<div style="color:#fbbf24;padding:12px;line-height:1.6">' +
-      '⚠️ <strong>El servicio de IA está temporalmente caído.</strong><br><br>' +
-      'Esto pasa a veces con servicios gratuitos. Probá:<br>' +
-      '1️⃣ Esperá 30 segundos y tocá <strong>🔄 Regenerar</strong><br>' +
-      '2️⃣ Si sigue, esperá 5 minutos y volvé a intentar<br>' +
-      '3️⃣ Si nada funciona, recargá la página (cerrá y abrí la app)<br><br>' +
-      '<em style="color:#9ca3af;font-size:12px">Detalle técnico: ' + errMsg + '</em>' +
+      '⚠️ <strong>El servicio de IA no respondió a tiempo.</strong><br><br>' +
+      'Probá:<br>' +
+      '1️⃣ Tocá <strong>🔄 Regenerar</strong> — suele funcionar al segundo intento<br>' +
+      '2️⃣ Si sigue fallando, esperá 1 minuto y reintentá<br>' +
+      '3️⃣ Como último recurso, recargá la página<br><br>' +
+      '<em style="color:#9ca3af;font-size:12px">Error: ' + (errMsg.includes('abort') ? 'Tiempo agotado (25s) — el servicio está lento, reintentá' : errMsg) + '</em>' +
       '</div>';
   }
 }
@@ -1519,9 +1526,12 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
     
     try {
       const apiKey = getApiKey ? getApiKey() : '';
+      const contCtrl = new AbortController();
+      const contTid = setTimeout(() => contCtrl.abort(), 25000);
       const response = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: contCtrl.signal,
         body: JSON.stringify({
           messages: [
             { role: 'user', content: originalPrompt },
@@ -1532,6 +1542,7 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
           seed: Math.floor(Math.random() * 100000)
         })
       });
+      clearTimeout(contTid);
       
       const data = await response.json();
       const moreText = data.choices?.[0]?.message?.content || '';
@@ -1813,9 +1824,12 @@ LECTOR: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
 Escribí directamente, sin saludos. Revisá tu texto antes de entregarlo. Calidad editorial profesional.`;
 
     try {
+      const ebookCtrl = new AbortController();
+      const ebookTid = setTimeout(() => ebookCtrl.abort(), 40000);
       const response = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: ebookCtrl.signal,
         body: JSON.stringify({
           messages: [
             { role: 'system', content: systemPrompt },
@@ -1825,6 +1839,7 @@ Escribí directamente, sin saludos. Revisá tu texto antes de entregarlo. Calida
           seed: Math.floor(Math.random() * 100000)
         })
       });
+      clearTimeout(ebookTid);
       
       const data = await response.json();
       const text = data.choices?.[0]?.message?.content || data.text || '';
