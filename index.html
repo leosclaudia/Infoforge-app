@@ -478,7 +478,7 @@ select { appearance: none; cursor: pointer; }
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">InfoForge — Fábrica de Infoproductos</div>
     <div class="topbar-right">
-      <button class="btn-reset" id="apikey-btn" style="border-color:#34d399;color:#34d399;cursor:default">✅ IA Lista</button>
+      <button class="btn-reset" id="apikey-btn" onclick="showApiKeyModal()" style="border-color:#34d399;color:#34d399;cursor:pointer" title="Configurar Groq para mejor rendimiento">✅ IA Lista</button>
       <div class="progress-ring">
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -1384,116 +1384,158 @@ ${context}
 
 REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o "Aquí tienes". Sé específico, claro, profundo y revisá tu propio texto antes de entregarlo. Calidad de libro publicado.`;
 
-  // Helper: esperar N segundos mostrando cuenta regresiva
+  // ── Helpers ──────────────────────────────────────────────
   async function waitWithCountdown(seconds, msg) {
     for (let s = seconds; s > 0; s--) {
-      output.textContent = `${msg} (${s}s)...`;
+      output.textContent = `${msg} ${s}s...`;
       await new Promise(r => setTimeout(r, 1000));
     }
   }
 
-  // Helper: un intento de fetch a Pollinations con timeout
-  async function tryFetch(model, timeoutMs) {
+  async function callGroq(msgs, apiKey) {
     const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), timeoutMs);
+    const tid = setTimeout(() => ctrl.abort(), 30000);
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: msgs,
+          max_tokens: 2048,
+          temperature: 0.7
+        })
+      });
+      clearTimeout(tid);
+      return res;
+    } catch(e) { clearTimeout(tid); throw e; }
+  }
+
+  async function tryPollinations(msgs, model) {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 28000);
     try {
       const res = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: ctrl.signal,
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
+          messages: msgs,
           model: model,
           seed: Math.floor(Math.random() * 100000)
         })
       });
       clearTimeout(tid);
       return res;
-    } catch(e) {
-      clearTimeout(tid);
-      throw e;
-    }
+    } catch(e) { clearTimeout(tid); throw e; }
   }
 
+  // ── Flujo principal ───────────────────────────────────────
   output.textContent = '⏳ Conectando con la IA...';
   output.classList.add('loading');
 
+  const msgs = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: prompt }
+  ];
+
+  let text = null;
+  let lastError = null;
+  const apiKey = getApiKey();
+
   try {
-    const models = ['openai-large', 'openai', 'mistral', 'llama'];
-    let text = null;
-    let lastError = null;
-
-    for (const model of models) {
-      // Cada modelo tiene hasta 2 intentos (el 2do tras espera de 6s si hay 429)
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          output.textContent = attempt === 1
-            ? `⏳ Generando con IA (${model})...`
-            : `🔄 Reintentando (${model}, intento ${attempt})...`;
-
-          const response = await tryFetch(model, 28000);
-
-          if (response.status === 429) {
-            lastError = 'HTTP 429';
-            if (attempt === 1) {
-              // Esperar 6 segundos y reintentar el mismo modelo
-              await waitWithCountdown(6, `⏳ Servicio ocupado, reintentando en`);
-              continue; // ir al intento 2
-            } else {
-              // Ya reintentamos, pasar al siguiente modelo
-              await waitWithCountdown(4, `⏳ Probando modelo alternativo en`);
-              break;
-            }
-          }
-
-          if (!response.ok) {
-            lastError = `HTTP ${response.status}`;
-            break; // error no recuperable, probar siguiente modelo
-          }
-
-          const data = await response.json();
-          const candidateText = data.choices?.[0]?.message?.content || data.text;
-
-          if (candidateText && typeof candidateText === 'string' && candidateText.length > 10) {
-            text = candidateText;
-            break;
-          } else {
-            lastError = 'Respuesta vacía';
-            break;
-          }
-        } catch(e) {
-          lastError = e.name === 'AbortError' ? 'Tiempo agotado' : e.message;
-          break; // timeout u otro error, probar siguiente modelo
-        }
-      }
-
-      if (text) break; // tenemos respuesta, salir del loop de modelos
-    }
-
-    // Fallback final: GET simple
-    if (!text) {
+    // ── OPCIÓN A: Groq (si hay key) ───────────────────────
+    if (apiKey && apiKey.startsWith('gsk_')) {
+      output.textContent = '⚡ Generando con Groq...';
       try {
-        output.textContent = '⏳ Probando método alternativo...';
-        const simplePrompt = encodeURIComponent(prompt.substring(0, 800));
-        const altCtrl = new AbortController();
-        const altTid = setTimeout(() => altCtrl.abort(), 20000);
-        const altRes = await fetch(`https://text.pollinations.ai/${simplePrompt}`, { signal: altCtrl.signal });
-        clearTimeout(altTid);
-        if (altRes.ok) {
-          const t = await altRes.text();
-          if (t && t.length > 10) text = t;
+        const res = await callGroq(msgs, apiKey);
+        if (res.ok) {
+          const data = await res.json();
+          text = data.choices?.[0]?.message?.content || '';
+          if (!text) lastError = 'Respuesta vacía de Groq';
+        } else if (res.status === 401) {
+          lastError = 'API key de Groq inválida';
+          document.getElementById('apikey-btn').textContent = '⚠️ Key inválida';
+          document.getElementById('apikey-btn').style.color = '#f87171';
+          document.getElementById('apikey-btn').style.borderColor = '#f87171';
+        } else {
+          lastError = `Groq HTTP ${res.status}`;
         }
       } catch(e) {
-        lastError = e.message;
+        lastError = e.name === 'AbortError' ? 'Groq tardó demasiado' : e.message;
       }
     }
 
-    if (!text) throw new Error(lastError || 'Todos los servicios fallaron');
+    // ── OPCIÓN B: Pollinations (fallback o si no hay key) ─
+    if (!text) {
+      const models = ['openai-large', 'openai', 'mistral', 'llama'];
+      for (const model of models) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          output.textContent = attempt === 1
+            ? `⏳ Generando (${model})...`
+            : `🔄 Reintentando (${model})...`;
+          try {
+            const res = await tryPollinations(msgs, model);
+            if (res.status === 429) {
+              lastError = 'Servicio saturado (429)';
+              if (attempt === 1) {
+                await waitWithCountdown(6, '⏳ Servicio ocupado, reintentando en');
+                continue;
+              } else {
+                await waitWithCountdown(3, '⏳ Probando siguiente modelo en');
+                break;
+              }
+            }
+            if (!res.ok) { lastError = `HTTP ${res.status}`; break; }
+            const data = await res.json();
+            const candidate = data.choices?.[0]?.message?.content || data.text;
+            if (candidate && candidate.length > 10) { text = candidate; break; }
+            lastError = 'Respuesta vacía'; break;
+          } catch(e) {
+            lastError = e.name === 'AbortError' ? 'Tiempo agotado' : e.message;
+            break;
+          }
+        }
+        if (text) break;
+      }
+    }
 
-    // Mostrar el texto con efecto typewriter
+    // ── OPCIÓN C: Pollinations GET simple ─────────────────
+    if (!text) {
+      try {
+        output.textContent = '⏳ Último intento...';
+        const sp = encodeURIComponent(prompt.substring(0, 600));
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 18000);
+        const res = await fetch(`https://text.pollinations.ai/${sp}`, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (res.ok) {
+          const t = await res.text();
+          if (t && t.length > 10) text = t;
+        }
+      } catch(e) { lastError = e.message; }
+    }
+
+    if (!text) {
+      // Si no hay key y todo falló, sugerir configurar Groq
+      if (!apiKey) {
+        output.classList.remove('loading');
+        output.innerHTML = '<div style="color:#fbbf24;padding:12px;line-height:1.7">' +
+          '⚠️ <strong>El servicio gratuito está saturado.</strong><br><br>' +
+          'Para que funcione siempre, configurá una <strong>key gratuita de Groq</strong> — tarda 2 minutos, no necesitás tarjeta:<br><br>' +
+          '<button onclick="showApiKeyModal()" style="background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:14px;margin-bottom:10px">⚡ Configurar Groq gratis</button><br>' +
+          '<em style="color:#9ca3af;font-size:12px">Groq es 100% gratis, funciona desde GitHub Pages, y genera en segundos.</em>' +
+          '</div>';
+        return;
+      }
+      throw new Error(lastError || 'Todos los servicios fallaron');
+    }
+
+    // ── Mostrar resultado con typewriter ──────────────────
     output.classList.remove('loading');
     output.textContent = '';
     state.results[resultKey] = text;
@@ -1526,12 +1568,11 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
     output.classList.remove('loading');
     const errMsg = err.message || '';
     output.innerHTML = '<div style="color:#fbbf24;padding:12px;line-height:1.6">' +
-      '⚠️ <strong>El servicio de IA no está disponible ahora.</strong><br><br>' +
-      'Ya reintentamos automáticamente con varios modelos. Opciones:<br>' +
-      '1️⃣ Tocá <strong>🔄 Regenerar</strong> para volver a intentarlo<br>' +
-      '2️⃣ Esperá 2 minutos y reintentá (el servicio suele recuperarse)<br>' +
-      '3️⃣ Recargá la página si sigue sin funcionar<br><br>' +
-      '<em style="color:#9ca3af;font-size:12px">Último error: ' + errMsg + '</em>' +
+      '⚠️ <strong>No se pudo conectar con la IA.</strong><br><br>' +
+      '1️⃣ Tocá <strong>🔄 Regenerar</strong> para reintentar<br>' +
+      '2️⃣ O configurá una key gratuita de Groq para mayor estabilidad:<br><br>' +
+      '<button onclick="showApiKeyModal()" style="background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px">⚡ Configurar Groq gratis</button><br><br>' +
+      '<em style="color:#9ca3af;font-size:12px">Error: ' + errMsg + '</em>' +
       '</div>';
   }
 }
@@ -2903,30 +2944,30 @@ function saveApiKey() {
     document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
     return;
   }
-  if (!key.startsWith('sk-or-') && !key.startsWith('sk-or-v1-')) {
-    document.getElementById('apikey-error').textContent = '⚠️ La key de OpenRouter debe empezar con gsk_ — verificá que copiaste la correcta.';
+  if (!key.startsWith('gsk_')) {
+    document.getElementById('apikey-error').textContent = '⚠️ La key de Groq debe empezar con gsk_ — revisá que copiaste la correcta.';
     return;
   }
-  // Guardar en AMBOS sessionStorage y localStorage para mayor persistencia
-  sessionStorage.setItem('if_apikey', key);
   localStorage.setItem('if_apikey', key);
+  sessionStorage.setItem('if_apikey', key);
   document.getElementById('apikey-modal').style.display = 'none';
-  document.getElementById('apikey-btn').textContent = '✅ IA Lista';
+  document.getElementById('apikey-btn').textContent = '⚡ Groq Activo';
   document.getElementById('apikey-btn').style.color = '#34d399';
   document.getElementById('apikey-btn').style.borderColor = '#34d399';
   document.getElementById('apikey-error').textContent = '';
-  // Mostrar confirmación
-  const preview = key.substring(0, 8) + '...' + key.substring(key.length - 4);
-  console.log('Key guardada:', preview);
 }
 function getApiKey() {
-  return sessionStorage.getItem('if_apikey') || localStorage.getItem('if_apikey') || '';
+  return localStorage.getItem('if_apikey') || sessionStorage.getItem('if_apikey') || '';
 }
 // Cargar key guardada al inicio
 window.addEventListener('DOMContentLoaded', () => {
-  // Asegurar que el botón siempre diga "IA Lista" (Pollinations no necesita key)
   const btn = document.getElementById('apikey-btn');
-  if (btn) {
+  const key = getApiKey();
+  if (btn && key && key.startsWith('gsk_')) {
+    btn.textContent = '⚡ Groq Activo';
+    btn.style.color = '#34d399';
+    btn.style.borderColor = '#34d399';
+  } else if (btn) {
     btn.textContent = '✅ IA Lista';
     btn.style.color = '#34d399';
     btn.style.borderColor = '#34d399';
@@ -3059,24 +3100,25 @@ setInterval(() => { if (state.completedSteps.size > 0) saveProgress(); }, 30000)
 <button id="install-fab" onclick="installApp()" title="Instalar InfoForge como app">⬇ Instalar app</button>
 
 
-<!-- API KEY MODAL -->
+<!-- API KEY MODAL — GROQ -->
 <div id="apikey-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;">
-  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
-    <div style="font-size:28px;margin-bottom:8px">🔑</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">🔑 API Key de OpenRouter</h2>
-    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS — funciona desde GitHub Pages sin restricciones</div>
-    <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:12px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.6">
-      <strong>¿Dónde conseguir tu API Key?</strong><br>
-      1. Abrí <strong style="color:#a78bfa">openrouter.ai</strong><br>
-      2. Clic en <strong>Sign In</strong> → con tu Google<br>
-      3. Menú → <strong>Keys</strong> → <strong>Create Key</strong><br>
-      4. Copiá la key → empieza con <strong>sk-or-...</strong>
+  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
+    <div style="font-size:28px;margin-bottom:8px">⚡</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">Configurar IA con Groq</h2>
+    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS · Sin tarjeta · Funciona desde GitHub Pages</div>
+    <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.8">
+      <strong style="color:#a78bfa">Cómo obtener tu key gratis (2 min):</strong><br>
+      1. Abrí <a href="https://console.groq.com" target="_blank" style="color:#e879f9;font-weight:700">console.groq.com</a><br>
+      2. Clic en <strong>Sign up</strong> → entrá con Google<br>
+      3. En el menú izquierdo → <strong>API Keys</strong><br>
+      4. Clic <strong>Create API Key</strong> → copiá la key<br>
+      <span style="color:#6b5f8a;font-size:12px">La key empieza con <strong style="color:#a78bfa">gsk_...</strong></span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin:0">TU API KEY DE GROQ</label>
       <button onclick="toggleKeyVisibility()" id="toggle-key-btn" style="background:none;border:none;color:#6b5f8a;font-size:12px;cursor:pointer;padding:2px 6px">👁 Ver</button>
     </div>
-    <input id="apikey-input" type="password" placeholder="sk-or-..." 
+    <input id="apikey-input" type="password" placeholder="gsk_..." 
       style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
       onkeydown="if(event.key==='Enter')saveApiKey()">
     <div id="apikey-error" style="color:#f87171;font-size:12px;margin-bottom:12px;min-height:18px"></div>
@@ -3086,11 +3128,11 @@ setInterval(() => { if (state.completedSteps.size > 0) saveProgress(); }, 30000)
         Cancelar
       </button>
       <button onclick="saveApiKey()" 
-        style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
-        Guardar y continuar ✓
+        style="flex:2;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
+        ⚡ Activar Groq ✓
       </button>
     </div>
-    <p style="font-size:11px;color:#3d3060;text-align:center;margin-top:14px">Tu key se guarda solo en esta sesión del navegador. No se envía a ningún servidor — va directo a Google.</p>
+    <p style="font-size:11px;color:#3d3060;text-align:center;margin-top:14px">Tu key se guarda en tu navegador. No pasa por ningún servidor — va directo a Groq.</p>
   </div>
 </div>
 
