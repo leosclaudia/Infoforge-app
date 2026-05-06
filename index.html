@@ -1406,7 +1406,7 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: msgs,
-          max_tokens: 2048,
+          max_tokens: 4096,
           temperature: 0.7
         })
       });
@@ -1600,23 +1600,48 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
     const continuePrompt = 'Continuá exactamente donde te cortaste. NO repitas lo anterior. Seguí desde aquí: "' + previousText.slice(-200) + '"';
     
     try {
-      const apiKey = getApiKey ? getApiKey() : '';
+      const storedKey = getApiKey ? getApiKey() : '';
       const contCtrl = new AbortController();
-      const contTid = setTimeout(() => contCtrl.abort(), 25000);
-      const response = await fetch('https://text.pollinations.ai/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: contCtrl.signal,
-        body: JSON.stringify({
-          messages: [
-            { role: 'user', content: originalPrompt },
-            { role: 'assistant', content: previousText },
-            { role: 'user', content: continuePrompt }
-          ],
-          model: 'openai-large',
-          seed: Math.floor(Math.random() * 100000)
-        })
-      });
+      const contTid = setTimeout(() => contCtrl.abort(), 30000);
+      
+      let response;
+      if (storedKey && storedKey.startsWith('gsk_')) {
+        // Usar Groq si hay key
+        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${storedKey}`
+          },
+          signal: contCtrl.signal,
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { role: 'user', content: originalPrompt },
+              { role: 'assistant', content: previousText },
+              { role: 'user', content: continuePrompt }
+            ],
+            max_tokens: 2048,
+            temperature: 0.7
+          })
+        });
+      } else {
+        // Fallback Pollinations
+        response = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: contCtrl.signal,
+          body: JSON.stringify({
+            messages: [
+              { role: 'user', content: originalPrompt },
+              { role: 'assistant', content: previousText },
+              { role: 'user', content: continuePrompt }
+            ],
+            model: 'openai-large',
+            seed: Math.floor(Math.random() * 100000)
+          })
+        });
+      }
       clearTimeout(contTid);
       
       const data = await response.json();
@@ -2028,7 +2053,7 @@ SECCIONES A CUBRIR:
 9. FAQ
 10. Footer con CTA final
 
-Al final: CHECKLIST de conversión — 10 puntos para revisar antes de publicar.`;
+Al final: CHECKLIST rápido de conversión (5 puntos clave antes de publicar). Sé específico y directo.`;
   callClaude(prompt, 'landing-struct-result', 'landing-struct-output', 'landingStruct');
   document.getElementById('btn-landing-struct').disabled = true;
   document.getElementById('btn-landing-struct').textContent = '⏳ Estructurando...';
