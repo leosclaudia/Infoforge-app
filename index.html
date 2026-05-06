@@ -1595,9 +1595,17 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
   
   btn.onclick = async () => {
     btn.disabled = true;
-    btn.textContent = '⏳ Continuando...';
-    
-    const continuePrompt = 'Continuá exactamente donde te cortaste. NO repitas lo anterior. Seguí desde aquí: "' + previousText.slice(-200) + '"';
+
+    // Esperar 5s para que se renueve el cupo de tokens por minuto (Groq free tier)
+    for (let s = 5; s > 0; s--) {
+      btn.textContent = `⏳ Continuando en ${s}s...`;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    btn.textContent = '⏳ Generando continuación...';
+
+    // Solo mandamos el final del texto anterior como contexto — no el texto completo
+    const tail = previousText.slice(-400);
+    const continuePrompt = `Estás completando un texto que quedó cortado. Continuá exactamente desde donde terminó, sin repetir nada. El texto termina así:\n\n"...${tail}"\n\nSeguí desde ahí:`;
     
     try {
       const storedKey = getApiKey ? getApiKey() : '';
@@ -1606,7 +1614,6 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
       
       let response;
       if (storedKey && storedKey.startsWith('gsk_')) {
-        // Usar Groq si hay key
         response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -1615,35 +1622,27 @@ function showContinueButton(originalPrompt, outputId, containerId, resultKey, pr
           },
           signal: contCtrl.signal,
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              { role: 'user', content: originalPrompt },
-              { role: 'assistant', content: previousText },
-              { role: 'user', content: continuePrompt }
-            ],
-            max_tokens: 2048,
+            model: 'llama-3.1-8b-instant',
+            messages: [{ role: 'user', content: continuePrompt }],
+            max_tokens: 1500,
             temperature: 0.7
           })
         });
       } else {
-        // Fallback Pollinations
         response = await fetch('https://text.pollinations.ai/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           signal: contCtrl.signal,
           body: JSON.stringify({
-            messages: [
-              { role: 'user', content: originalPrompt },
-              { role: 'assistant', content: previousText },
-              { role: 'user', content: continuePrompt }
-            ],
+            messages: [{ role: 'user', content: continuePrompt }],
             model: 'openai-large',
             seed: Math.floor(Math.random() * 100000)
           })
         });
       }
       clearTimeout(contTid);
-      
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const moreText = data.choices?.[0]?.message?.content || '';
       
@@ -2031,29 +2030,26 @@ Escribí el copy en español latinoamericano, directo, emocional y que vende.`;
 
 function generateLandingStructure() {
   const d = state.data;
-  const prompt = `Creá el wireframe y estructura de la landing page para el infoproducto "${d.topic}" en ${d.platform || 'Hotmart'}.
+  const prompt = `Wireframe de landing page para "${d.topic}" en ${d.platform || 'Hotmart'}.
 
-Para cada sección de la landing, describí:
-- NOMBRE DE LA SECCIÓN
-- COMPONENTES VISUALES: qué elementos UI contiene (imagen, video, lista, tabla, etc)
-- COPY PRINCIPAL: qué dice (ya generado en el paso anterior)
-- COLOR Y ESTILO: tono visual recomendado
-- INSTRUCCIÓN DE DISEÑO: cómo armarla paso a paso
-- CONVERSIÓN: por qué esta sección importa para la venta
+Formato OBLIGATORIO — para cada sección, exactamente 3 líneas:
+▸ SECCIÓN: [nombre]
+  Elementos: [qué va visualmente en 1 frase]
+  Copy clave: [headline o texto principal en 1 frase]
 
-SECCIONES A CUBRIR:
-1. Hero section (above the fold)
-2. Sección del problema
-3. Video de ventas o demo (si aplica)
-4. Qué incluye / beneficios
-5. Para quién es
-6. Testimoniales
-7. Sección de precio y oferta
-8. Garantía
-9. FAQ
-10. Footer con CTA final
+SECCIONES (listá las 7 siguientes, nada más):
+1. Hero / portada
+2. El problema del cliente
+3. Qué incluye el producto
+4. Para quién es (y para quién NO)
+5. Precio y garantía
+6. Testimoniales o prueba social
+7. CTA final + FAQ (2 preguntas clave)
 
-Al final: CHECKLIST rápido de conversión (5 puntos clave antes de publicar). Sé específico y directo.`;
+Al terminar las 7 secciones, agregá:
+✅ CHECKLIST (5 ítems de una línea cada uno): qué revisar antes de publicar.
+
+Respuesta breve y directa. Sin introducciones.`;
   callClaude(prompt, 'landing-struct-result', 'landing-struct-output', 'landingStruct');
   document.getElementById('btn-landing-struct').disabled = true;
   document.getElementById('btn-landing-struct').textContent = '⏳ Estructurando...';
@@ -2914,10 +2910,24 @@ function exportForPlatform(platform) {
 
 function confirmReset() {
   if(confirm('¿Seguro que querés empezar una nueva sesión? Se perderá todo el contenido generado.')) {
+    // Limpiar estado
     state = { currentStep: 0, completedSteps: new Set(), data: {}, results: {} };
+    // Limpiar localStorage (progreso guardado)
+    localStorage.removeItem('infoforge_progress');
+    localStorage.removeItem('infoforge_state');
+    // Limpiar todos los campos de texto, selects y textareas
+    document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => { el.value = ''; });
+    document.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+    // Limpiar chips seleccionados
+    document.querySelectorAll('.chip.selected').forEach(el => el.classList.remove('selected'));
+    // Limpiar feat-cards seleccionadas
+    document.querySelectorAll('.feat-card.selected').forEach(el => el.classList.remove('selected'));
+    // Ocultar outputs
+    document.querySelectorAll('.output-box').forEach(el => { el.textContent = ''; });
+    document.querySelectorAll('[id$="-output"]').forEach(el => { el.style.display = 'none'; });
+    // Volver al paso 0
     document.querySelectorAll('.step-page').forEach(p => p.style.display = 'none');
     document.getElementById('step-0').style.display = 'block';
-    document.querySelectorAll('.output-box').forEach(el => { el.textContent = ''; el.parentElement.style.display = 'none'; });
     updateUI();
   }
 }
