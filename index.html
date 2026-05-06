@@ -1362,7 +1362,7 @@ Plataformas de venta: ${d.platforms && d.platforms.length ? d.platforms.join(', 
 Precio: ${d.price || '27'} USD
 Avatar: ${d.gender || 'ambos'}, ${d.age || '25-35'} años
 Situación del avatar: ${d.situation || ''}
-Diferenciador: ${d.differentiator || ''}
+Diferenciador: ${d.differenciador || ''}
 Bonos: ${d.bonuses || 'ninguno especificado'}
 Garantía: ${d.guarantee || '30'} días
 `.trim();
@@ -1384,85 +1384,120 @@ ${context}
 
 REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o "Aquí tienes". Sé específico, claro, profundo y revisá tu propio texto antes de entregarlo. Calidad de libro publicado.`;
 
-  // Pollinations no requiere API key
-  
-  // Mostrar que está procesando
+  // Helper: esperar N segundos mostrando cuenta regresiva
+  async function waitWithCountdown(seconds, msg) {
+    for (let s = seconds; s > 0; s--) {
+      output.textContent = `${msg} (${s}s)...`;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+
+  // Helper: un intento de fetch a Pollinations con timeout
+  async function tryFetch(model, timeoutMs) {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          model: model,
+          seed: Math.floor(Math.random() * 100000)
+        })
+      });
+      clearTimeout(tid);
+      return res;
+    } catch(e) {
+      clearTimeout(tid);
+      throw e;
+    }
+  }
+
   output.textContent = '⏳ Conectando con la IA...';
   output.classList.add('loading');
-  
+
   try {
-    // Usar Pollinations AI - gratis, sin key, sin restricciones
-    // Probamos varios modelos por si uno está caído
     const models = ['openai-large', 'openai', 'mistral', 'llama'];
     let text = null;
     let lastError = null;
-    
+
     for (const model of models) {
-      try {
-        output.textContent = `⏳ Conectando con IA (${model})...`;
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000);
-        const response = await fetch('https://text.pollinations.ai/openai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: prompt }
-            ],
-            model: model,
-            seed: Math.floor(Math.random() * 100000)
-          })
-        });
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          lastError = `HTTP ${response.status}`;
-          continue; // probar siguiente modelo
+      // Cada modelo tiene hasta 2 intentos (el 2do tras espera de 6s si hay 429)
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          output.textContent = attempt === 1
+            ? `⏳ Generando con IA (${model})...`
+            : `🔄 Reintentando (${model}, intento ${attempt})...`;
+
+          const response = await tryFetch(model, 28000);
+
+          if (response.status === 429) {
+            lastError = 'HTTP 429';
+            if (attempt === 1) {
+              // Esperar 6 segundos y reintentar el mismo modelo
+              await waitWithCountdown(6, `⏳ Servicio ocupado, reintentando en`);
+              continue; // ir al intento 2
+            } else {
+              // Ya reintentamos, pasar al siguiente modelo
+              await waitWithCountdown(4, `⏳ Probando modelo alternativo en`);
+              break;
+            }
+          }
+
+          if (!response.ok) {
+            lastError = `HTTP ${response.status}`;
+            break; // error no recuperable, probar siguiente modelo
+          }
+
+          const data = await response.json();
+          const candidateText = data.choices?.[0]?.message?.content || data.text;
+
+          if (candidateText && typeof candidateText === 'string' && candidateText.length > 10) {
+            text = candidateText;
+            break;
+          } else {
+            lastError = 'Respuesta vacía';
+            break;
+          }
+        } catch(e) {
+          lastError = e.name === 'AbortError' ? 'Tiempo agotado' : e.message;
+          break; // timeout u otro error, probar siguiente modelo
         }
-        
-        const data = await response.json();
-        const candidateText = data.choices?.[0]?.message?.content || data.text;
-        
-        if (candidateText && typeof candidateText === 'string' && candidateText.length > 10) {
-          text = candidateText;
-          break; // tenemos respuesta válida
-        } else {
-          lastError = 'Respuesta vacía';
-          continue;
-        }
-      } catch(e) {
-        lastError = e.message;
-        continue;
       }
+
+      if (text) break; // tenemos respuesta, salir del loop de modelos
     }
-    
-    // Si falló todos los modelos, intentar versión simple GET
+
+    // Fallback final: GET simple
     if (!text) {
       try {
         output.textContent = '⏳ Probando método alternativo...';
-        const simplePrompt = encodeURIComponent(systemPrompt + '\n\n' + prompt);
+        const simplePrompt = encodeURIComponent(prompt.substring(0, 800));
         const altCtrl = new AbortController();
         const altTid = setTimeout(() => altCtrl.abort(), 20000);
-        const altResponse = await fetch(`https://text.pollinations.ai/${simplePrompt}`, { signal: altCtrl.signal });
+        const altRes = await fetch(`https://text.pollinations.ai/${simplePrompt}`, { signal: altCtrl.signal });
         clearTimeout(altTid);
-        if (altResponse.ok) {
-          text = await altResponse.text();
+        if (altRes.ok) {
+          const t = await altRes.text();
+          if (t && t.length > 10) text = t;
         }
       } catch(e) {
         lastError = e.message;
       }
     }
-    
-    if (!text) throw new Error(lastError || 'Servicio temporalmente no disponible');
+
+    if (!text) throw new Error(lastError || 'Todos los servicios fallaron');
 
     // Mostrar el texto con efecto typewriter
     output.classList.remove('loading');
     output.textContent = '';
     state.results[resultKey] = text;
-    saveProgress(); // guardar progreso automáticamente
+    saveProgress();
 
     const cursor = document.createElement('span');
     cursor.className = 'typing-cursor';
@@ -1479,7 +1514,6 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
         clearInterval(interval);
         state.completedSteps.add(state.currentStep);
         updateUI();
-        // Si la respuesta parece cortada, mostrar botón continuar
         const lastChar = text.trim().slice(-1);
         const looksTruncated = !'.!?"\'`)'.includes(lastChar) && text.length > 500;
         if (looksTruncated) {
@@ -1492,12 +1526,12 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
     output.classList.remove('loading');
     const errMsg = err.message || '';
     output.innerHTML = '<div style="color:#fbbf24;padding:12px;line-height:1.6">' +
-      '⚠️ <strong>El servicio de IA no respondió a tiempo.</strong><br><br>' +
-      'Probá:<br>' +
-      '1️⃣ Tocá <strong>🔄 Regenerar</strong> — suele funcionar al segundo intento<br>' +
-      '2️⃣ Si sigue fallando, esperá 1 minuto y reintentá<br>' +
-      '3️⃣ Como último recurso, recargá la página<br><br>' +
-      '<em style="color:#9ca3af;font-size:12px">Error: ' + (errMsg.includes('abort') ? 'Tiempo agotado (25s) — el servicio está lento, reintentá' : errMsg) + '</em>' +
+      '⚠️ <strong>El servicio de IA no está disponible ahora.</strong><br><br>' +
+      'Ya reintentamos automáticamente con varios modelos. Opciones:<br>' +
+      '1️⃣ Tocá <strong>🔄 Regenerar</strong> para volver a intentarlo<br>' +
+      '2️⃣ Esperá 2 minutos y reintentá (el servicio suele recuperarse)<br>' +
+      '3️⃣ Recargá la página si sigue sin funcionar<br><br>' +
+      '<em style="color:#9ca3af;font-size:12px">Último error: ' + errMsg + '</em>' +
       '</div>';
   }
 }
