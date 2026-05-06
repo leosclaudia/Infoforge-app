@@ -6,7 +6,40 @@
   "display": "standalone",
   "orientation": "any",
   "background_color": "#09070f",
+  "theme_color": "#7c3aed",{
+  "name": "InfoForge — Fábrica de Infoproductos IA",
+  "short_name": "InfoForge",
+  "description": "Creá tu infoproducto completo con IA en 16 pasos: investigación, ebook, landing y ads.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#09070f",
   "theme_color": "#7c3aed",
+  "lang": "es",
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%237c3aed'/%3E%3Ctext x='256' y='340' font-family='serif' font-weight='bold' font-size='260' text-anchor='middle' fill='white'%3EIF%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nuevo infoproducto",
+      "short_name": "Nuevo",
+      "description": "Empezar un nuevo infoproducto desde cero",
+      "url": "./index.html"
+    }
+  ],
+  "scope": "/"
+}
   "lang": "es",
   "categories": [
     "business",
