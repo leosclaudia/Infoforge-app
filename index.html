@@ -1419,26 +1419,46 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
   }
 
   async function callGroq(msgs, apiKey) {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 60000);
-    try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        signal: ctrl.signal,
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: msgs,
-          max_tokens: 4096,
-          temperature: 0.7
-        })
-      });
-      clearTimeout(tid);
-      return res;
-    } catch(e) { clearTimeout(tid); throw e; }
+    // Intentar primero con modelo rápido, luego con alternativo
+    const models = ['llama-3.1-8b-instant', 'gemma2-9b-it', 'mixtral-8x7b-32768'];
+    let lastErr;
+    for (const model of models) {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 45000);
+      try {
+        output.textContent = `⏳ Conectando con IA (modelo: ${model})...`;
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          signal: ctrl.signal,
+          body: JSON.stringify({
+            model: model,
+            messages: msgs,
+            max_tokens: 4096,
+            temperature: 0.7
+          })
+        });
+        clearTimeout(tid);
+        if (res.ok) return res;
+        // Si el modelo no está disponible, probar el siguiente
+        const errData = await res.json().catch(() => ({}));
+        lastErr = new Error(errData.error?.message || `HTTP ${res.status}`);
+        if (res.status === 429) {
+          // Rate limit — esperar y reintentar
+          await new Promise(r => setTimeout(r, 3000));
+        }
+      } catch(e) { 
+        clearTimeout(tid); 
+        lastErr = e;
+        // Si fue timeout, probar siguiente modelo
+        if (e.name === 'AbortError') continue;
+        throw e;
+      }
+    }
+    throw lastErr || new Error('Todos los modelos fallaron');
   }
 
   async function tryPollinations(msgs, model) {
