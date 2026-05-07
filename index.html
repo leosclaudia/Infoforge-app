@@ -1420,7 +1420,7 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
 
   async function callGroq(msgs, apiKey) {
     const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 30000);
+    const tid = setTimeout(() => ctrl.abort(), 60000);
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -1443,7 +1443,7 @@ REGLA FINAL: Respondé directamente sin introducciones tipo "¡Claro que sí!" o
 
   async function tryPollinations(msgs, model) {
     const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 28000);
+    const tid = setTimeout(() => ctrl.abort(), 50000);
     try {
       const res = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
