@@ -3239,70 +3239,65 @@ async function apCallGroq(prompt, systemPrompt, maxTokens) {
   let response;
   if (key && key.startsWith('gsk_')) {
     response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-      signal: ctrl.signal,
+      method: 'POST', signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt || 'Sos un experto en marketing digital y creación de infoproductos. Respondé en español.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: maxTokens || 2500,
-        temperature: 0.75
+        max_tokens: maxTokens || 2000,
+        temperature: 0.7
       })
     });
   } else {
-    response = await fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: ctrl.signal,
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }],
-        model: 'openai-large',
-        seed: Math.floor(Math.random() * 99999)
-      })
-    });
+    const sp = encodeURIComponent((systemPrompt || 'Sos experto en marketing digital. Respondé en español.') + '\n\n' + prompt);
+    response = await fetch(`https://text.pollinations.ai/${sp}`, { signal: ctrl.signal });
   }
+
   clearTimeout(tid);
-  if (!response.ok) throw new Error('HTTP ' + response.status);
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || data.text || '';
+  if (!response.ok) throw new Error('API error ' + response.status);
+
+  if (key && key.startsWith('gsk_')) {
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } else {
+    return (await response.text()).trim();
+  }
 }
 
 async function runAutopilot() {
-  const d = state.data;
-  if (!d.topic) {
-    alert('Completá el Paso 01 primero: ingresá el tema y el resultado prometido del producto.');
+  const topic = state.results.topic || state.topic;
+  const price = state.results.price || '47';
+
+  if (!topic) {
+    alert('Primero completá el Paso 1 y 2 (tema y precio del producto).');
     return;
   }
+
   const key = getApiKey();
   if (!key || !key.startsWith('gsk_')) {
-    alert('Necesitás una clave Groq activa. Hacé click en "Configurar IA" primero.');
+    alert('El modo autopiloto requiere una API key de Groq (empieza con gsk_). Ingresá tu key en el campo de arriba.');
     return;
   }
 
   autopilotRunning = true;
   const overlay = document.getElementById('autopilot-overlay');
   overlay.style.display = 'flex';
-  document.getElementById('ap-steps-list').innerHTML = '';
 
-  const topic = d.topic;
-  const result = d.result || 'transformación del cliente';
-  const price = d.price || '27';
-  const platform = d.platform || 'Hotmart';
   const sys = `Sos un experto en marketing digital, copywriting y creación de infoproductos digitales.
-Producto: "${topic}" | Promesa: "${result}" | Precio: $${price} USD | Plataforma: ${platform}
-Respondé siempre en español latinoamericano claro y profesional. Sin saludos, directo al contenido.`;
+Estás ayudando a crear un producto digital completo sobre: "${topic}" con precio: $${price} USD.
+Respondé siempre en español. Sé específico, detallado y accionable. No uses frases genéricas.`;
 
   const steps = [
     {
       pct: 8, icon: '🔍', label: 'PASO 3 — Investigación de mercado', short: 'Investigando el mercado...',
       fn: async () => {
         const text = await apCallGroq(
-          `Hacé una investigación de mercado para el infoproducto "${topic}" que promete "${result}".
-Incluí: tamaño del mercado, tendencias actuales, canales de venta más efectivos, palabras clave de búsqueda, y oportunidades concretas. Datos específicos y accionables.`, sys, 2000);
-        state.results.market = text;
+          `Hacé una investigación de mercado completa para un infoproducto sobre "${topic}" a $${price} USD.
+Incluí: tamaño del mercado, público objetivo, tendencias actuales, canales de distribución recomendados, estacionalidad. Mínimo 400 palabras.`, sys, 2000);
+        state.results.marketResearch = text;
         showResult('market-result', 'market-output', text);
       }
     },
@@ -3310,18 +3305,19 @@ Incluí: tamaño del mercado, tendencias actuales, canales de venta más efectiv
       pct: 16, icon: '🏆', label: 'PASO 4 — Análisis de competencia', short: 'Analizando competidores...',
       fn: async () => {
         const text = await apCallGroq(
-          `Analizá la competencia para un infoproducto sobre "${topic}". Describí: tipos de competidores existentes, sus precios, sus puntos débiles, y cómo diferenciarse claramente. Incluí oportunidades de posicionamiento.`, sys, 2000);
-        state.results.competitive = text;
-        showResult('comp-result', 'comp-output', text);
+          `Analizá la competencia para un infoproducto sobre "${topic}" a $${price} USD.
+Identificá: principales competidores, sus fortalezas y debilidades, gaps de mercado, cómo diferenciarse. Incluí estrategia de posicionamiento.`, sys, 2000);
+        state.results.competitiveAnalysis = text;
+        showResult('competitive-result', 'competitive-output', text);
       }
     },
     {
       pct: 24, icon: '🎯', label: 'PASO 5 — Avatar del cliente', short: 'Definiendo el cliente ideal...',
       fn: async () => {
         const text = await apCallGroq(
-          `Creá el perfil detallado del cliente ideal (avatar) para el infoproducto "${topic}" que promete "${result}".
-Incluí: datos demográficos, situación actual, frustraciones, deseos, objeciones, lenguaje que usa, y por qué compraría.`, sys, 2000);
-        state.results.avatar = text;
+          `Creá el avatar del cliente ideal para un infoproducto sobre "${topic}".
+Incluí: nombre ficticio, edad, ocupación, nivel de ingresos, dolores principales, deseos, objeciones de compra, dónde pasa tiempo online, qué lee/mira, lenguaje que usa. Muy detallado.`, sys, 2000);
+        state.results.avatarContent = text;
         showResult('avatar-result', 'avatar-output', text);
       }
     },
@@ -3329,9 +3325,9 @@ Incluí: datos demográficos, situación actual, frustraciones, deseos, objecion
       pct: 32, icon: '😤', label: 'PASO 6 — Dolores y deseos', short: 'Mapeando dolores y deseos...',
       fn: async () => {
         const text = await apCallGroq(
-          `Listá los 10 dolores más profundos y los 10 deseos más poderosos del cliente ideal de "${topic}".
-Escribilos en primera persona como si el cliente los dijera. Específicos, emocionales, reales.`, sys, 1800);
-        state.results.pain = text;
+          `Mapeá los 10 dolores más profundos y los 10 deseos más intensos del cliente ideal de "${topic}".
+Para cada uno: describí en sus propias palabras, el impacto emocional, y cómo el producto los resuelve.`, sys, 2200);
+        state.results.painContent = text;
         showResult('pain-result', 'pain-output', text);
       }
     },
@@ -3339,9 +3335,9 @@ Escribilos en primera persona como si el cliente los dijera. Específicos, emoci
       pct: 40, icon: '💎', label: 'PASO 7 — Oferta irresistible', short: 'Construyendo la oferta...',
       fn: async () => {
         const text = await apCallGroq(
-          `Creá la oferta completa para el infoproducto "${topic}" a $${price} USD en ${platform}.
-Incluí: nombre del producto (3 opciones), promesa principal, qué incluye, bonos, valor percibido total, justificación del precio, garantía y urgencia.`, sys, 2500);
-        state.results.offer = text;
+          `Diseñá la oferta irresistible para "${topic}" a $${price} USD.
+Incluí: nombre del producto, promesa principal, entregables (ebook + bonus), garantía, urgencia/escasez, stack de valor con precio de referencia de cada elemento, precio final con justificación.`, sys, 2200);
+        state.results.offerContent = text;
         showResult('offer-result', 'offer-output', text);
       }
     },
@@ -3349,9 +3345,9 @@ Incluí: nombre del producto (3 opciones), promesa principal, qué incluye, bono
       pct: 47, icon: '💰', label: 'PASO 8 — Precio y garantía', short: 'Diseñando precio y garantía...',
       fn: async () => {
         const text = await apCallGroq(
-          `Redactá el bloque completo de precio y garantía para "${topic}" a $${price} USD.
-Incluí: redacción de la garantía, copy del bloque de precio, manejo de objeciones de precio (3), texto de urgencia (2 versiones) y microcopy del botón de compra (5 opciones).`, sys, 2000);
-        state.results.pricing = text;
+          `Diseñá la estrategia de precio y garantía para "${topic}" a $${price} USD.
+Incluí: justificación psicológica del precio, comparación de valor, tipo de garantía (días, condiciones), texto exacto de la garantía para la página de ventas, estrategia de upsell/downsell.`, sys, 1800);
+        state.results.pricingContent = text;
         showResult('pricing-result', 'pricing-output', text);
       }
     },
@@ -3359,9 +3355,9 @@ Incluí: redacción de la garantía, copy del bloque de precio, manejo de objeci
       pct: 54, icon: '📋', label: 'PASO 9 — Estructura del ebook', short: 'Estructurando el ebook...',
       fn: async () => {
         const text = await apCallGroq(
-          `Creá la estructura completa del ebook "${topic}" que promete "${result}".
-Incluí: índice con introducción, 3 capítulos principales (con subtemas), conclusión. Para cada capítulo: título, objetivo, 3-4 subtemas y qué aprende el lector.`, sys, 2200);
-        state.results.ebookStruct = text;
+          `Creá la estructura completa de un ebook sobre "${topic}".
+Incluí: título del ebook, subtítulo, introducción (qué aprenderá el lector), 5 capítulos con: título, subtítulo, 3-4 secciones por capítulo con descripción, conclusión, bonus/recursos. Formato profesional.`, sys, 2500);
+        state.results.ebookStructure = text;
         showResult('ebook-struct-result', 'ebook-struct-output', text);
       }
     },
@@ -3373,9 +3369,9 @@ Incluí: índice con introducción, 3 capítulos principales (con subtemas), con
       pct: 72, icon: '🌐', label: 'PASO 11 — Copy de landing', short: 'Escribiendo landing page...',
       fn: async () => {
         const text = await apCallGroq(
-          `Escribí el copy COMPLETO de la landing page para "${topic}" a $${price} USD en ${platform}.
-Incluí todas estas secciones con copy listo: headline + subheadline (3 opciones), lead, sección de dolor, transformación, qué incluye, oferta y bonos, para quién es/no es, FAQ (4 preguntas), garantía, cierre + CTA urgente.`, sys, 3000);
-        state.results.landing = text;
+          `Escribí el copy completo de una landing page de ventas para "${topic}" a $${price} USD.
+Incluí: headline principal (5 opciones), subheadline, bullets de beneficios (10), historia/problema-solución, prueba social, stack de valor, CTA principal, sección de garantía, FAQ (5 preguntas). Copy persuasivo y emocional.`, sys, 2800);
+        state.results.landingContent = text;
         showResult('landing-result', 'landing-output', text);
       }
     },
@@ -3383,13 +3379,9 @@ Incluí todas estas secciones con copy listo: headline + subheadline (3 opciones
       pct: 79, icon: '🏗️', label: 'PASO 12 — Estructura de landing', short: 'Diseñando wireframe...',
       fn: async () => {
         const text = await apCallGroq(
-          `Creá el wireframe de la landing page para "${topic}" en ${platform}.
-Formato: para cada sección escribí exactamente 3 líneas:
-▸ SECCIÓN: [nombre]
-  Elementos: [qué va visualmente]
-  Copy clave: [texto principal]
-Secciones obligatorias: Hero, Dolor, Transformación, Qué incluye, Oferta, Garantía, FAQ, CTA final.`, sys, 1800);
-        state.results.landingStruct = text;
+          `Diseñá la estructura visual (wireframe) de la landing page para "${topic}".
+Describí sección por sección: qué elementos incluir, orden, colores sugeridos, imágenes, CTA buttons, formularios. Incluí mobile-first considerations.`, sys, 2000);
+        state.results.landingStructure = text;
         showResult('landing-struct-result', 'landing-struct-output', text);
       }
     },
@@ -3397,10 +3389,9 @@ Secciones obligatorias: Hero, Dolor, Transformación, Qué incluye, Oferta, Gara
       pct: 85, icon: '📢', label: 'PASO 13 — Meta Ads + Scripts', short: 'Creando anuncios...',
       fn: async () => {
         const text = await apCallGroq(
-          `Creá 5 creativos completos de Meta Ads para "${topic}" a $${price} USD.
-Para cada uno: hook (ángulo: dolor / transformación / resultado / urgencia / social proof), copy principal, headline, descripción, CTA y sugerencia visual.
-También incluí 3 scripts de video ad de 30 segundos para Reels/TikTok.`, sys, 2500);
-        state.results.ads = text;
+          `Creá 5 anuncios completos de Meta Ads (Facebook/Instagram) para "${topic}" a $${price} USD.
+Para cada anuncio: texto principal (copy), headline, descripción, CTA, público objetivo sugerido, tipo de imagen/video recomendado. Variá el enfoque: problema, beneficio, social proof, urgencia, curiosidad.`, sys, 2500);
+        state.results.adsContent = text;
         showResult('ads-result', 'ads-output', text);
       }
     },
@@ -3408,13 +3399,13 @@ También incluí 3 scripts de video ad de 30 segundos para Reels/TikTok.`, sys, 
       pct: 91, icon: '🎬', label: 'PASO 14 — Scripts de video', short: 'Escribiendo guiones...',
       fn: async () => {
         const text = await apCallGroq(
-          `Escribí scripts completos para videos sobre "${topic}":
-1. Reel/TikTok 30 segundos (gancho, problema, solución, CTA)
-2. Story 15 segundos (3 pantallas de texto)
-3. Video largo 2-3 minutos (intro, historia, desarrollo, oferta, CTA)
-Scripts listos para grabar, naturales y que conviertan.`, sys, 2000);
+          `Escribí 3 scripts de video para promocionar "${topic}" a $${price} USD:
+Script 1: Video largo YouTube (5-7 min) — problema + solución + demo + CTA
+Script 2: Reel/TikTok (60 segundos) — hook fuerte + beneficio rápido + CTA
+Script 3: Story (15 segundos) — urgencia + oferta + link en bio
+Cada script: completo, palabra por palabra, con indicaciones de cámara/edición.`, sys, 2500);
         state.results.videoScripts = text;
-        showResult('scripts-result', 'scripts-output', text);
+        showResult('videos-result', 'videos-output', text);
       }
     },
     {
