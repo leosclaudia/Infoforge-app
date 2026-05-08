@@ -1282,19 +1282,52 @@ select { appearance: none; cursor: pointer; }
         <div id="banner-grid" style="margin-top:16px"></div>
       </div>
 
-      <!-- VIDEO SCRIPT -->
+      <!-- VIDEO PROMO -->
       <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(245,158,11,0.04));border-color:rgba(251,191,36,0.3)">
-        <div class="card-title" style="color:#fbbf24">🎬 SCRIPTS DE VIDEO — Listos para grabar</div>
-        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">3 formatos listos: Reel/TikTok (30s), Story (15s) y Video largo (60-90s). Generados con los datos de tu producto.</p>
-        <button class="btn-primary" onclick="generateAndShowVideoScripts()" id="btn-video-scripts" style="width:100%;background:linear-gradient(135deg,#d97706,#f59e0b)">
-          🎬 Generar scripts de video con IA
-        </button>
-        <div id="video-scripts-output" style="display:none;margin-top:16px">
-          <div class="output-header">
-            <div class="output-label">🎬 Scripts listos para grabar</div>
-            <button class="copy-btn" onclick="copyOutput('video-scripts-result')">Copiar todo</button>
+        <div class="card-title" style="color:#fbbf24">🎬 VIDEO PUBLICITARIO — Se genera y descarga solo</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:12px;line-height:1.6">
+          Generá el video de promo <strong style="color:#fbbf24">listo para descargar</strong> como archivo HTML animado — igual que los banners. Lo abrís en el navegador y ya está el video. No tenés que grabar nada vos.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;font-size:11px;text-align:center">
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">🎬</div>
+            <div style="color:#fbbf24;font-weight:700">Reel 30s animado</div>
+            <div style="color:#6b7280">Pantallas con texto y transiciones</div>
           </div>
-          <div class="output-box" id="video-scripts-result" style="white-space:pre-wrap;font-size:13px;line-height:1.7"></div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">📖</div>
+            <div style="color:#fbbf24;font-weight:700">Story 15s</div>
+            <div style="color:#6b7280">4 pantallas automáticas</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">📜</div>
+            <div style="color:#fbbf24;font-weight:700">Teleprompter</div>
+            <div style="color:#6b7280">Script que corre solo</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateVideoPromo()" id="btn-video-scripts" style="width:100%;background:linear-gradient(135deg,#d97706,#f59e0b);font-size:15px;padding:14px">
+          🎬 Generar video y descargar
+        </button>
+        <div id="video-scripts-output" style="display:none;margin-top:12px">
+          <div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;color:#34d399;line-height:1.6">
+            ✅ <strong>Video listo.</strong> Ya se descargó el archivo HTML. <br>
+            <span style="color:#9ca3af;font-size:12px">Abrilo en Chrome → ya ves el video animado con las pantallas del reel, story y teleprompter con tu script.</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+            <button onclick="generateVideoPromo()" style="flex:1;background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer">
+              🔄 Regenerar video
+            </button>
+            <button onclick="previewVideoHTML()" style="flex:1;background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.4);border-radius:8px;padding:10px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer">
+              👁 Previsualizar aquí
+            </button>
+          </div>
+          <div id="video-preview-wrap" style="display:none;margin-top:12px;border-radius:10px;overflow:hidden;border:2px solid rgba(251,191,36,0.4)">
+            <iframe id="video-preview-frame" style="width:100%;height:520px;border:none"></iframe>
+          </div>
+          <div style="margin-top:10px">
+            <div class="output-label" style="margin-bottom:6px">SCRIPT TEXTO</div>
+            <div class="output-box" id="video-scripts-result" style="white-space:pre-wrap;font-size:12px;line-height:1.7;max-height:250px;overflow-y:auto"></div>
+          </div>
         </div>
       </div>
 
@@ -3945,89 +3978,428 @@ async function exportBonoPDF(type) {
   pdf.save(filename);
 }
 
-function generateAndShowVideoScripts() {
-  const d = state.data;
-  const btn = document.getElementById('btn-video-scripts');
-  const out = document.getElementById('video-scripts-output');
-  const res = document.getElementById('video-scripts-result');
-
-  // Si ya hay scripts del paso 14, mostramos esos directamente
-  if (state.results.scripts) {
-    res.textContent = state.results.scripts;
-    out.style.display = 'block';
-    btn.textContent = '✅ Scripts listos — Regenerar en Paso 14';
-    return;
-  }
+function generateVideoPromo() {
+  const d     = state.data;
+  const btn   = document.getElementById('btn-video-scripts');
+  const out   = document.getElementById('video-scripts-output');
+  const res   = document.getElementById('video-scripts-result');
 
   btn.disabled = true;
-  btn.textContent = '⏳ Generando scripts...';
-  out.style.display = 'block';
-  res.textContent = '⏳ Generando scripts con IA...';
+  btn.textContent = '⏳ Generando video con IA...';
+  out.style.display = 'none';
 
-  const prompt = `Escribi 3 scripts de video para promocionar el infoproducto "${d.topic || 'mi producto'}" a ${d.price || '8'} USD. Resultado prometido: "${d.result || 'transformar tu productividad'}".
+  const topic  = d.topic  || 'Mi producto';
+  const result = d.result || 'transformar tu vida';
+  const price  = d.price  || '8';
+  const oldp   = d.oldprice || String(parseInt(price) * 4);
+  const guar   = d.guarantee || '30';
 
-──────────────────────────────────────
-📱 SCRIPT 1 — REEL / TIKTOK (30 segundos)
-──────────────────────────────────────
-[GANCHO — 0 a 3 segundos, texto en pantalla en grande]:
-[PROBLEMA — 3 a 10 segundos, hablando a cámara]:
-[SOLUCION — 10 a 25 segundos]:
-[CTA — 25 a 30 segundos]:
+  const prompt = `Sos un experto en videos de ventas virales. Crea scripts para: "${topic}" — $${price} USD — promesa: "${result}".
 
-──────────────────────────────────────
-📖 SCRIPT 2 — STORY (15 segundos)
-──────────────────────────────────────
-[Pantalla 1 — texto grande]:
-[Pantalla 2 — beneficio]:
-[Pantalla 3 — precio]:
-[Pantalla 4 — CTA]:
-
-──────────────────────────────────────
-🎬 SCRIPT 3 — VIDEO LARGO (60-90 segundos)
-──────────────────────────────────────
-[INTRO — hook]:
-[HISTORIA / PROBLEMA]:
-[SOLUCION — mostrar el producto]:
-[OFERTA Y PRECIO]:
-[GARANTIA]:
-[CTA final]:
-
-Para cada script incluí:
-- Las palabras EXACTAS a decir (listo para leer)
-- Que sugerís mostrar en pantalla
-- Tono: natural, no publicitario, como si hablaras con un amigo
-- Espanol rioplatense (vos, tenes, sabes)`;
+Respondé SOLO con JSON válido sin markdown:
+{
+  "reel": {
+    "pantallas": [
+      {"tipo":"gancho",    "texto":"...", "sub":"...", "seg":3},
+      {"tipo":"problema",  "texto":"...", "sub":"...", "seg":7},
+      {"tipo":"solucion",  "texto":"...", "sub":"...", "seg":10},
+      {"tipo":"beneficio", "texto":"...", "sub":"...", "seg":5},
+      {"tipo":"oferta",    "texto":"$${price} USD", "sub":"Garantía ${guar} días 🛡️", "seg":5}
+    ],
+    "voz": "script completo de 30 segundos para leer"
+  },
+  "story": [
+    {"texto":"...", "sub":"...", "seg":4},
+    {"texto":"...", "sub":"...", "seg":4},
+    {"texto":"$${price} USD", "sub":"antes $${oldp} USD", "seg":3},
+    {"texto":"Link en bio →", "sub":"Garantía ${guar} días", "seg":4}
+  ],
+  "vsl": [
+    {"titulo":"GANCHO",   "script":"..."},
+    {"titulo":"PROBLEMA", "script":"..."},
+    {"titulo":"SOLUCIÓN", "script":"..."},
+    {"titulo":"OFERTA",   "script":"Solo $${price} USD — antes $${oldp} USD..."},
+    {"titulo":"GARANTÍA", "script":"${guar} días de garantía total..."},
+    {"titulo":"CTA",      "script":"..."}
+  ]
+}
+Español rioplatense. Textos cortos e impactantes. Emojis donde corresponda.`;
 
   const storedKey = getApiKey();
-  const fetchOpts = storedKey && storedKey.startsWith('gsk_')
-    ? {
-        url: 'https://api.groq.com/openai/v1/chat/completions',
-        body: JSON.stringify({ model:'llama-3.3-70b-versatile', messages:[{role:'user',content:prompt}], max_tokens:2000, temperature:0.75 }),
-        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${storedKey}` }
-      }
-    : {
-        url: 'https://text.pollinations.ai/openai',
-        body: JSON.stringify({ messages:[{role:'user',content:prompt}], model:'openai-large' }),
-        headers: { 'Content-Type':'application/json' }
-      };
+  const url  = storedKey && storedKey.startsWith('gsk_')
+    ? 'https://api.groq.com/openai/v1/chat/completions'
+    : 'https://text.pollinations.ai/openai';
+  const body = storedKey && storedKey.startsWith('gsk_')
+    ? JSON.stringify({ model:'llama-3.3-70b-versatile', messages:[{role:'user',content:prompt}], max_tokens:1800, temperature:0.7 })
+    : JSON.stringify({ messages:[{role:'user',content:prompt}], model:'openai-large', seed:Math.floor(Math.random()*99999) });
+  const headers = storedKey && storedKey.startsWith('gsk_')
+    ? { 'Content-Type':'application/json', 'Authorization':'Bearer '+storedKey }
+    : { 'Content-Type':'application/json' };
 
-  fetch(fetchOpts.url, { method:'POST', headers:fetchOpts.headers, body:fetchOpts.body })
+  fetch(url, { method:'POST', headers, body })
     .then(r => r.json())
     .then(data => {
-      const text = data.choices?.[0]?.message?.content || data.text || '';
-      if (!text) throw new Error('Respuesta vacía');
-      res.textContent = text;
-      state.results.scripts = text;
+      const raw = data.choices?.[0]?.message?.content || data.text || '';
+      let json;
+      try { json = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+      catch(e) { json = buildDefaultVideoData(topic, result, price, oldp, guar); }
+
+      window._videoData  = json;
+      window._videoTopic = topic;
+      window._videoPrice = price;
+
+      // Mostrar script texto
+      const scriptText = buildScriptText(json);
+      res.textContent = scriptText;
+      state.results.scripts = scriptText;
       saveProgress();
+
+      // ── Generar y descargar el HTML del video automáticamente ──
+      const html = buildVideoHTML(json, topic, price);
+      const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'video-promo-' + topic.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25) + '.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      out.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = '🔄 Regenerar scripts';
+      btn.textContent = '🔄 Regenerar video';
     })
-    .catch(err => {
-      res.textContent = '⚠️ Error: ' + err.message + '\n\nSi tenés Groq configurado, esperá 30 segundos y reintentá. Si no, configurá tu clave en el botón "Groq Activo" arriba.';
+    .catch(() => {
+      const json = buildDefaultVideoData(topic, result, price, oldp, guar);
+      window._videoData  = json;
+      window._videoTopic = topic;
+      window._videoPrice = price;
+      const scriptText = buildScriptText(json);
+      res.textContent = scriptText;
+      const html = buildVideoHTML(json, topic, price);
+      const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'video-promo-' + topic.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25) + '.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      out.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = '🔄 Reintentar';
+      btn.textContent = '🔄 Regenerar video';
     });
 }
+
+function previewVideoHTML() {
+  const json  = window._videoData;
+  const topic = window._videoTopic || 'mi-producto';
+  const price = window._videoPrice || '8';
+  if (!json) { generateVideoPromo(); return; }
+  const html  = buildVideoHTML(json, topic, price);
+  const wrap  = document.getElementById('video-preview-wrap');
+  const frame = document.getElementById('video-preview-frame');
+  const blob  = new Blob([html], { type:'text/html;charset=utf-8' });
+  frame.src   = URL.createObjectURL(blob);
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function buildDefaultVideoData(topic, result, price, oldp, guar) {
+  return {
+    reel: {
+      pantallas: [
+        { tipo:'gancho',    texto:'¿Trabajás demasiado? 😩',        sub:'Y sentís que el tiempo no alcanza...', seg:3 },
+        { tipo:'problema',  texto:'No es tu culpa',                  sub:'Nadie te enseñó las herramientas correctas', seg:7 },
+        { tipo:'solucion',  texto:topic.slice(0,40),                 sub:result.slice(0,55), seg:10 },
+        { tipo:'beneficio', texto:'Resultado real desde el día 1',   sub:'Sin experiencia previa necesaria', seg:5 },
+        { tipo:'oferta',    texto:'Solo $'+price+' USD 🔥',          sub:'Garantía '+guar+' días 🛡️  — Link en bio 👆', seg:5 }
+      ],
+      voz: '¿Trabajás demasiado y sentís que el tiempo no alcanza? No es tu culpa — nadie te enseñó a usar las herramientas correctas. Con '+topic+' vas a poder '+result+'. Sin experiencia previa. Por solo $'+price+' USD con garantía de '+guar+' días. El link está en mi bio.'
+    },
+    story: [
+      { texto:'¿Te sobra trabajo\ny te falta tiempo? 😩', sub:'Existe una solución', seg:4 },
+      { texto:topic.slice(0,35), sub:result.slice(0,50), seg:4 },
+      { texto:'$'+price+' USD', sub:'Antes $'+oldp+' USD • Oferta limitada', seg:3 },
+      { texto:'Link en bio ↑', sub:'Garantía '+guar+' días 🛡️', seg:4 }
+    ],
+    vsl: [
+      { titulo:'GANCHO',   script:'¿Cuántas horas perdés por día en tareas que podrían resolverse solas? Si la respuesta es muchas, este video es para vos.' },
+      { titulo:'PROBLEMA', script:'La mayoría de los profesionales desperdician horas en cosas repetitivas. No porque sean ineficientes — sino porque nadie les enseñó cómo trabajar diferente.' },
+      { titulo:'SOLUCIÓN', script:'Por eso creé '+topic+'. Un sistema concreto para que puedas '+result+'. Sin tecnicismos, sin experiencia previa.' },
+      { titulo:'OFERTA',   script:'Todo esto lo conseguís por solo $'+price+' USD. Antes costaba $'+oldp+' USD. Por tiempo limitado a este precio especial.' },
+      { titulo:'GARANTÍA', script:'Y si en '+guar+' días no notás una diferencia real, te devuelvo cada centavo. Sin preguntas. Así de seguros estamos.' },
+      { titulo:'CTA',      script:'El link para acceder está en la descripción. Clickeá ahora antes de que se acabe el precio de lanzamiento.' }
+    ]
+  };
+}
+
+function buildScriptText(j) {
+  let t = '📱 REEL (30s)\n' + '─'.repeat(38) + '\n';
+  (j.reel?.pantallas||[]).forEach((p,i) => { t += `[${i+1} · ${p.seg}s] ${p.texto}\n${p.sub}\n`; });
+  t += '\n🎤 VOZ:\n' + (j.reel?.voz||'') + '\n\n';
+  t += '📖 STORY (15s)\n' + '─'.repeat(38) + '\n';
+  (j.story||[]).forEach((p,i) => { t += `[${i+1} · ${p.seg}s] ${p.texto} — ${p.sub}\n`; });
+  t += '\n🎬 VSL (90s)\n' + '─'.repeat(38) + '\n';
+  (j.vsl||[]).forEach(s => { t += `[${s.titulo}]\n${s.script}\n\n`; });
+  return t;
+}
+
+function buildVideoHTML(json, topic, price) {
+  const pan   = json.reel?.pantallas || [];
+  const story = json.story || [];
+  const vsl   = json.vsl   || [];
+  const voz   = (json.reel?.voz || '').replace(/`/g,"'").replace(/\\/g,'');
+
+  const COLORS = {
+    gancho:    ['#7c3aed','#e879f9'],
+    problema:  ['#1e1535','#4c1d95'],
+    solucion:  ['#065f46','#10b981'],
+    beneficio: ['#92400e','#f59e0b'],
+    oferta:    ['#7c3aed','#e879f9'],
+  };
+
+  // Escapar textos para uso seguro en JS dentro del HTML
+  function esc(s) { return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+
+  const reelData  = pan.map(p => {
+    const [c1,c2] = COLORS[p.tipo]||['#1a1229','#7c3aed'];
+    return `{bg1:'${c1}',bg2:'${c2}',texto:'${esc(p.texto)}',sub:'${esc(p.sub)}',seg:${p.seg||4},tipo:'${p.tipo||''}'}`;
+  }).join(',');
+
+  const storyData = story.map(p =>
+    `{texto:'${esc(p.texto)}',sub:'${esc(p.sub)}',seg:${p.seg||4}}`
+  ).join(',');
+
+  const vslData = vsl.map(s =>
+    `{titulo:'${esc(s.titulo)}',script:'${esc(s.script)}'}`
+  ).join(',');
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Promo — ${topic.replace(/</g,'&lt;')}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#09070f;color:#fff;min-height:100vh}
+.tabs{display:flex;background:#0f0b1a;border-bottom:1px solid #2d2245}
+.tab{flex:1;padding:13px 6px;text-align:center;cursor:pointer;font-weight:700;font-size:13px;color:#6b5f8a;border:none;background:none;transition:all .2s}
+.tab.active{color:#fff;border-bottom:3px solid #7c3aed;background:rgba(124,58,237,0.1)}
+.panel{display:none}.panel.active{display:block}
+
+/* ── REEL ── */
+#reel-wrap{max-width:380px;margin:0 auto;padding:16px}
+.reel-screen{width:100%;aspect-ratio:9/16;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;position:relative;transition:background .6s}
+.reel-tipo{position:absolute;top:14px;left:14px;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.7;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:20px}
+.reel-num{position:absolute;top:14px;right:14px;font-size:10px;color:rgba(255,255,255,.6)}
+.reel-txt{font-size:clamp(20px,6vw,32px);font-weight:900;line-height:1.2;margin-bottom:10px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.reel-sub{font-size:clamp(13px,3.5vw,17px);opacity:.85;line-height:1.5}
+.prog-bar{height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:12px;overflow:hidden}
+.prog-fill{height:100%;background:#fff;border-radius:2px;width:0%;transition:width linear}
+.reel-dots{display:flex;justify-content:center;gap:5px;margin-top:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .3s;cursor:pointer}
+.dot.active{background:#fff;width:18px;border-radius:4px}
+.reel-btns{display:flex;gap:8px;margin-top:12px;justify-content:center;flex-wrap:wrap}
+.rbtn{padding:9px 18px;border-radius:8px;border:none;font-weight:700;font-size:12px;cursor:pointer}
+.rbtn-play{background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff}
+.rbtn-nav{background:rgba(255,255,255,.1);color:#fff}
+.rbtn-fs{background:rgba(255,255,255,.08);color:#fff;font-size:16px;padding:9px 14px}
+.hint{font-size:11px;color:#4b5563;text-align:center;margin-top:6px}
+
+/* ── STORY ── */
+#story-wrap{max-width:380px;margin:0 auto;padding:16px}
+.s-card{background:linear-gradient(135deg,#1a1229,#2d1f4e);border-radius:16px;padding:22px;margin-bottom:10px;text-align:center;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #3d3060}
+.s-num{font-size:9px;color:#a78bfa;font-weight:800;letter-spacing:2px;margin-bottom:8px}
+.s-txt{font-size:19px;font-weight:900;margin-bottom:6px;line-height:1.3;white-space:pre-line}
+.s-sub{font-size:13px;color:#c4b5fd;opacity:.85}
+
+/* ── VSL ── */
+#vsl-wrap{max-width:680px;margin:0 auto;padding:16px}
+.vsl-sec{background:#1a1229;border-radius:12px;padding:16px;margin-bottom:10px}
+.vsl-title{color:#a78bfa;font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:7px}
+.vsl-text{color:#e5e7eb;font-size:15px;line-height:1.7}
+
+/* ── TELEPROMPTER ── */
+#tp-wrap{max-width:680px;margin:0 auto;padding:16px}
+.tp-btns{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tp-btn{padding:8px 14px;border-radius:8px;border:none;font-weight:700;font-size:12px;cursor:pointer}
+.tp-play{background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff}
+.tp-spd{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+#tp-area{background:#09070f;border-radius:12px;padding:22px;height:380px;overflow:hidden;position:relative;border:1px solid #2d2245}
+#tp-text{font-size:22px;line-height:1.9;color:#fff;white-space:pre-wrap}
+.tp-ot{position:absolute;top:0;left:0;right:0;height:70px;background:linear-gradient(to bottom,#09070f,transparent);z-index:2;pointer-events:none}
+.tp-ob{position:absolute;bottom:0;left:0;right:0;height:70px;background:linear-gradient(to top,#09070f,transparent);z-index:2;pointer-events:none}
+.tp-cur{position:absolute;left:0;right:0;top:50%;height:3px;background:rgba(124,58,237,.5);z-index:3;pointer-events:none}
+#tp-spd-lbl{font-size:11px;color:#6b5f8a;text-align:center;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('reel',this)">📱 Reel 30s</button>
+  <button class="tab"        onclick="showTab('story',this)">📖 Story 15s</button>
+  <button class="tab"        onclick="showTab('vsl',this)">🎬 VSL 90s</button>
+  <button class="tab"        onclick="showTab('tp',this)">📜 Teleprompter</button>
+</div>
+
+<!-- REEL -->
+<div class="panel active" id="panel-reel">
+  <div id="reel-wrap">
+    <div class="reel-screen" id="reel-screen">
+      <div class="reel-tipo" id="r-tipo"></div>
+      <div class="reel-num"  id="r-num"></div>
+      <div class="reel-txt"  id="r-txt"></div>
+      <div class="reel-sub"  id="r-sub"></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="r-prog"></div></div>
+    <div class="reel-dots" id="r-dots"></div>
+    <div class="reel-btns">
+      <button class="rbtn rbtn-nav"  onclick="rNav(-1)">← Ant</button>
+      <button class="rbtn rbtn-play" onclick="rToggle()" id="r-play-btn">▶ Play</button>
+      <button class="rbtn rbtn-nav"  onclick="rNav(1)">Sig →</button>
+      <button class="rbtn rbtn-fs"   onclick="rFullscreen()" title="Pantalla completa">⛶</button>
+    </div>
+    <div class="hint">💡 Play automático pasa las pantallas al ritmo del reel · ⛶ pantalla completa para grabar</div>
+  </div>
+</div>
+
+<!-- STORY -->
+<div class="panel" id="panel-story">
+  <div id="story-wrap">
+    <p style="font-size:12px;color:#6b5f8a;margin-bottom:12px;text-align:center">Cada pantalla dura los segundos indicados. Publicá cada una como Story separada.</p>
+    <div id="s-cards"></div>
+  </div>
+</div>
+
+<!-- VSL -->
+<div class="panel" id="panel-vsl">
+  <div id="vsl-wrap">
+    <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Script para video de 60-90 segundos. Leé cada sección mientras grabás.</p>
+    <div id="vsl-cards"></div>
+  </div>
+</div>
+
+<!-- TELEPROMPTER -->
+<div class="panel" id="panel-tp">
+  <div id="tp-wrap">
+    <div class="tp-btns">
+      <button class="tp-btn tp-play" onclick="tpToggle()" id="tp-btn">▶ Iniciar</button>
+      <button class="tp-btn tp-spd"  onclick="tpSpd(-1)">🐢 Más lento</button>
+      <button class="tp-btn tp-spd"  onclick="tpSpd(1)">🐇 Más rápido</button>
+      <button class="tp-btn tp-spd"  onclick="tpReset()">↺ Reiniciar</button>
+    </div>
+    <div id="tp-area">
+      <div class="tp-ot"></div><div class="tp-cur"></div><div class="tp-ob"></div>
+      <div id="tp-text"></div>
+    </div>
+    <div id="tp-spd-lbl">Velocidad: media</div>
+    <p style="font-size:11px;color:#4b5563;text-align:center;margin-top:6px">💡 Colocá el celular frente a la cámara y leé mientras grabás</p>
+  </div>
+</div>
+
+<script>
+const REEL  = [${reelData}];
+const STORY = [${storyData}];
+const VSL   = [${vslData}];
+const VOZ   = '${esc(voz)}';
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── REEL ──────────────────────────────────────────────────────────────────
+let rIdx=0, rPlay=false, rTimer=null;
+function rShow(i){
+  const s=REEL[i]; if(!s) return;
+  const sc=document.getElementById('reel-screen');
+  sc.style.background='linear-gradient(135deg,'+s.bg1+','+s.bg2+')';
+  document.getElementById('r-txt').textContent=s.texto;
+  document.getElementById('r-sub').textContent=s.sub;
+  document.getElementById('r-tipo').textContent=(s.tipo||'').toUpperCase();
+  document.getElementById('r-num').textContent=(i+1)+'/'+REEL.length;
+  document.querySelectorAll('.dot').forEach((d,j)=>{ d.classList.toggle('active',j===i); });
+}
+function rBuildDots(){
+  const c=document.getElementById('r-dots'); c.innerHTML='';
+  REEL.forEach((_,i)=>{ const d=document.createElement('div'); d.className='dot'+(i===0?' active':'');
+    d.onclick=()=>{ rIdx=i; rShow(i); }; c.appendChild(d); });
+}
+function rNav(dir){ rIdx=Math.max(0,Math.min(REEL.length-1,rIdx+dir)); rShow(rIdx); }
+function rToggle(){
+  rPlay=!rPlay;
+  document.getElementById('r-play-btn').textContent=rPlay?'⏸ Pausar':'▶ Play';
+  if(rPlay) rAuto(); else { clearTimeout(rTimer); const f=document.getElementById('r-prog'); f.style.transition='none'; f.style.width='0%'; }
+}
+function rAuto(){
+  if(!rPlay) return;
+  const s=REEL[rIdx]; if(!s){ rIdx=0; rShow(0); rAuto(); return; }
+  const dur=(s.seg||4)*1000;
+  const f=document.getElementById('r-prog');
+  f.style.transition='none'; f.style.width='0%';
+  setTimeout(()=>{ f.style.transition='width '+dur+'ms linear'; f.style.width='100%'; },30);
+  rTimer=setTimeout(()=>{
+    f.style.transition='none'; f.style.width='0%';
+    if(rIdx<REEL.length-1){ rIdx++; rShow(rIdx); rAuto(); }
+    else{ rPlay=false; document.getElementById('r-play-btn').textContent='▶ Reiniciar'; rIdx=0; rShow(0); }
+  },dur);
+}
+function rFullscreen(){
+  const s=document.getElementById('reel-screen');
+  if(s.requestFullscreen) s.requestFullscreen();
+  else if(s.webkitRequestFullscreen) s.webkitRequestFullscreen();
+}
+
+// ── STORY ─────────────────────────────────────────────────────────────────
+function buildStory(){
+  const c=document.getElementById('s-cards');
+  STORY.forEach((p,i)=>{
+    c.innerHTML+=\`<div class="s-card">
+      <div class="s-num">PANTALLA \${i+1} — \${p.seg}s</div>
+      <div class="s-txt">\${p.texto}</div>
+      <div class="s-sub">\${p.sub}</div>
+    </div>\`;
+  });
+}
+
+// ── VSL ───────────────────────────────────────────────────────────────────
+function buildVSL(){
+  const c=document.getElementById('vsl-cards');
+  const colors=['#7c3aed','#ef4444','#10b981','#f59e0b','#3b82f6','#e879f9'];
+  VSL.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='vsl-sec';
+    d.style.borderLeft='4px solid '+colors[i%colors.length];
+    d.innerHTML=\`<div class="vsl-title">\${s.titulo}</div><div class="vsl-text">\${s.script}</div>\`;
+    c.appendChild(d);
+  });
+}
+
+// ── TELEPROMPTER ──────────────────────────────────────────────────────────
+let tpRun=false, tpInt=null, tpPos=0, tpSpdIdx=2;
+const SPEEDS=[0.5,0.8,1.2,1.8,2.5,3.5];
+const SPDNAMES=['muy lenta','lenta','media','rápida','muy rápida','ultra rápida'];
+function tpInit(){
+  const full=VOZ+'\n\n'+VSL.map(s=>'['+s.titulo+']\n'+s.script).join('\n\n');
+  document.getElementById('tp-text').textContent=full;
+}
+function tpToggle(){
+  tpRun=!tpRun;
+  document.getElementById('tp-btn').textContent=tpRun?'⏸ Pausar':'▶ Iniciar';
+  if(tpRun){ tpInt=setInterval(()=>{ tpPos+=SPEEDS[tpSpdIdx];
+    document.getElementById('tp-text').style.transform='translateY(-'+tpPos+'px)'; },50); }
+  else clearInterval(tpInt);
+}
+function tpSpd(d){ tpSpdIdx=Math.max(0,Math.min(SPEEDS.length-1,tpSpdIdx+d));
+  document.getElementById('tp-spd-lbl').textContent='Velocidad: '+SPDNAMES[tpSpdIdx]; }
+function tpReset(){ tpPos=0; tpRun=false; clearInterval(tpInt);
+  document.getElementById('tp-text').style.transform='translateY(0)';
+  document.getElementById('tp-btn').textContent='▶ Iniciar'; }
+
+// INIT
+rBuildDots(); rShow(0); buildStory(); buildVSL(); tpInit();
+<\/script>
+</body>
+</html>`;
+}
+
 
 function exportDoc(type) {
   const d = state.data;
