@@ -19,7 +19,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -641,22 +640,6 @@ select { appearance: none; cursor: pointer; }
         </div>
         <div class="tip"><div class="tip-icon">💡</div> Para infoproductos de entrada, los precios entre $17–$49 USD tienen mejor conversión en cold traffic de Meta Ads.</div>
       </div>
-
-      <!-- AUTOPILOT CARD -->
-      <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:#7c3aed;border-width:2px">
-        <div class="card-title" style="color:#f1eeff;font-size:16px">🤖 MODO AUTOPILOTO — Generar TODO en automático</div>
-        <p style="font-size:14px;color:#c4b5fd;margin-bottom:12px;line-height:1.65">
-          Completaste los datos básicos. Ahora la IA puede generar <strong style="color:#f1eeff">todos los pasos</strong> sola:<br>
-          investigación → avatar → oferta → ebook completo → landing → ads → emails.<br>
-          Tarda ~10 minutos. Solo dejá la pantalla encendida.
-        </p>
-        <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#9ca3af">
-          <strong style="color:#c4b5fd">Necesitás:</strong> clave Groq activa (el botón verde "Groq Activo" arriba) y tener completado el Paso 01 con tema y resultado.
-        </div>
-        <button class="btn-primary" onclick="runAutopilot()" id="btn-autopilot" style="width:100%;font-size:16px;padding:16px;background:linear-gradient(135deg,#7c3aed,#a855f7)">
-          🚀 Generar todo el kit automáticamente
-        </button>
-      </div>
     </div>
 
     <!-- ═══ STEP 3: INVESTIGACIÓN DE MERCADO ═══ -->
@@ -1182,16 +1165,37 @@ select { appearance: none; cursor: pointer; }
         <div id="final-summary" style="font-size:14px;line-height:1.8;color:var(--text2)"></div>
       </div>
 
+      <!-- EXPORTAR EBOOK PDF - DESTACADO -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.12));border-color:#7c3aed;margin-bottom:16px">
+        <div class="card-title" style="color:#f1eeff">📕 EBOOK COMPLETO — PDF CON DISEÑO + IMÁGENES IA</div>
+        <p style="font-size:13px;color:#c4b5fd;margin-bottom:14px;line-height:1.6">Genera el ebook completo en PDF con portada con imagen IA, <strong style="color:#f1eeff">todas las páginas del contenido</strong>, imágenes por capítulo y diseño profesional. Necesitás haber generado el contenido en el Paso 10 primero.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;font-size:12px;text-align:center">
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">🖼️</div>
+            <div style="color:#c4b5fd;font-weight:700">Portada con IA</div>
+            <div style="color:#6b7280">Imagen generada</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">📄</div>
+            <div style="color:#c4b5fd;font-weight:700">Contenido completo</div>
+            <div style="color:#6b7280">Todas las páginas</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px">
+            <div style="font-size:20px;margin-bottom:4px">🎨</div>
+            <div style="color:#c4b5fd;font-weight:700">Diseño profesional</div>
+            <div style="color:#6b7280">Listo para entregar</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="exportEbookPDF()" style="width:100%;font-size:16px;padding:16px">
+          📕 Generar PDF completo del ebook
+        </button>
+      </div>
+
       <div class="export-grid">
         <div class="export-card" onclick="exportDoc('ebook')">
           <div class="export-icon">📄</div>
-          <div class="export-title">Ebook (texto)</div>
-          <div class="export-desc">.txt para editar</div>
-        </div>
-        <div class="export-card" onclick="exportEbookPDF()" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:#7c3aed">
-          <div class="export-icon">📕</div>
-          <div class="export-title" style="color:#f1eeff">PDF Profesional</div>
-          <div class="export-desc">Con diseño + imágenes IA</div>
+          <div class="export-title">Ebook (texto .txt)</div>
+          <div class="export-desc">Para editar en Word</div>
         </div>
         <div class="export-card" onclick="exportDoc('landing')">
           <div class="export-icon">🌐</div>
@@ -1205,7 +1209,7 @@ select { appearance: none; cursor: pointer; }
         </div>
         <div class="export-card" onclick="exportDoc('full')">
           <div class="export-icon">📦</div>
-          <div class="export-title">Kit completo</div>
+          <div class="export-title">Kit completo .txt</div>
           <div class="export-desc">Todo en un archivo</div>
         </div>
       </div>
@@ -1219,95 +1223,83 @@ select { appearance: none; cursor: pointer; }
         <p style="font-size:12px;color:#a89ec4;margin-top:10px;text-align:center">Te descarga 1 archivo por cada plataforma seleccionada en el Paso 02</p>
       </div>
 
-      <!-- BANNERS HOTMART -->
-      <div class="card" style="margin-top:20px">
-        <div class="card-title">🎨 BANNERS CON IA — Tamaños exactos Hotmart</div>
-        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Imágenes sin texto generadas con IA. Después podés agregar tu logo en Canva (gratis).</p>
-
-        <div style="margin-bottom:14px">
-          <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">¿Qué imágenes necesitás?</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border-radius:8px;border:1px solid #2d1f4e;background:rgba(124,58,237,0.08)">
-              <input type="radio" name="banner-group" value="principal" checked style="margin-top:2px">
-              <span><strong>Página del producto en Hotmart</strong><br><span style="font-size:11px;color:#6b7280">Banner 1920×640 + Avatar 600×600 + Portada vitrina 600×900</span></span>
-            </label>
-            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border-radius:8px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-group" value="afiliados" style="margin-top:2px">
-              <span><strong>Material de afiliados (Hotmart)</strong><br><span style="font-size:11px;color:#6b7280">250×250, 300×250, 336×280, 468×60, 728×90, 160×600</span></span>
-            </label>
-            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border-radius:8px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-group" value="redes" style="margin-top:2px">
-              <span><strong>Redes sociales y ads</strong><br><span style="font-size:11px;color:#6b7280">Facebook 1200×628, Instagram 1080×1080, Story 1080×1920, Twitter 1500×500</span></span>
-            </label>
+      <!-- BONOS PDF -->
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(16,185,129,0.05));border-color:rgba(52,211,153,0.3)">
+        <div class="card-title" style="color:#34d399">🎁 BONOS DESCARGABLES — PDFs con diseño profesional</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Generá los 3 bonos incluidos en tu producto como PDFs completos con imágenes. Van dentro del ZIP que entregás al comprador.</p>
+        <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px">
+          <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:14px;border:1px solid rgba(52,211,153,0.2)">
+            <div style="font-weight:700;font-size:13px;color:#34d399;margin-bottom:4px">🏆 Bono 1 — Checklist: Las 10 mejores herramientas IA gratis</div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:10px">PDF de 2 páginas · Valor percibido: $20 USD</div>
+            <button class="btn-secondary" onclick="exportBonoPDF('checklist')" style="font-size:12px;padding:8px 16px;border-color:rgba(52,211,153,0.4);color:#34d399">
+              📥 Generar PDF Bono 1
+            </button>
+          </div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:14px;border:1px solid rgba(52,211,153,0.2)">
+            <div style="font-weight:700;font-size:13px;color:#34d399;margin-bottom:4px">📅 Bono 2 — Plantilla de rutina productiva con IA</div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:10px">PDF de 2 páginas · Valor percibido: $25 USD</div>
+            <button class="btn-secondary" onclick="exportBonoPDF('plantilla')" style="font-size:12px;padding:8px 16px;border-color:rgba(52,211,153,0.4);color:#34d399">
+              📥 Generar PDF Bono 2
+            </button>
+          </div>
+          <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:14px;border:1px solid rgba(52,211,153,0.2)">
+            <div style="font-weight:700;font-size:13px;color:#34d399;margin-bottom:4px">💬 Bono 3 — Guía de prompts esenciales para trabajo diario</div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:10px">PDF de 3 páginas · Valor percibido: $15 USD</div>
+            <button class="btn-secondary" onclick="exportBonoPDF('prompts')" style="font-size:12px;padding:8px 16px;border-color:rgba(52,211,153,0.4);color:#34d399">
+              📥 Generar PDF Bono 3
+            </button>
           </div>
         </div>
-
-        <div style="margin-bottom:14px">
-          <div style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Estilo visual</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-style" value="warm" checked> 🍽️ Lifestyle / Comida
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-style" value="elegant"> ✨ Elegante / Premium
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-style" value="bold"> 🔥 Impacto / Bold
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #2d1f4e">
-              <input type="radio" name="banner-style" value="modern"> 🎯 Moderno / Minimalista
-            </label>
-          </div>
-        </div>
-
-        <button class="btn-primary" onclick="generateBanners()" id="btn-banners" style="width:100%">
-          🎨 Generar imágenes con IA
-        </button>
-        <p style="font-size:11px;color:#4b5563;margin-top:8px;text-align:center">Las imágenes se generan sin texto. Para agregar logo y texto usá <strong style="color:#6b7280">Canva.com</strong> (gratis)</p>
-        <div id="banner-status" style="display:none;font-size:13px;color:#c4b5fd;margin-top:10px;text-align:center;padding:8px;background:rgba(124,58,237,0.1);border-radius:8px"></div>
-        <div id="banner-grid" style="margin-top:16px"></div>
+        <div class="tip"><div class="tip-icon">💡</div> Los bonos se entregan GRATIS con la compra. Solo tienen precio de marketing para mostrar el valor. No los vendas por separado.</div>
       </div>
 
-      <!-- KIT ZIP AFILIADOS -->
-      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(5,150,105,0.08));border-color:#059669">
-        <div class="card-title" style="color:#6ee7b7">📦 KIT COMPLETO PARA AFILIADOS — Descargar ZIP</div>
-        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Un solo archivo ZIP con todo el material para tus afiliados: banners en los 6 tamaños de Hotmart + modelos de email + tweets + scripts de video.</p>
-
-        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin-bottom:14px">
-          <div style="font-size:12px;font-weight:700;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">El ZIP incluye:</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#9ca3af">
-            <div>🖼️ 6 banners para afiliados</div>
-            <div>📧 Modelos de email (txt)</div>
-            <div>🐦 Modelos de tweet (txt)</div>
-            <div>🎥 Scripts de video (txt)</div>
-            <div>📋 Copy de la oferta (txt)</div>
-            <div>📖 README instrucciones</div>
+      <!-- BANNERS HOTMART COMPLETOS -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">🎨 BANNERS CON IA — Hotmart completo + Redes sociales</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:6px;line-height:1.6">Todos los tamaños exactos que pide Hotmart para afiliados, más formatos para Meta Ads e Instagram.</p>
+        
+        <div style="background:rgba(0,0,0,0.25);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#6b7280">
+          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">HOTMART — PRODUCTO</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+            <div>🖼️ <strong style="color:#9ca3af">Banner principal</strong><br>1920 × 640 px</div>
+            <div>🟦 <strong style="color:#9ca3af">Avatar del producto</strong><br>600 × 600 px</div>
+            <div>📋 <strong style="color:#9ca3af">Portada vitrina</strong><br>600 × 900 px</div>
+          </div>
+          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">HOTMART — MATERIAL PARA AFILIADOS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+            <div>🔹 250 × 250 px</div>
+            <div>🔹 300 × 250 px</div>
+            <div>🔹 336 × 280 px</div>
+            <div>🔹 468 × 60 px</div>
+            <div>🔹 728 × 90 px</div>
+            <div>🔹 160 × 600 px</div>
+          </div>
+          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">REDES SOCIALES</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div>📣 Meta Ads<br>1200 × 628 px</div>
+            <div>📷 Instagram post<br>1080 × 1080 px</div>
           </div>
         </div>
 
-        <div style="margin-bottom:14px">
-          <label style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:6px">Estilo visual de los banners en el ZIP:</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
-              <input type="radio" name="zip-style" value="warm" checked> 🍽️ Lifestyle
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
-              <input type="radio" name="zip-style" value="elegant"> ✨ Elegante
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
-              <input type="radio" name="zip-style" value="bold"> 🔥 Bold
-            </label>
-            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
-              <input type="radio" name="zip-style" value="modern"> 🎯 Moderno
-            </label>
-          </div>
+        <div id="banner-style-row" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="modern" checked> Moderno / Minimalista
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="bold"> Impacto / Bold
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="elegant"> Elegante / Premium
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="warm"> Cálido / Lifestyle
+          </label>
         </div>
-
-        <button class="btn-primary" onclick="downloadAffiliateKit()" id="btn-zip" style="width:100%;background:linear-gradient(135deg,#059669,#047857)">
-          📦 Generar y descargar kit ZIP
+        <button class="btn-primary" onclick="generateBanners()" id="btn-banners" style="width:100%">
+          🎨 Generar todos los banners con IA (11 formatos)
         </button>
-        <div id="zip-status" style="display:none;font-size:13px;color:#6ee7b7;margin-top:10px;text-align:center;padding:8px;background:rgba(5,150,105,0.15);border-radius:8px"></div>
-        <p style="font-size:11px;color:#4b5563;margin-top:8px;text-align:center">Después subí el ZIP a Google Drive y pegá el link en Hotmart → Material para afiliados → "Link para una carpeta en la nube"</p>
+        <div id="banner-status" style="font-size:13px;color:#c4b5fd;margin-top:10px;text-align:center"></div>
+        <div id="banner-grid" style="margin-top:16px"></div>
       </div>
     </div>
 
@@ -1319,32 +1311,6 @@ select { appearance: none; cursor: pointer; }
     <div class="step-nav-info">Paso <strong id="current-step-display">1</strong> de <strong>16</strong></div>
     <button class="btn-next" id="btn-next" onclick="nextStep()">Siguiente →</button>
   </div>
-
-<!-- AUTOPILOT OVERLAY -->
-<div id="autopilot-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(5,3,14,0.97);align-items:center;justify-content:center;padding:24px;flex-direction:column">
-  <div style="max-width:520px;width:100%;text-align:center">
-    <div style="font-size:48px;margin-bottom:16px" id="ap-icon">🤖</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#f1eeff;margin-bottom:8px">Modo Autopiloto activo</h2>
-    <p style="color:#9ca3af;font-size:14px;margin-bottom:28px">La IA está generando todo tu kit. No cierres la pantalla.</p>
-
-    <!-- Barra de progreso -->
-    <div style="background:rgba(255,255,255,0.06);border-radius:100px;height:10px;margin-bottom:20px;overflow:hidden">
-      <div id="ap-progress-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:100px;transition:width 0.5s ease;width:0%"></div>
-    </div>
-
-    <!-- Paso actual -->
-    <div id="ap-step-label" style="font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Iniciando...</div>
-    <div id="ap-step-detail" style="font-size:24px;font-weight:800;color:#f1eeff;font-family:'Syne',sans-serif;margin-bottom:20px;min-height:36px">Preparando...</div>
-    <div id="ap-countdown" style="font-size:13px;color:#6b7280;margin-bottom:28px;min-height:20px"></div>
-
-    <!-- Lista de pasos -->
-    <div style="text-align:left;background:rgba(0,0,0,0.3);border-radius:14px;padding:16px;max-height:320px;overflow-y:auto" id="ap-steps-list"></div>
-
-    <button onclick="stopAutopilot()" style="margin-top:20px;background:none;border:1px solid #3b1f6e;color:#6b7280;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px">
-      ✋ Detener autopiloto
-    </button>
-  </div>
-</div>
 
 </div><!-- end main -->
 
@@ -2701,7 +2667,7 @@ async function exportEbookPDF() {
     <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:480px;width:100%;text-align:center">
       <div style="font-size:48px;margin-bottom:16px">📕</div>
       <h2 style="font-family:'Syne',sans-serif;font-size:22px;margin-bottom:8px;color:#f1eeff">Creando tu ebook PDF</h2>
-      <p style="font-size:14px;color:#a89ec4;margin-bottom:20px;line-height:1.6">Generando imágenes con IA, diseñando páginas y armando el PDF...</p>
+      <p style="font-size:14px;color:#a89ec4;margin-bottom:20px;line-height:1.6">Generando avatar del cliente ideal, portada con IA, ilustraciones de capítulos y armando el PDF completo...</p>
       <div style="background:#09070f;border-radius:8px;padding:14px;margin-bottom:14px">
         <div id="pdf-status" style="font-size:13px;color:#c4b5fd;margin-bottom:10px">⏳ Iniciando...</div>
         <div style="background:#221a35;height:6px;border-radius:3px;overflow:hidden">
@@ -2719,28 +2685,56 @@ async function exportEbookPDF() {
   };
   
   try {
-    // Paso 1: Generar imagen de portada con IA
-    setStatus('🎨 Generando portada con IA...', 10);
-    // Prompt SIN texto - solo imagen ilustrativa profesional
-    const coverPrompt = encodeURIComponent(`beautiful artistic illustration about ${d.topic}, no text, no words, no letters, professional editorial photography, soft lighting, vibrant colors, modern minimalist style, magazine quality, clean composition`);
+    // ── Construir descripción del avatar según los datos del proyecto ──
+    const avatarGender = d.gender || 'person';
+    const avatarAge    = d.age    || '30-40';
+    const avatarGenderDesc = avatarGender === 'mujer' ? 'woman' :
+                             avatarGender === 'hombre' ? 'man' :
+                             avatarGender === 'ambos'  ? 'person' : 'professional person';
+    const topicCleanEn = (d.topic || 'productivity').replace(/[^\w\s]/g,'').slice(0,60);
+
+    // Paso 1: Generar avatar del cliente ideal (imagen de persona real)
+    setStatus('👤 Generando avatar del cliente ideal...', 8);
+    const avatarPrompt = encodeURIComponent(
+      `realistic portrait of a ${avatarGenderDesc} aged ${avatarAge}, ` +
+      `professional, friendly smile, confident, working with technology, ` +
+      `related to ${topicCleanEn}, modern office background, warm natural light, ` +
+      `high quality photography, editorial style, no text, no watermark, ` +
+      `sharp focus, professional headshot`
+    );
+    const avatarSeed = Math.floor(Math.random() * 99999);
+    const avatarImgUrl = `https://image.pollinations.ai/prompt/${avatarPrompt}?width=500&height=500&nologo=true&seed=${avatarSeed}&enhance=true`;
+    let avatarImg = null;
+    try {
+      avatarImg = await loadImageAsBase64(avatarImgUrl);
+      setStatus('✅ Avatar listo', 18);
+    } catch(e) { setStatus('⚠️ Avatar omitido — continuando...', 18); }
+
+    // Paso 2: Generar imagen de portada con IA
+    setStatus('🎨 Generando portada con IA...', 20);
+    const coverPrompt = encodeURIComponent(
+      `beautiful artistic illustration about ${topicCleanEn}, ` +
+      `no text, no words, no letters, professional editorial photography, ` +
+      `soft lighting, vibrant colors, modern minimalist style, magazine quality, clean composition`
+    );
     const coverImgUrl = `https://image.pollinations.ai/prompt/${coverPrompt}?width=800&height=1000&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
     
     const coverImg = await loadImageAsBase64(coverImgUrl);
-    setStatus('✅ Portada lista', 25);
+    setStatus('✅ Portada lista', 35);
     
-    // Paso 2: Generar imágenes para cada capítulo
-    setStatus('🖼️ Generando ilustraciones de capítulos...', 30);
+    // Paso 3: Generar imágenes para cada capítulo
+    setStatus('🖼️ Generando ilustraciones de capítulos...', 40);
     const chapterImages = [];
     const chapterTopics = ['introduction concept', 'problem analysis', 'solution method', 'practical application', 'conclusion success'];
     
     for (let i = 0; i < 3; i++) {
-      const imgPrompt = encodeURIComponent(`${chapterTopics[i]} related to ${d.topic}, no text, no words, no letters, professional photography, modern illustration, vibrant colors, magazine style`);
+      const imgPrompt = encodeURIComponent(`${chapterTopics[i]} related to ${topicCleanEn}, no text, no words, no letters, professional photography, modern illustration, vibrant colors, magazine style`);
       const imgUrl = `https://image.pollinations.ai/prompt/${imgPrompt}?width=600&height=400&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
       try {
         const img = await loadImageAsBase64(imgUrl);
         chapterImages.push(img);
       } catch(e) { chapterImages.push(null); }
-      setStatus(`🖼️ Imagen ${i+1}/3 lista`, 30 + (i+1) * 15);
+      setStatus(`🖼️ Imagen ${i+1}/3 lista`, 40 + (i+1) * 10);
     }
     
     // Paso 3: Crear el PDF
@@ -2802,16 +2796,149 @@ async function exportEbookPDF() {
     // Línea decorativa abajo del subtítulo
     pdf.setFillColor(124, 58, 237);
     pdf.rect(W/2 - 20, titleStartY + titleHeight + 25 + (subLines.length * 5), 40, 1, 'F');
+
+    // ── AVATAR DEL CLIENTE IDEAL — esquina inferior izquierda ──
+    if (avatarImg) {
+      const avSize = 28;           // diámetro del círculo en mm
+      const avX = 18;              // margen izquierdo
+      const avY = H - 55;          // posición vertical (zona de footer)
+
+      // Círculo de fondo con borde púrpura
+      pdf.setFillColor(124, 58, 237);
+      pdf.circle(avX + avSize/2, avY + avSize/2, avSize/2 + 1.5, 'F');
+
+      // Imagen del avatar recortada en círculo
+      // jsPDF no tiene clip circular nativo, usamos el cuadrado con bordes redondeados visualmente
+      pdf.addImage(avatarImg, 'JPEG', avX, avY, avSize, avSize, '', 'FAST');
+
+      // Overlay de sombra circular decorativo (línea de borde blanca)
+      pdf.setDrawColor(255, 255, 255);
+      pdf.setLineWidth(1);
+      pdf.circle(avX + avSize/2, avY + avSize/2, avSize/2 + 0.5);
+
+      // Texto junto al avatar
+      const avTextX = avX + avSize + 5;
+      pdf.setTextColor(200, 190, 230);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(9);
+      pdf.text('PARA QUIÉN ES ESTE LIBRO', avTextX, avY + 7);
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+      const avatarDesc = `${d.gender === 'mujer' ? 'Mujer' : d.gender === 'hombre' ? 'Hombre' : 'Profesional'} de ${d.age || '25-45'} años que quiere ${(d.result || 'mejorar su productividad').toLowerCase().slice(0,55)}`;
+      const avDescLines = pdf.splitTextToSize(avatarDesc, 95);
+      pdf.text(avDescLines, avTextX, avY + 14);
+
+      // Badge "PARA VOS" 
+      pdf.setFillColor(232, 121, 249);
+      pdf.roundedRect(avTextX, avY + avDescLines.length * 5 + 14, 28, 7, 3, 3, 'F');
+      pdf.setTextColor(15, 11, 26);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.text('DISEÑADO PARA VOS', avTextX + 14, avY + avDescLines.length * 5 + 19, { align: 'center' });
+    }
     
     // Footer de la portada
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(180, 180, 200);
-    pdf.text('UNA GUÍA COMPLETA', W/2, H - 30, { align: 'center' });
+    pdf.text('UNA GUÍA COMPLETA', W/2, H - 14, { align: 'center' });
     
     pdf.setFontSize(9);
     pdf.setTextColor(140, 140, 160);
-    pdf.text('Edición ' + new Date().getFullYear(), W/2, H - 22, { align: 'center' });
+    pdf.text('Edición ' + new Date().getFullYear(), W/2, H - 8, { align: 'center' });
+
+    // ── PÁGINA 2: SOBRE EL LECTOR (avatar completo) ──
+    pdf.addPage();
+    pdf.setFillColor(15, 11, 26);
+    pdf.rect(0, 0, W, H, 'F');
+    pdf.setFillColor(124, 58, 237);
+    pdf.rect(0, 0, W, 8, 'F');
+
+    // Foto del avatar grande a la izquierda
+    if (avatarImg) {
+      pdf.addImage(avatarImg, 'JPEG', 15, 20, 70, 70, '', 'FAST');
+      // Borde decorativo
+      pdf.setDrawColor(124, 58, 237);
+      pdf.setLineWidth(1.5);
+      pdf.rect(15, 20, 70, 70);
+      // Línea de acento
+      pdf.setFillColor(232, 121, 249);
+      pdf.rect(15, 90, 70, 2, 'F');
+    }
+
+    // Info del avatar a la derecha
+    const ax = avatarImg ? 95 : 20;
+    pdf.setTextColor(167, 139, 250);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('ESTE LIBRO ES PARA VOS SI...', ax, 28);
+
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(15);
+    const avatarName = d.gender === 'mujer' ? 'Vos que querés más tiempo' : d.gender === 'hombre' ? 'Vos que querés rendir más' : 'Vos que trabajás mucho';
+    const avatarNameLines = pdf.splitTextToSize(avatarName, 105);
+    pdf.text(avatarNameLines, ax, 38);
+
+    const avatarDetails = [
+      `✓ Tenés ${d.age || '25 a 45'} años y trabajás más de 8 horas al día`,
+      `✓ Sentís que el tiempo no te alcanza`,
+      `✓ Querés ${(d.result || 'ser más productivo').slice(0,50)}`,
+      `✓ No necesitás experiencia previa en tecnología`,
+      `✓ Estás listo/a para cambiar tu forma de trabajar`,
+    ];
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    let detY = 38 + avatarNameLines.length * 7 + 6;
+    avatarDetails.forEach(det => {
+      pdf.setTextColor(196, 181, 253);
+      const detLines = pdf.splitTextToSize(det, 105);
+      pdf.text(detLines, ax, detY);
+      detY += detLines.length * 5.5 + 2;
+    });
+
+    // Sección "Este libro NO es para..." 
+    let bottomY = 110;
+    pdf.setFillColor(30, 20, 50);
+    pdf.roundedRect(15, bottomY, W-30, 45, 5, 5, 'F');
+    pdf.setDrawColor(60, 40, 90);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(15, bottomY, W-30, 45, 5, 5, 'D');
+
+    pdf.setTextColor(167, 139, 250);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.text('ESTE LIBRO NO ES PARA VOS SI...', 25, bottomY + 10);
+
+    const notFor = [
+      '✗  Buscás resultados sin esfuerzo ni práctica',
+      '✗  No tenés acceso a internet o herramientas digitales',
+      '✗  Querés reemplazar completamente tu criterio por una máquina',
+    ];
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(160, 140, 190);
+    notFor.forEach((line, i) => { pdf.text(line, 25, bottomY + 18 + i * 8); });
+
+    // Frase motivacional
+    bottomY += 55;
+    pdf.setDrawColor(124, 58, 237);
+    pdf.setLineWidth(2);
+    pdf.line(15, bottomY, 15, bottomY + 28);
+    pdf.setTextColor(232, 121, 249);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    pdf.text('"La IA no reemplaza tu trabajo.', 22, bottomY + 8);
+    pdf.text('Amplifica tu capacidad para hacerlo', 22, bottomY + 16);
+    pdf.text('mejor y más rápido."', 22, bottomY + 24);
+
+    pdf.setTextColor(100, 90, 130);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.text('— ' + (d.topic || 'Productividad con IA'), 22, bottomY + 34);
     
     // ÍNDICE
     pdf.addPage();
@@ -2858,10 +2985,18 @@ async function exportEbookPDF() {
     
     // CONTENIDO - Dividir el texto del ebook por secciones
     const fullText = r.ebookContent || r.ebookStruct || '';
-    const sections = fullText.split(/═══+/).filter(s => s.trim().length > 50);
     
+    // Dividir por separadores de secciones — múltiples formatos posibles
+    const sections = fullText
+      .split(/═══+[^═]*═══+|(?=\n#{1,3}\s)|(?=\n📖|📘|📗|📙|🎯)/)
+      .map(s => s.trim())
+      .filter(s => s.length > 30);
+    
+    // Si no se pudo dividir, tratar el texto como un bloque continuo
+    const processedSections = sections.length > 1 ? sections : [fullText];
+
     let imgIdx = 0;
-    sections.forEach((section, sIdx) => {
+    processedSections.forEach((section, sIdx) => {
       pdf.addPage();
       pdf.setFillColor(255, 255, 255);
       pdf.rect(0, 0, W, H, 'F');
@@ -2889,7 +3024,7 @@ async function exportEbookPDF() {
       
       pdf.setTextColor(20, 20, 20);
       pdf.setFontSize(22);
-      const titleClean = sectionTitle.replace(/[📖📘📗📙🎯═]/g, '').trim();
+      const titleClean = sectionTitle.replace(/[📖📘📗📙🎯═#*_]/g, '').trim();
       const tLines = pdf.splitTextToSize(titleClean, 140);
       pdf.text(tLines, 20, 45);
       
@@ -2898,54 +3033,88 @@ async function exportEbookPDF() {
       pdf.setLineWidth(1);
       pdf.line(20, 70, 50, 70);
       
-      // Imagen del capítulo
-      let textStartY = 85;
-      if (sIdx > 0 && sIdx <= 3 && chapterImages[sIdx - 1]) {
+      // Imagen del capítulo (solo en los primeros 3 capítulos)
+      let textStartY = 82;
+      if (sIdx < 3 && chapterImages[sIdx]) {
         try {
-          pdf.addImage(chapterImages[sIdx - 1], 'JPEG', 20, 80, 170, 60, '', 'FAST');
-          textStartY = 150;
-        } catch(e) {}
+          pdf.addImage(chapterImages[sIdx], 'JPEG', 20, 78, 170, 55, '', 'FAST');
+          textStartY = 140;
+        } catch(e) { textStartY = 82; }
       }
       
-      // Contenido del capítulo
+      // Contenido del capítulo — COMPLETO, con paginación automática
       pdf.setTextColor(50, 50, 50);
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
+      pdf.setFontSize(10.5);
       
-      const contentLines = pdf.splitTextToSize(sectionContent, 170);
+      // Procesar el contenido línea por línea con salto de página automático
+      const contentParas = sectionContent.split('\n');
       let currentY = textStartY;
       
-      contentLines.forEach(line => {
-        if (currentY > 270) {
-          pdf.addPage();
-          pdf.setFillColor(255, 255, 255);
-          pdf.rect(0, 0, W, H, 'F');
-          pdf.setFillColor(124, 58, 237);
-          pdf.rect(0, 0, W, 8, 'F');
-          currentY = 25;
-        }
+      const addNewPage = () => {
+        pdf.addPage();
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, W, H, 'F');
+        pdf.setFillColor(124, 58, 237);
+        pdf.rect(0, 0, W, 8, 'F');
+        // Footer de continuación
+        pdf.setTextColor(180,180,200);
+        pdf.setFont('helvetica','italic');
+        pdf.setFontSize(8);
+        pdf.text('(continúa)', W-20, 14, {align:'right'});
+        return 22;
+      };
+
+      contentParas.forEach(para => {
+        if (!para.trim()) { currentY += 3; return; }
         
-        // Detectar subtítulos (mayúsculas o que empiezan con #)
-        if (line.length < 80 && (line === line.toUpperCase() || line.startsWith('#') || line.match(/^[A-Z][^.]+:$/))) {
+        // Detectar si es subtítulo (mayúsculas, negrita con **, #, etc.)
+        const isSubtitle = (
+          (para.trim().length < 100 && para.trim() === para.trim().toUpperCase() && para.trim().length > 3) ||
+          para.startsWith('**') || para.startsWith('##') || para.startsWith('#') ||
+          para.match(/^[A-ZÁÉÍÓÚÑ][^.]{5,50}:$/)
+        );
+        
+        if (isSubtitle) {
+          if (currentY > 255) { currentY = addNewPage(); }
+          const cleanSub = para.replace(/[*#_►•]/g, '').trim();
           pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(124, 58, 237);
-          pdf.setFontSize(13);
-          pdf.text(line.replace(/^#+\s*/, ''), 20, currentY);
+          pdf.setFontSize(12);
+          const subLines = pdf.splitTextToSize(cleanSub, 170);
+          if (currentY + subLines.length * 6 > 270) { currentY = addNewPage(); }
+          pdf.text(subLines, 20, currentY);
           pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(50, 50, 50);
-          pdf.setFontSize(11);
-          currentY += 7;
+          pdf.setFontSize(10.5);
+          currentY += subLines.length * 6 + 3;
         } else {
-          pdf.text(line, 20, currentY);
-          currentY += 6;
+          // Párrafo normal — limpiar markdown
+          const cleanPara = para
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
+            .replace(/\*([^*]+)\*/g, '$1')
+            .replace(/^[-•►]\s?/, '   • ')
+            .trim();
+          
+          const paraLines = pdf.splitTextToSize(cleanPara, 170);
+          
+          // Si el párrafo no entra en la página, nueva página
+          if (currentY + paraLines.length * 5.5 > 275) {
+            currentY = addNewPage();
+          }
+          
+          pdf.text(paraLines, 20, currentY);
+          currentY += paraLines.length * 5.5 + 2;
         }
       });
       
       // Footer con número de página
       pdf.setTextColor(150, 150, 150);
+      pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      pdf.text(d.topic || 'InfoForge', 20, 285);
-      pdf.text('Página ' + (sIdx + 3), W - 20, 285, { align: 'right' });
+      const topicShort = (d.topic || 'InfoForge').slice(0, 40);
+      pdf.text(topicShort, 20, 285);
+      pdf.text('Pág. ' + (pdf.getNumberOfPages()), W - 20, 285, { align: 'right' });
     });
     
     // Página final - CTA
@@ -3006,467 +3175,794 @@ function loadImageAsBase64(url) {
   });
 }
 
-// ─── GENERADOR DE BANNERS ────────────────────────────────────────────────
+// ─── GENERADOR DE BANNERS CON IA — 11 FORMATOS HOTMART COMPLETOS ──────────
 async function generateBanners() {
-  const topic = state.results.topic || state.topic || 'Productividad con IA';
   const btn = document.getElementById('btn-banners');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando banners...'; }
+  const statusDiv = document.getElementById('banner-status');
+  const grid = document.getElementById('banner-grid');
+  const d = state.data;
 
-  const bannerSizes = [
-    { label: 'Banner Principal Hotmart (1920×640)', w: 1920, h: 640, file: 'hotmart_banner_principal_1920x640' },
-    { label: 'Avatar Cuadrado Hotmart (600×600)',   w: 600,  h: 600,  file: 'hotmart_avatar_600x600' },
-    { label: 'Portada Vitrina Hotmart (600×900)',   w: 600,  h: 900,  file: 'hotmart_vitrina_600x900' },
-    { label: 'Afiliados 250×250',  w: 250, h: 250, file: 'afiliados_250x250' },
-    { label: 'Afiliados 300×250',  w: 300, h: 250, file: 'afiliados_300x250' },
-    { label: 'Afiliados 336×280',  w: 336, h: 280, file: 'afiliados_336x280' },
-    { label: 'Afiliados 468×60',   w: 468, h: 60,  file: 'afiliados_468x60' },
-    { label: 'Afiliados 728×90',   w: 728, h: 90,  file: 'afiliados_728x90' },
-    { label: 'Afiliados 160×600',  w: 160, h: 600, file: 'afiliados_160x600' },
-    { label: 'Facebook/LinkedIn (1200×628)', w: 1200, h: 628, file: 'redes_facebook_1200x628' },
-    { label: 'Instagram Post (1080×1080)',   w: 1080, h: 1080, file: 'redes_instagram_1080x1080' },
-    { label: 'Instagram Story (1080×1920)',  w: 1080, h: 1920, file: 'redes_story_1080x1920' },
-  ];
-
-  const container = document.getElementById('banners-output') || (() => {
-    const d = document.createElement('div'); d.id = 'banners-output';
-    btn.parentNode.appendChild(d); return d;
-  })();
-  container.style.display = 'block';
-  container.innerHTML = '<p style="color:#a78bfa">⏳ Generando imágenes una por una...</p>';
-
-  const basePromptText = encodeURIComponent(
-    `minimalist digital product banner, "${topic}", purple gradient background, glowing neon accents, no text, no words, no letters, no logo, abstract geometric shapes, modern tech aesthetic, professional`
-  );
-
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px">';
-  const results = [];
-
-  for (let i = 0; i < bannerSizes.length; i++) {
-    const s = bannerSizes[i];
-    const seed = Math.floor(Math.random() * 99999) + i * 1000;
-    // Use a reasonably sized version for display then resize with canvas
-    const fetchW = Math.min(s.w, 1200);
-    const fetchH = Math.min(s.h, 900);
-    const url = `https://image.pollinations.ai/prompt/${basePromptText}?width=${fetchW}&height=${fetchH}&nologo=true&seed=${seed}`;
-    results.push({ ...s, url });
+  if (!d.topic) {
+    alert('Primero completá el Paso 01 con el tema de tu producto.');
+    return;
   }
 
-  // Generate all banners — show progress
-  let built = '';
-  for (let i = 0; i < results.length; i++) {
-    const s = results[i];
-    container.innerHTML = `<p style="color:#a78bfa">⏳ Generando ${i+1}/${results.length}: ${s.label}...</p>`;
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando banners...';
+  statusDiv.style.display = 'block';
+  grid.innerHTML = '';
+
+  const styleVal = document.querySelector('input[name="banner-style"]:checked')?.value || 'modern';
+  const styleMap = {
+    modern:  'minimalist modern design, clean white and purple gradient, professional corporate, no text, geometric shapes, soft shadows',
+    bold:    'bold dynamic design, high contrast, vibrant colors, energetic, powerful visual impact, no text, dramatic lighting',
+    elegant: 'elegant premium design, gold and dark tones, luxury feel, sophisticated, premium quality product, no text, soft bokeh',
+    warm:    'warm lifestyle photography, natural light, happy person working on laptop, cozy home office, authentic, no text, golden hour'
+  };
+  const styleDesc = styleMap[styleVal];
+  const topicClean = (d.topic || 'infoproduct').replace(/[^\w\s]/g, '').slice(0, 60);
+
+  // TODOS LOS FORMATOS HOTMART + REDES
+  const BANNERS = [
+    // HOTMART - Producto
+    { group: '🏪 HOTMART — Producto',     label: '🖼️ Banner Principal',   file: 'hotmart_banner_principal',   w:1920, h:640,  hint:"Personalizar producto → Banner — 1920×640px" },
+    { group: null,                         label: '🟦 Avatar del producto', file: 'hotmart_avatar',             w:600,  h:600,  hint:"Personalizar producto → Avatar — 600×600px" },
+    { group: null,                         label: '📋 Portada vitrina',     file: 'hotmart_portada_vitrina',    w:600,  h:900,  hint:"Personalizar producto → Portadas vitrina — 600×900px" },
+    // HOTMART - Afiliados
+    { group: '👥 HOTMART — Afiliados',    label: '🔹 Banner 250×250',     file: 'hotmart_afiliado_250x250',   w:250,  h:250,  hint:"Material afiliados Hotmart — 250×250px" },
+    { group: null,                         label: '🔹 Banner 300×250',     file: 'hotmart_afiliado_300x250',   w:300,  h:250,  hint:"Material afiliados Hotmart — 300×250px" },
+    { group: null,                         label: '🔹 Banner 336×280',     file: 'hotmart_afiliado_336x280',   w:336,  h:280,  hint:"Material afiliados Hotmart — 336×280px" },
+    { group: null,                         label: '🔹 Banner 468×60',      file: 'hotmart_afiliado_468x60',    w:468,  h:60,   hint:"Material afiliados Hotmart — 468×60px" },
+    { group: null,                         label: '🔹 Banner 728×90',      file: 'hotmart_afiliado_728x90',    w:728,  h:90,   hint:"Material afiliados Hotmart — 728×90px (leaderboard)" },
+    { group: null,                         label: '🔹 Banner 160×600',     file: 'hotmart_afiliado_160x600',   w:160,  h:600,  hint:"Material afiliados Hotmart — 160×600px (skyscraper)" },
+    // REDES
+    { group: '📱 Redes Sociales',          label: '📣 Meta Ads',           file: 'meta_ads_1200x628',          w:1200, h:628,  hint:"Facebook / Instagram Ads — 1200×628px" },
+    { group: null,                         label: '📷 Instagram Post',      file: 'instagram_1080x1080',        w:1080, h:1080, hint:"Instagram cuadrado — 1080×1080px" },
+  ];
+
+  // Generar solo 1 imagen base y reutilizar/redimensionar
+  // Las APIs de imagen generan a distintas resoluciones según aspect ratio
+  const baseSeeds = { wide: Math.floor(Math.random()*99999), square: Math.floor(Math.random()*99999)+1000, tall: Math.floor(Math.random()*99999)+2000 };
+  const total = BANNERS.length;
+
+  for (let i = 0; i < BANNERS.length; i++) {
+    const b = BANNERS[i];
+    statusDiv.textContent = `⏳ Generando ${i+1}/${total}: ${b.label}...`;
+
+    // Header de grupo
+    if (b.group) {
+      const groupHeader = document.createElement('div');
+      groupHeader.style.cssText = 'font-size:11px;font-weight:700;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #2d2245';
+      groupHeader.textContent = b.group;
+      grid.appendChild(groupHeader);
+    }
+
+    // Calcular dimensiones para la API (máx 1280 en cualquier eje)
+    const ratio = b.w / b.h;
+    let fw, fh;
+    if (b.h < 100) { fw = Math.min(b.w, 1280); fh = Math.max(60, Math.round(fw * b.h / b.w)); }
+    else if (b.w >= b.h) { fw = Math.min(b.w, 1280); fh = Math.min(b.h, 1280); }
+    else { fh = Math.min(b.h, 1280); fw = Math.min(b.w, 1280); }
+    const orient = b.w > b.h ? 'wide horizontal landscape' : b.w === b.h ? 'square' : 'vertical portrait';
+    const seed = b.h < 100 ? baseSeeds.wide : (b.w === b.h ? baseSeeds.square : baseSeeds.tall);
+
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d1f4e';
+    card.innerHTML = `
+      <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:2px">${b.label}</div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:10px">${b.hint}</div>
+      <div style="text-align:center;padding:16px;color:#6b7280;font-size:12px">⏳ Cargando imagen...</div>
+    `;
+    grid.appendChild(card);
+
     try {
-      // Fetch image and resize to exact dimensions via canvas
-      const dataUrl = await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = s.w; canvas.height = s.h;
-          const ctx = canvas.getContext('2d');
-          // Fill background in case image doesn't cover fully
-          ctx.fillStyle = '#1a0533';
-          ctx.fillRect(0, 0, s.w, s.h);
-          // Draw image scaled to cover
-          const imgAspect = img.width / img.height;
-          const canvasAspect = s.w / s.h;
-          let drawW, drawH, dx, dy;
-          if (imgAspect > canvasAspect) {
-            drawH = s.h; drawW = drawH * imgAspect;
-            dx = (s.w - drawW) / 2; dy = 0;
-          } else {
-            drawW = s.w; drawH = drawW / imgAspect;
-            dx = 0; dy = (s.h - drawH) / 2;
-          }
-          ctx.drawImage(img, dx, dy, drawW, drawH);
-          resolve(canvas.toDataURL('image/jpeg', 0.9));
+      const prompt = encodeURIComponent(
+        `${styleDesc}, illustration about "${topicClean}", ${orient} composition, ` +
+        `no text, no words, no letters, no watermark, professional marketing banner, ultra clean`
+      );
+      const url = `https://image.pollinations.ai/prompt/${prompt}?width=${fw}&height=${fh}&nologo=true&seed=${seed+i*7}&enhance=true`;
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => { img.onload=res; img.onerror=rej; img.src=url; setTimeout(rej,60000); });
+
+      img.style.cssText = 'width:100%;border-radius:8px;display:block;max-height:280px;object-fit:cover';
+
+      const dlBtn = document.createElement('button');
+      dlBtn.style.cssText = 'display:inline-block;margin-top:10px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer';
+      dlBtn.textContent = `⬇️ Descargar ${b.w}×${b.h}`;
+      dlBtn.onclick = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = b.w; canvas.height = b.h;
+        const ctx = canvas.getContext('2d');
+        const tmp = new Image(); tmp.crossOrigin = 'anonymous';
+        tmp.onload = () => {
+          ctx.drawImage(tmp, 0, 0, b.w, b.h);
+          const a = document.createElement('a');
+          a.download = `${b.file}.png`;
+          a.href = canvas.toDataURL('image/png');
+          a.click();
         };
-        img.onerror = () => reject(new Error('Error cargando imagen de Pollinations'));
-        setTimeout(() => reject(new Error('Timeout')), 45000);
-        img.src = s.url;
-      });
-      built += `<div style="background:#1a1a2e;border-radius:8px;padding:8px;text-align:center">
-        <div style="color:#a78bfa;font-size:11px;margin-bottom:6px">${s.label}</div>
-        <img src="${dataUrl}" style="max-width:100%;max-height:140px;border-radius:4px;display:block;margin:0 auto"/>
-        <a href="${dataUrl}" download="${s.file}.jpg" style="display:inline-block;margin-top:6px;background:#7c3aed;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;text-decoration:none">⬇ Descargar ${s.w}×${s.h}</a>
-      </div>`;
-    } catch(e) {
-      built += `<div style="background:#1a1a2e;border-radius:8px;padding:8px;text-align:center;color:#f87171">
-        <div style="font-size:11px;margin-bottom:4px">${s.label}</div>
-        <div style="font-size:12px">⚠️ ${e.message}</div>
-        <a href="${s.url}" target="_blank" style="font-size:11px;color:#a78bfa">Ver en nueva pestaña</a>
-      </div>`;
-    }
-  }
+        tmp.onerror = () => window.open(img.src, '_blank');
+        tmp.src = img.src;
+      };
 
-  container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px">' + built + '</div>';
-  if (btn) { btn.disabled = false; btn.textContent = '🖼️ Regenerar Banners'; }
-}
+      card.innerHTML = `
+        <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:2px">${b.label}</div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:10px">${b.hint}</div>
+      `;
+      card.appendChild(img);
+      card.appendChild(dlBtn);
 
-// ─── ZIP KIT DE AFILIADOS ────────────────────────────────────────────────
-async function downloadAffiliateKit() {
-  const btn = document.getElementById('btn-zip');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Creando ZIP...'; }
-
-  try {
-    if (typeof JSZip === 'undefined') throw new Error('JSZip no está cargado. Recargá la página.');
-
-    const zip = new JSZip();
-    const topic  = state.results.topic || state.topic || 'Productividad con IA';
-    const price  = state.results.price || '47';
-
-    // ── Textos ──────────────────────────────────────────────
-    const tweets = state.results.adsContent ||
-      `🧵 TWEETS DE AFILIADO — ${topic}\n\n` +
-      `1. ¿Querés aprender ${topic} en horas, no en meses? Este ebook lo explica todo paso a paso. Link: [TU_LINK]\n\n` +
-      `2. Llevo semanas usando ${topic} y la diferencia en productividad es real. Te dejo el recurso que usé: [TU_LINK]\n\n` +
-      `3. Si sos como yo y perdés horas en tareas repetibles, esto te va a cambiar el juego. Solo $${price}: [TU_LINK]`;
-
-    const emails = state.results.emailContent ||
-      `📧 SECUENCIA DE EMAILS — ${topic}\n\n` +
-      `EMAIL 1 — Asunto: "Encontré algo que te va a ahorrar horas cada semana"\n` +
-      `Hola [Nombre],\nHoy quiero contarte sobre ${topic}. Probé este ebook y la verdad me sorprendió...\n[TU_LINK]\n\n` +
-      `EMAIL 2 — Asunto: "¿Todavía no lo viste? Te cuento qué incluye"\n` +
-      `Hola [Nombre],\nEl ebook sobre ${topic} incluye todo lo que necesitás para empezar...\n[TU_LINK]\n\n` +
-      `EMAIL 3 — Asunto: "Último aviso — precio sube mañana"\n` +
-      `Hola [Nombre],\nÚltima oportunidad de conseguir ${topic} a $${price}...\n[TU_LINK]`;
-
-    const scripts = state.results.videoScripts ||
-      `🎬 SCRIPTS DE VIDEO — ${topic}\n\n` +
-      `VIDEO 1 (60 segundos):\n¿Sabías que podés automatizar el 80% de tus tareas con ${topic}?\n` +
-      `Yo lo hice y hoy te muestro cómo. El ebook que uso está en el link de la bio. Solo $${price}.\n\n` +
-      `VIDEO 2 (30 segundos — Reels/Shorts):\n` +
-      `"${topic}" suena difícil pero con este ebook lo entendí en un fin de semana.\n` +
-      `Link en bio. [Mostrar pantalla del ebook]`;
-
-    const landing = state.results.landingContent ||
-      `🌐 COPY DE LANDING — ${topic}\n\n` +
-      (state.results.landingHTML || 'Generá primero el copy en el Paso 11.');
-
-    const offer = state.results.offerContent ||
-      `💎 OFERTA — ${topic}\n\nGenerá primero la oferta en el Paso 7.`;
-
-    zip.file('TWEETS_afiliado.txt', tweets);
-    zip.file('EMAILS_lanzamiento.txt', emails);
-    zip.file('VIDEO_SCRIPTS.txt', scripts);
-    zip.file('LANDING_copy.txt', landing);
-    zip.file('OFERTA.txt', offer);
-
-    if (state.results.ebookContent) {
-      zip.file('EBOOK_contenido.txt', state.results.ebookContent);
-    }
-    if (state.results.marketResearch) {
-      zip.file('INVESTIGACION_mercado.txt', state.results.marketResearch);
-    }
-
-    zip.file('LEEME.txt',
-      `KIT DE AFILIADO — ${topic}\n` +
-      `Precio: $${price} USD\n` +
-      `Generado con InfoForge\n\n` +
-      `Archivos incluidos:\n` +
-      `- TWEETS_afiliado.txt — 3 tweets listos para publicar\n` +
-      `- EMAILS_lanzamiento.txt — Secuencia de 3 emails\n` +
-      `- VIDEO_SCRIPTS.txt — Guiones para Reels/TikTok/YouTube Shorts\n` +
-      `- LANDING_copy.txt — Texto de la página de ventas\n` +
-      `- OFERTA.txt — Detalles de la oferta\n` +
-      `- EBOOK_contenido.txt — Contenido completo del ebook\n\n` +
-      `Instrucciones:\n` +
-      `1. Reemplazá [TU_LINK] con tu link de Hotmart\n` +
-      `2. Reemplazá [Nombre] con el nombre del suscriptor\n` +
-      `3. Personalizá los textos con tu voz y estilo`
-    );
-
-    // ── Generar y descargar ZIP ──────────────────────────────
-    if (btn) btn.textContent = '⏳ Comprimiendo...';
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `KIT_AFILIADO_${topic.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-
-    if (btn) { btn.disabled = false; btn.textContent = '✅ ZIP descargado — volver a descargar'; }
-  } catch(err) {
-    alert('Error creando ZIP: ' + err.message);
-    if (btn) { btn.disabled = false; btn.textContent = '📦 Descargar ZIP Kit de Afiliado'; }
-  }
-}
-
-// ─── MODO AUTOPILOTO ─────────────────────────────────────────────────────
-let autopilotRunning = false;
-
-function stopAutopilot() {
-  autopilotRunning = false;
-  document.getElementById('autopilot-overlay').style.display = 'none';
-}
-
-function apSetStep(label, detail, pct) {
-  document.getElementById('ap-step-label').textContent = label;
-  document.getElementById('ap-step-detail').textContent = detail;
-  document.getElementById('ap-progress-bar').style.width = pct + '%';
-}
-
-function apLog(emoji, text, done) {
-  const list = document.getElementById('ap-steps-list');
-  const id = 'ap-log-' + Date.now();
-  const div = document.createElement('div');
-  div.id = id;
-  div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px';
-  div.innerHTML = `<span style="font-size:16px">${emoji}</span><span style="color:${done?'#6ee7b7':'#c4b5fd'}">${text}</span>`;
-  list.appendChild(div);
-  list.scrollTop = list.scrollHeight;
-  return id;
-}
-
-async function apPause(seconds, reason) {
-  const cd = document.getElementById('ap-countdown');
-  for (let s = seconds; s > 0; s--) {
-    if (!autopilotRunning) return;
-    cd.textContent = `⏸ ${reason} — continuando en ${s}s...`;
-    await new Promise(r => setTimeout(r, 1000));
-  }
-  cd.textContent = '';
-}
-
-async function apCallGroq(prompt, systemPrompt, maxTokens) {
-  const key = getApiKey();
-  const ctrl = new AbortController();
-  const tid = setTimeout(() => ctrl.abort(), 55000);
-
-  let response;
-  if (key && key.startsWith('gsk_')) {
-    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST', signal: ctrl.signal,
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemPrompt || 'Sos un experto en marketing digital y creación de infoproductos. Respondé en español.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: maxTokens || 2000,
-        temperature: 0.7
-      })
-    });
-  } else {
-    const sp = encodeURIComponent((systemPrompt || 'Sos experto en marketing digital. Respondé en español.') + '\n\n' + prompt);
-    response = await fetch(`https://text.pollinations.ai/${sp}`, { signal: ctrl.signal });
-  }
-
-  clearTimeout(tid);
-  if (!response.ok) throw new Error('API error ' + response.status);
-
-  if (key && key.startsWith('gsk_')) {
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
-  } else {
-    return (await response.text()).trim();
-  }
-}
-
-async function runAutopilot() {
-  const topic = state.results.topic || state.topic;
-  const price = state.results.price || '47';
-
-  if (!topic) {
-    alert('Primero completá el Paso 1 y 2 (tema y precio del producto).');
-    return;
-  }
-
-  const key = getApiKey();
-  if (!key || !key.startsWith('gsk_')) {
-    alert('El modo autopiloto requiere una API key de Groq (empieza con gsk_). Ingresá tu key en el campo de arriba.');
-    return;
-  }
-
-  autopilotRunning = true;
-  const overlay = document.getElementById('autopilot-overlay');
-  overlay.style.display = 'flex';
-
-  const sys = `Sos un experto en marketing digital, copywriting y creación de infoproductos digitales.
-Estás ayudando a crear un producto digital completo sobre: "${topic}" con precio: $${price} USD.
-Respondé siempre en español. Sé específico, detallado y accionable. No uses frases genéricas.`;
-
-  const steps = [
-    {
-      pct: 8, icon: '🔍', label: 'PASO 3 — Investigación de mercado', short: 'Investigando el mercado...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Hacé una investigación de mercado completa para un infoproducto sobre "${topic}" a $${price} USD.
-Incluí: tamaño del mercado, público objetivo, tendencias actuales, canales de distribución recomendados, estacionalidad. Mínimo 400 palabras.`, sys, 2000);
-        state.results.marketResearch = text;
-        showResult('market-result', 'market-output', text);
-      }
-    },
-    {
-      pct: 16, icon: '🏆', label: 'PASO 4 — Análisis de competencia', short: 'Analizando competidores...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Analizá la competencia para un infoproducto sobre "${topic}" a $${price} USD.
-Identificá: principales competidores, sus fortalezas y debilidades, gaps de mercado, cómo diferenciarse. Incluí estrategia de posicionamiento.`, sys, 2000);
-        state.results.competitiveAnalysis = text;
-        showResult('competitive-result', 'competitive-output', text);
-      }
-    },
-    {
-      pct: 24, icon: '🎯', label: 'PASO 5 — Avatar del cliente', short: 'Definiendo el cliente ideal...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Creá el avatar del cliente ideal para un infoproducto sobre "${topic}".
-Incluí: nombre ficticio, edad, ocupación, nivel de ingresos, dolores principales, deseos, objeciones de compra, dónde pasa tiempo online, qué lee/mira, lenguaje que usa. Muy detallado.`, sys, 2000);
-        state.results.avatarContent = text;
-        showResult('avatar-result', 'avatar-output', text);
-      }
-    },
-    {
-      pct: 32, icon: '😤', label: 'PASO 6 — Dolores y deseos', short: 'Mapeando dolores y deseos...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Mapeá los 10 dolores más profundos y los 10 deseos más intensos del cliente ideal de "${topic}".
-Para cada uno: describí en sus propias palabras, el impacto emocional, y cómo el producto los resuelve.`, sys, 2200);
-        state.results.painContent = text;
-        showResult('pain-result', 'pain-output', text);
-      }
-    },
-    {
-      pct: 40, icon: '💎', label: 'PASO 7 — Oferta irresistible', short: 'Construyendo la oferta...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Diseñá la oferta irresistible para "${topic}" a $${price} USD.
-Incluí: nombre del producto, promesa principal, entregables (ebook + bonus), garantía, urgencia/escasez, stack de valor con precio de referencia de cada elemento, precio final con justificación.`, sys, 2200);
-        state.results.offerContent = text;
-        showResult('offer-result', 'offer-output', text);
-      }
-    },
-    {
-      pct: 47, icon: '💰', label: 'PASO 8 — Precio y garantía', short: 'Diseñando precio y garantía...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Diseñá la estrategia de precio y garantía para "${topic}" a $${price} USD.
-Incluí: justificación psicológica del precio, comparación de valor, tipo de garantía (días, condiciones), texto exacto de la garantía para la página de ventas, estrategia de upsell/downsell.`, sys, 1800);
-        state.results.pricingContent = text;
-        showResult('pricing-result', 'pricing-output', text);
-      }
-    },
-    {
-      pct: 54, icon: '📋', label: 'PASO 9 — Estructura del ebook', short: 'Estructurando el ebook...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Creá la estructura completa de un ebook sobre "${topic}".
-Incluí: título del ebook, subtítulo, introducción (qué aprenderá el lector), 5 capítulos con: título, subtítulo, 3-4 secciones por capítulo con descripción, conclusión, bonus/recursos. Formato profesional.`, sys, 2500);
-        state.results.ebookStructure = text;
-        showResult('ebook-struct-result', 'ebook-struct-output', text);
-      }
-    },
-    {
-      pct: 62, icon: '📖', label: 'PASO 10 — Contenido del ebook (5 partes)', short: 'Escribiendo el ebook completo...',
-      fn: async () => { await generateFullEbook(); }
-    },
-    {
-      pct: 72, icon: '🌐', label: 'PASO 11 — Copy de landing', short: 'Escribiendo landing page...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Escribí el copy completo de una landing page de ventas para "${topic}" a $${price} USD.
-Incluí: headline principal (5 opciones), subheadline, bullets de beneficios (10), historia/problema-solución, prueba social, stack de valor, CTA principal, sección de garantía, FAQ (5 preguntas). Copy persuasivo y emocional.`, sys, 2800);
-        state.results.landingContent = text;
-        showResult('landing-result', 'landing-output', text);
-      }
-    },
-    {
-      pct: 79, icon: '🏗️', label: 'PASO 12 — Estructura de landing', short: 'Diseñando wireframe...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Diseñá la estructura visual (wireframe) de la landing page para "${topic}".
-Describí sección por sección: qué elementos incluir, orden, colores sugeridos, imágenes, CTA buttons, formularios. Incluí mobile-first considerations.`, sys, 2000);
-        state.results.landingStructure = text;
-        showResult('landing-struct-result', 'landing-struct-output', text);
-      }
-    },
-    {
-      pct: 85, icon: '📢', label: 'PASO 13 — Meta Ads + Scripts', short: 'Creando anuncios...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Creá 5 anuncios completos de Meta Ads (Facebook/Instagram) para "${topic}" a $${price} USD.
-Para cada anuncio: texto principal (copy), headline, descripción, CTA, público objetivo sugerido, tipo de imagen/video recomendado. Variá el enfoque: problema, beneficio, social proof, urgencia, curiosidad.`, sys, 2500);
-        state.results.adsContent = text;
-        showResult('ads-result', 'ads-output', text);
-      }
-    },
-    {
-      pct: 91, icon: '🎬', label: 'PASO 14 — Scripts de video', short: 'Escribiendo guiones...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Escribí 3 scripts de video para promocionar "${topic}" a $${price} USD:
-Script 1: Video largo YouTube (5-7 min) — problema + solución + demo + CTA
-Script 2: Reel/TikTok (60 segundos) — hook fuerte + beneficio rápido + CTA
-Script 3: Story (15 segundos) — urgencia + oferta + link en bio
-Cada script: completo, palabra por palabra, con indicaciones de cámara/edición.`, sys, 2500);
-        state.results.videoScripts = text;
-        showResult('videos-result', 'videos-output', text);
-      }
-    },
-    {
-      pct: 97, icon: '📧', label: 'PASO 15 — Secuencia de emails', short: 'Escribiendo emails...',
-      fn: async () => {
-        const text = await apCallGroq(
-          `Escribí una secuencia de 3 emails de lanzamiento para "${topic}" a $${price} USD:
-Email 1: Anuncio del lanzamiento (asunto + cuerpo completo)
-Email 2: Recordatorio de beneficios con historia (asunto + cuerpo completo)
-Email 3: Último aviso con urgencia (asunto + cuerpo completo)
-Cada email: concreto, emocional, con CTA claro.`, sys, 2500);
-        state.results.emailContent = text;
-        showResult('emails-result', 'emails-output', text);
-      }
-    },
-  ];
-
-  function showResult(outputId, containerId, text) {
-    const el = document.getElementById(outputId);
-    const cont = document.getElementById(containerId);
-    if (el) el.textContent = text;
-    if (cont) cont.style.display = 'block';
-  }
-
-  let completedCount = 0;
-
-  for (let i = 0; i < steps.length; i++) {
-    if (!autopilotRunning) break;
-    const step = steps[i];
-
-    apSetStep('Paso ' + (i + 1) + ' de ' + steps.length, step.short, step.pct);
-    apLog(step.icon, step.label, false);
-
-    try {
-      await step.fn();
-      completedCount++;
-      apLog('✅', step.label + ' — listo', true);
-      state.completedSteps.add(3 + i);
-      updateUI();
-      saveProgress();
     } catch(err) {
-      apLog('⚠️', step.label + ' — error: ' + err.message.slice(0,60), false);
+      card.innerHTML += `<div style="color:#f87171;font-size:12px;margin-top:6px">⚠️ Error — recargá la página o esperá y regenerá</div>`;
     }
 
-    // Pausa 22s entre pasos (el ebook ya tiene sus propias pausas)
-    if (i < steps.length - 1 && step.icon !== '📖') {
-      await apPause(22, 'esperando para el siguiente paso');
-    }
+    if (i < BANNERS.length-1) await new Promise(r => setTimeout(r, 1500));
   }
 
-  if (autopilotRunning) {
-    apSetStep('¡COMPLETADO!', '🎉 Kit listo — ' + completedCount + '/' + steps.length + ' pasos', 100);
-    document.getElementById('ap-icon').textContent = '🎉';
-    document.getElementById('ap-countdown').textContent = '';
-    apLog('🚀', 'Kit completo generado — yendo al Paso 16 (Exportar)...', true);
-    setTimeout(() => {
-      stopAutopilot();
-      goToStep(16);
-    }, 3000);
+  btn.disabled = false;
+  btn.textContent = '🔄 Regenerar todos los banners';
+  statusDiv.textContent = `✅ ¡${total} banners listos! Descargá cada uno con el botón.`;
+}
+
+// ─── EXPORTAR BONOS COMO PDF ──────────────────────────────────────────────
+async function exportBonoPDF(type) {
+  const d = state.data;
+  const topic = d.topic || 'Productividad con IA';
+
+  const bonoData = {
+    checklist: {
+      titulo: 'CHECKLIST — Las 10 mejores herramientas de IA gratis',
+      subtitulo: 'Tu lista de recursos esenciales para empezar hoy',
+      bono: 'BONO 1',
+      valor: '$20 USD',
+      color: [52, 211, 153],
+      items: [
+        { n:'01', nombre:'ChatGPT / Claude',   desc:'Redacción, resúmenes, análisis y brainstorming. Tu asistente universal.',                  link:'chat.openai.com / claude.ai',  gratis:'✅ Gratis (plan básico)' },
+        { n:'02', nombre:'Perplexity AI',       desc:'Búsqueda con IA que cita fuentes verificadas. Mejor que Google para investigar.',         link:'perplexity.ai',                gratis:'✅ Gratis' },
+        { n:'03', nombre:'Otter.ai',            desc:'Transcripción automática de reuniones en tiempo real con resumen incluido.',              link:'otter.ai',                     gratis:'✅ 300 min/mes gratis' },
+        { n:'04', nombre:'Notion AI',           desc:'Organización de proyectos y notas con IA integrada. Wiki inteligente para tu trabajo.',   link:'notion.so',                    gratis:'✅ Plan gratuito disponible' },
+        { n:'05', nombre:'Canva AI',            desc:'Diseño gráfico con generación de imágenes, fondos y layouts automáticos por IA.',         link:'canva.com',                    gratis:'✅ Gratis (funciones básicas)' },
+        { n:'06', nombre:'Grammarly',           desc:'Corrección y mejora de textos en inglés y español de forma automática.',                  link:'grammarly.com',                gratis:'✅ Versión gratuita' },
+        { n:'07', nombre:'Fireflies.ai',        desc:'Graba, transcribe y resume reuniones. Extrae action items automáticamente.',             link:'fireflies.ai',                 gratis:'✅ Gratis (800 min)' },
+        { n:'08', nombre:'Zapier (con IA)',     desc:'Automatización de flujos entre apps sin código. Conecta más de 6.000 aplicaciones.',     link:'zapier.com',                   gratis:'✅ 100 tareas/mes gratis' },
+        { n:'09', nombre:'Google Bard / Gemini',desc:'IA de Google integrada con Gmail, Docs y Drive. Ideal para usuarios del ecosistema G.',  link:'gemini.google.com',            gratis:'✅ 100% Gratis' },
+        { n:'10', nombre:'Make (Integromat)',   desc:'Automatización visual avanzada entre cientos de aplicaciones sin programar.',            link:'make.com',                     gratis:'✅ 1.000 operaciones/mes gratis' },
+      ]
+    },
+    plantilla: {
+      titulo: 'PLANTILLA — Rutina productiva con IA',
+      subtitulo: 'Copiá y adaptá este sistema a tu día a día',
+      bono: 'BONO 2',
+      valor: '$25 USD',
+      color: [167, 139, 250],
+      bloques: [
+        { emoji:'🌅', tiempo:'Mañana (primeros 15 min)', items:[
+          'Abrí tu IA y pedile: "Listá mis 3 prioridades de hoy basadas en [contexto]"',
+          'Filtrá emails con IA: urgente / info / eliminar (usa ChatGPT o Gemini)',
+          'Revisá agenda: pedile que detecte conflictos o huecos sin tareas',
+          'Generá tu "plan del día" en 3 prioridades con ayuda de la IA',
+        ]},
+        { emoji:'💼', tiempo:'Durante el trabajo', items:[
+          'Antes de escribir algo largo: pedile un borrador a la IA primero',
+          'Resumí documentos extensos con IA antes de leerlos completos',
+          'Ante una decisión difícil: pedile pros y contras a la IA',
+          'Para reuniones: generá agenda con IA 30 min antes',
+          'Delegá a la IA la redacción de emails rutinarios',
+        ]},
+        { emoji:'🌙', tiempo:'Cierre del día (10 min)', items:[
+          'Dictá o escribí lo que hiciste — la IA lo convierte en reporte',
+          'Pedile que genere la lista de pendientes para mañana',
+          'Revisá las transcripciones automáticas de las reuniones del día',
+          'Anotá qué herramienta te ahorró más tiempo hoy',
+        ]},
+        { emoji:'📊', tiempo:'Seguimiento semanal', items:[
+          'Tiempo ahorrado por día (meta: +2 horas)',
+          'Herramientas nuevas probadas (meta: 1 por semana)',
+          'Tareas automatizadas (meta: 3 nuevas por mes)',
+          'Calidad percibida del trabajo (escala 1-10)',
+          'Nivel de estrés al final del día (escala 1-10)',
+        ]},
+      ]
+    },
+    prompts: {
+      titulo: 'GUÍA DE PROMPTS — Esenciales para el trabajo diario',
+      subtitulo: 'Copiá, pegá y adaptá estos prompts a tu trabajo',
+      bono: 'BONO 3',
+      valor: '$15 USD',
+      color: [251, 191, 36],
+      categorias: [
+        { cat:'📧 EMAILS Y COMUNICACIÓN', prompts:[
+          { p:'Redactá un email profesional para [destinatario] comunicando [mensaje]. Tono: [formal/amigable]. Máx 150 palabras.' },
+          { p:'Respondé este email de forma concisa y profesional. El email dice: [pegá el email aquí]' },
+          { p:'Resumí este hilo de emails en 3 puntos clave y decime qué acción debo tomar: [pegá el hilo]' },
+        ]},
+        { cat:'📋 REUNIONES Y DOCUMENTOS', prompts:[
+          { p:'Generá una agenda para una reunión de [X minutos] sobre [tema]. Participantes: [roles]. Objetivo: [resultado esperado].' },
+          { p:'Transformá estas notas de reunión en un acta formal con: resumen, decisiones tomadas y próximos pasos: [notas]' },
+          { p:'Resumí este documento en 5 puntos clave en orden de importancia: [pegá el texto]' },
+        ]},
+        { cat:'💡 BRAINSTORMING Y ANÁLISIS', prompts:[
+          { p:'Dame 10 ideas para [objetivo/problema]. Que sean concretas, aplicables y ordenadas de menor a mayor esfuerzo.' },
+          { p:'Analizá los pros y contras de [decisión/opción]. Considerá: impacto, costo, tiempo y riesgos.' },
+          { p:'Actuá como un experto en [área] y decime qué haría en esta situación: [describí el problema]' },
+        ]},
+        { cat:'✍️ REDACCIÓN Y CONTENIDO', prompts:[
+          { p:'Reescribí este párrafo de forma más clara y directa, sin palabras de relleno: [texto]' },
+          { p:'Creá un resumen ejecutivo de [X palabras] de este contenido, orientado a [audiencia]: [texto]' },
+          { p:'Corregí la ortografía, gramática y estilo de este texto sin cambiar el significado: [texto]' },
+        ]},
+      ]
+    }
+  };
+
+  const bono = bonoData[type];
+  if (!bono) return;
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit:'mm', format:'a4' });
+  const W=210, H=297;
+  const [r,g,b2] = bono.color;
+
+  // PORTADA
+  pdf.setFillColor(15,11,26);
+  pdf.rect(0,0,W,H,'F');
+  pdf.setFillColor(r,g,b2);
+  pdf.rect(0,0,W,12,'F');
+  pdf.rect(0,H-12,W,12,'F');
+
+  // Badge bono
+  pdf.setFillColor(r,g,b2);
+  pdf.roundedRect(W/2-22, 60, 44, 14, 7, 7, 'F');
+  pdf.setTextColor(15,11,26);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(9);
+  pdf.text(bono.bono, W/2, 69, {align:'center'});
+
+  pdf.setTextColor(r,g,b2);
+  pdf.setFontSize(8);
+  pdf.text('VALOR: ' + bono.valor, W/2, 84, {align:'center'});
+
+  pdf.setTextColor(255,255,255);
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(22);
+  const titleLines = pdf.splitTextToSize(bono.titulo, 170);
+  pdf.text(titleLines, W/2, 105, {align:'center'});
+
+  pdf.setTextColor(200,200,220);
+  pdf.setFont('helvetica','italic');
+  pdf.setFontSize(12);
+  pdf.text(bono.subtitulo, W/2, 105 + titleLines.length*9 + 8, {align:'center'});
+
+  pdf.setTextColor(r,g,b2);
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(10);
+  pdf.text('Incluido con: ' + topic, W/2, H-50, {align:'center'});
+  pdf.setTextColor(120,110,150);
+  pdf.setFontSize(9);
+  pdf.text('© ' + new Date().getFullYear() + ' — Para uso personal del comprador', W/2, H-40, {align:'center'});
+
+  // CONTENIDO según tipo
+  if (type === 'checklist') {
+    pdf.addPage();
+    pdf.setFillColor(250,250,255);
+    pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(r,g,b2);
+    pdf.rect(0,0,W,8,'F');
+
+    pdf.setTextColor(r,g,b2);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(16);
+    pdf.text('LAS 10 HERRAMIENTAS', 20, 25);
+    pdf.setFontSize(11);
+    pdf.setTextColor(100,100,120);
+    pdf.text('Marcá con ✓ las que ya estás usando', 20, 33);
+
+    let y = 48;
+    bono.items.forEach((item, idx) => {
+      if (y > 260) { pdf.addPage(); pdf.setFillColor(250,250,255); pdf.rect(0,0,W,H,'F'); pdf.setFillColor(r,g,b2); pdf.rect(0,0,W,8,'F'); y = 20; }
+      // Número
+      pdf.setFillColor(r,g,b2);
+      pdf.circle(27, y-1.5, 4.5, 'F');
+      pdf.setTextColor(15,11,26);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(8);
+      pdf.text(item.n, 27, y+1, {align:'center'});
+      // Nombre
+      pdf.setTextColor(30,30,40);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(11);
+      pdf.text(item.nombre, 35, y);
+      // Gratis badge
+      pdf.setTextColor(r,g,b2);
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(8);
+      pdf.text(item.gratis, 155, y, {align:'right'});
+      // Descripción
+      pdf.setTextColor(80,80,100);
+      pdf.setFont('helvetica','normal');
+      pdf.setFontSize(9);
+      const descLines = pdf.splitTextToSize(item.desc, 115);
+      pdf.text(descLines, 35, y+5);
+      // Link
+      pdf.setTextColor(150,120,220);
+      pdf.setFontSize(8);
+      pdf.text('🔗 ' + item.link, 35, y+5+descLines.length*4+2);
+      y += 5 + descLines.length*4 + 12;
+    });
+
+    // Footer
+    pdf.setTextColor(180,180,200);
+    pdf.setFontSize(8);
+    pdf.text('Incluido gratis con tu compra de: ' + topic, 20, H-10);
+
+  } else if (type === 'plantilla') {
+    pdf.addPage();
+    pdf.setFillColor(250,250,255);
+    pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(r,g,b2);
+    pdf.rect(0,0,W,8,'F');
+
+    pdf.setTextColor(r,g,b2);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(16);
+    pdf.text('TU RUTINA DIARIA CON IA', 20, 23);
+
+    let y = 36;
+    bono.bloques.forEach(bloque => {
+      if (y > 240) { pdf.addPage(); pdf.setFillColor(250,250,255); pdf.rect(0,0,W,H,'F'); pdf.setFillColor(r,g,b2); pdf.rect(0,0,W,8,'F'); y = 20; }
+      // Header del bloque
+      pdf.setFillColor(r,g,b2);
+      const bh = 9;
+      pdf.roundedRect(18, y-7, W-36, bh+2, 3, 3, 'F');
+      pdf.setTextColor(15,11,26);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(10);
+      pdf.text(`${bloque.emoji} ${bloque.tiempo}`, 22, y-0.5);
+      y += 8;
+      // Items
+      bloque.items.forEach(item => {
+        pdf.setFillColor(240,238,255);
+        pdf.roundedRect(22, y-5, W-44, 8, 2, 2, 'F');
+        pdf.setDrawColor(r,g,b2);
+        pdf.setLineWidth(0.4);
+        pdf.line(22, y-5, 22, y+3);
+        pdf.setTextColor(40,40,60);
+        pdf.setFont('helvetica','normal');
+        pdf.setFontSize(9);
+        const lines = pdf.splitTextToSize(item, 155);
+        pdf.text(lines, 26, y);
+        y += lines.length * 4.5 + 3;
+      });
+      y += 6;
+    });
+    pdf.setTextColor(180,180,200);
+    pdf.setFontSize(8);
+    pdf.text('Incluido gratis con tu compra de: ' + topic, 20, H-10);
+
+  } else if (type === 'prompts') {
+    pdf.addPage();
+    pdf.setFillColor(250,250,255);
+    pdf.rect(0,0,W,H,'F');
+    pdf.setFillColor(r,g,b2);
+    pdf.rect(0,0,W,8,'F');
+
+    pdf.setTextColor(r,g,b2);
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(15);
+    pdf.text('PROMPTS LISTOS PARA USAR', 20, 22);
+    pdf.setTextColor(100,100,120);
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(10);
+    pdf.text('Copiá, pegá en ChatGPT/Claude y reemplazá lo que está en [corchetes]', 20, 30);
+
+    let y = 42;
+    bono.categorias.forEach(cat => {
+      if (y > 240) { pdf.addPage(); pdf.setFillColor(250,250,255); pdf.rect(0,0,W,H,'F'); pdf.setFillColor(r,g,b2); pdf.rect(0,0,W,8,'F'); y = 18; }
+      pdf.setFillColor(r,g,b2);
+      pdf.roundedRect(18, y-6, W-36, 10, 3, 3, 'F');
+      pdf.setTextColor(15,11,26);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(10);
+      pdf.text(cat.cat, 22, y);
+      y += 10;
+      cat.prompts.forEach(pr => {
+        if (y > 250) { pdf.addPage(); pdf.setFillColor(250,250,255); pdf.rect(0,0,W,H,'F'); pdf.setFillColor(r,g,b2); pdf.rect(0,0,W,8,'F'); y=18; }
+        pdf.setFillColor(248,246,255);
+        const lines = pdf.splitTextToSize(pr.p, 155);
+        const blockH = lines.length * 5 + 6;
+        pdf.roundedRect(22, y-4, W-44, blockH, 2, 2, 'F');
+        pdf.setDrawColor(r,g,b2);
+        pdf.setLineWidth(0.3);
+        pdf.line(22, y-4, 22, y-4+blockH);
+        pdf.setTextColor(50,30,80);
+        pdf.setFont('helvetica','normal');
+        pdf.setFontSize(9);
+        pdf.text(lines, 26, y);
+        y += blockH + 4;
+      });
+      y += 6;
+    });
+    pdf.setTextColor(180,180,200);
+    pdf.setFontSize(8);
+    pdf.text('Incluido gratis con tu compra de: ' + topic, 20, H-10);
+  }
+
+  const filename = `bono${type==='checklist'?'1':type==='plantilla'?'2':'3'}_${(topic||'infoforge').toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25)}.pdf`;
+  pdf.save(filename);
+}
+
+function exportDoc(type) {
+  const d = state.data;
+  const r = state.results;
+  const platforms = d.platforms && d.platforms.length ? d.platforms : ['general'];
+  
+  // Si exportamos a múltiples plataformas, generar un archivo por cada una
+  if (type === 'multi' && platforms.length > 1) {
+    platforms.forEach(plat => exportForPlatform(plat));
+    return;
+  }
+  
+  let content = '';
+  const now = new Date().toLocaleDateString('es-AR');
+
+  if(type === 'full' || type === 'ebook') {
+    content += `═══════════════════════════════\n📖 EBOOK — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.ebookStruct) content += `ESTRUCTURA:\n${r.ebookStruct}\n\n`;
+    if(r.ebookContent) content += `CONTENIDO:\n${r.ebookContent}\n\n`;
+  }
+  if(type === 'full' || type === 'landing') {
+    content += `═══════════════════════════════\n🌐 LANDING PAGE — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.landing) content += `COPY COMPLETO:\n${r.landing}\n\n`;
+    if(r.landingStruct) content += `ESTRUCTURA Y WIREFRAME:\n${r.landingStruct}\n\n`;
+  }
+  if(type === 'full' || type === 'ads') {
+    content += `═══════════════════════════════\n📢 META ADS + SCRIPTS — ${d.topic}\n═══════════════════════════════\n\n`;
+    if(r.ads) content += `CREATIVOS:\n${r.ads}\n\n`;
+    if(r.scripts) content += `SCRIPTS:\n${r.scripts}\n\n`;
+  }
+  if(type === 'full') {
+    content += `═══════════════════════════════\n📊 INVESTIGACIÓN Y ESTRATEGIA\n═══════════════════════════════\n\n`;
+    if(r.market) content += `INVESTIGACIÓN DE MERCADO:\n${r.market}\n\n`;
+    if(r.competitive) content += `ANÁLISIS COMPETITIVO:\n${r.competitive}\n\n`;
+    if(r.avatar) content += `AVATAR:\n${r.avatar}\n\n`;
+    if(r.pain) content += `DOLORES Y DESEOS:\n${r.pain}\n\n`;
+    if(r.offer) content += `OFERTA:\n${r.offer}\n\n`;
+    if(r.pricing) content += `PRECIO Y GARANTÍA:\n${r.pricing}\n\n`;
+    if(r.emails) content += `EMAILS DE LANZAMIENTO:\n${r.emails}\n\n`;
+  }
+
+  if(!content.trim()) {
+    alert('Todavía no hay contenido generado para exportar. Completá algunos pasos primero.');
+    return;
+  }
+
+  const header = `InfoForge — Kit de Lanzamiento\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n${'─'.repeat(50)}\n\n`;
+  const blob = new Blob([header + content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `infoforge-${type}-${Date.now()}.txt`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportAll() { exportDoc('full'); }
+
+function exportForPlatform(platform) {
+  const d = state.data;
+  const r = state.results;
+  const now = new Date().toLocaleDateString('es-AR');
+  
+  const platformNames = {
+    'hotmart': '🟧 HOTMART',
+    'shopify': '🟩 SHOPIFY',
+    'tiendanube': '☁️ TIENDA NUBE',
+    'mercadopago': '💙 MERCADOPAGO',
+    'gumroad': '🟣 GUMROAD',
+    'instagram': '📸 INSTAGRAM DM',
+    'whatsapp': '💬 WHATSAPP',
+    'propio': '🌐 SITIO PROPIO'
+  };
+  
+  const platformTips = {
+    'hotmart': '\n💡 TIPS PARA HOTMART:\n• Usar título corto y poderoso (máx 60 chars)\n• Agregar descripción larga con bullets\n• Subir 5-7 imágenes del producto\n• Configurar afiliados con 50% comisión\n• Activar Order Bump y Upsell',
+    'shopify': '\n💡 TIPS PARA SHOPIFY:\n• Usar tema gratis Dawn o pago como Impulse\n• Instalar app de reviews (Loox, Judge.me)\n• Configurar checkout en 1 paso\n• Activar abandoned cart emails\n• Agregar trust badges',
+    'tiendanube': '\n💡 TIPS PARA TIENDA NUBE:\n• Configurar MercadoPago como pasarela\n• Activar Mercado Envíos\n• Usar plantilla Atlas o Astro\n• Configurar cupones de bienvenida\n• Conectar con Instagram Shopping',
+    'mercadopago': '\n💡 TIPS PARA MERCADOPAGO:\n• Crear link de pago directo\n• Permitir pago en cuotas sin interés\n• Habilitar pago con efectivo (Rapipago/Pago Fácil)\n• Configurar checkout pro para tu landing\n• Activar suscripciones si es recurrente',
+    'gumroad': '\n💡 TIPS PARA GUMROAD:\n• Precio sugerido vs precio fijo\n• Permitir "pay what you want"\n• Subir mockups del producto\n• Configurar variantes de precio\n• Habilitar afiliados',
+    'instagram': '\n💡 TIPS PARA INSTAGRAM DM:\n• Usar Stories con sticker de pregunta\n• Configurar respuestas rápidas\n• Crear destacados con info del producto\n• Usar Manychat para automatizar\n• Agregar link de pago en bio',
+    'whatsapp': '\n💡 TIPS PARA WHATSAPP:\n• Crear catálogo de productos\n• Configurar mensaje de bienvenida\n• Usar etiquetas para clasificar leads\n• Activar respuestas automáticas\n• Conectar con CRM si tenés muchos leads',
+    'propio': '\n💡 TIPS PARA SITIO PROPIO:\n• Configurar Google Analytics\n• Instalar Pixel de Meta\n• Optimizar velocidad (PageSpeed >80)\n• Agregar SSL\n• Configurar email marketing'
+  };
+  
+  let content = `═══════════════════════════════════════\nINFOFORGE - PUBLICACIÓN PARA ${platformNames[platform] || platform.toUpperCase()}\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n═══════════════════════════════════════\n`;
+  
+  content += platformTips[platform] || '';
+  content += '\n\n═══════════════════════════════════════\n📋 INFORMACIÓN DEL PRODUCTO\n═══════════════════════════════════════\n';
+  content += `Tema: ${d.topic}\nResultado: ${d.result}\nTipo: ${d.type}\nPrecio: ${d.price} ${d.currency || 'USD'}\nGarantía: ${d.guarantee || '30'} días\n`;
+  
+  if (r.offer) content += '\n\n═══════════════════════════════════════\n💎 OFERTA Y COPY DE VENTA\n═══════════════════════════════════════\n' + r.offer;
+  if (r.landing) content += '\n\n═══════════════════════════════════════\n🌐 COPY DE LANDING / DESCRIPCIÓN\n═══════════════════════════════════════\n' + r.landing;
+  if (r.pricing) content += '\n\n═══════════════════════════════════════\n🛡️ PRECIO Y GARANTÍA\n═══════════════════════════════════════\n' + r.pricing;
+  if (r.ads) content += '\n\n═══════════════════════════════════════\n📢 ADS PARA PROMOCIONAR\n═══════════════════════════════════════\n' + r.ads;
+  if (r.emails) content += '\n\n═══════════════════════════════════════\n📧 EMAILS DE LANZAMIENTO\n═══════════════════════════════════════\n' + r.emails;
+  
+  if (!content.includes('═══')) {
+    alert('Todavía no hay contenido suficiente. Generá los pasos primero.');
+    return;
+  }
+  
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; 
+  a.download = `infoforge-${platform}-${Date.now()}.txt`;
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
+
+function confirmReset() {
+  if(confirm('¿Seguro que querés empezar una nueva sesión? Se perderá todo el contenido generado.')) {
+    // Limpiar estado
+    state = { currentStep: 0, completedSteps: new Set(), data: {}, results: {} };
+    // Limpiar localStorage (progreso guardado)
+    localStorage.removeItem('infoforge_progress');
+    localStorage.removeItem('infoforge_state');
+    // Limpiar todos los campos de texto, selects y textareas
+    document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => { el.value = ''; });
+    document.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+    // Limpiar chips seleccionados
+    document.querySelectorAll('.chip.selected').forEach(el => el.classList.remove('selected'));
+    // Limpiar feat-cards seleccionadas
+    document.querySelectorAll('.feat-card.selected').forEach(el => el.classList.remove('selected'));
+    // Ocultar outputs
+    document.querySelectorAll('.output-box').forEach(el => { el.textContent = ''; });
+    document.querySelectorAll('[id$="-output"]').forEach(el => { el.style.display = 'none'; });
+    // Volver al paso 0
+    document.querySelectorAll('.step-page').forEach(p => p.style.display = 'none');
+    document.getElementById('step-0').style.display = 'block';
+    updateUI();
   }
 }
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.step-page').forEach((p,i) => { if(i > 0) p.style.display = 'none'; });
+
+// Cargar progreso guardado si existe
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const restored = loadProgress();
+    if (restored && state.completedSteps.size > 0) {
+      // Mostrar notificación de progreso restaurado
+      const notif = document.createElement('div');
+      notif.style.cssText = 'position:fixed;top:80px;right:20px;z-index:9999;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;padding:14px 20px;border-radius:10px;box-shadow:0 8px 30px rgba(124,58,237,0.4);font-family:sans-serif;font-size:14px;font-weight:600;max-width:300px;animation:slideIn .4s';
+      notif.innerHTML = '✅ Tu progreso fue restaurado automáticamente<br><span style="font-size:12px;opacity:0.9;font-weight:400">' + state.completedSteps.size + ' pasos completados</span>';
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 5000);
+      updateUI();
+    }
+  }, 500);
+});
+
+updateUI();
+
+
+// ═══ API KEY MANAGEMENT ═══
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('apikey-input');
+  const btn = document.getElementById('toggle-key-btn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈 Ocultar';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁 Ver';
+  }
+}
+
+function showApiKeyModal() {
+  document.getElementById('apikey-modal').style.display = 'flex';
+}
+function saveApiKey() {
+  const key = document.getElementById('apikey-input').value.trim();
+  if (key.length < 20) {
+    document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
+    return;
+  }
+  if (!key.startsWith('gsk_')) {
+    document.getElementById('apikey-error').textContent = '⚠️ La key de Groq debe empezar con gsk_ — revisá que copiaste la correcta.';
+    return;
+  }
+  localStorage.setItem('if_apikey', key);
+  sessionStorage.setItem('if_apikey', key);
+  document.getElementById('apikey-modal').style.display = 'none';
+  document.getElementById('apikey-btn').textContent = '⚡ Groq Activo';
+  document.getElementById('apikey-btn').style.color = '#34d399';
+  document.getElementById('apikey-btn').style.borderColor = '#34d399';
+  document.getElementById('apikey-error').textContent = '';
+}
+function getApiKey() {
+  return localStorage.getItem('if_apikey') || sessionStorage.getItem('if_apikey') || '';
+}
+// Cargar key guardada al inicio
+window.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('apikey-btn');
+  const key = getApiKey();
+  if (btn && key && key.startsWith('gsk_')) {
+    btn.textContent = '⚡ Groq Activo';
+    btn.style.color = '#34d399';
+    btn.style.borderColor = '#34d399';
+  } else if (btn) {
+    btn.textContent = '✅ IA Lista';
+    btn.style.color = '#34d399';
+    btn.style.borderColor = '#34d399';
+  }
+});
+
+// ═══════════════════════════════════════════════
+// PWA — SERVICE WORKER + INSTALL PROMPT
+// ═══════════════════════════════════════════════
+let deferredPrompt = null;
+
+// Service Worker deshabilitado para evitar caché
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('install-banner');
+  if (banner) { banner.style.display = 'flex'; setTimeout(() => banner.style.opacity = '1', 100); }
+});
+
+function installApp() {
+  if (!deferredPrompt) {
+    document.getElementById('install-manual').style.display = 'flex';
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') dismissBanner();
+    deferredPrompt = null;
+  });
+}
+
+function dismissBanner() {
+  const banner = document.getElementById('install-banner');
+  if (banner) { banner.style.opacity = '0'; setTimeout(() => banner.style.display = 'none', 300); }
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  document.body.classList.add('is-pwa');
+}
+
+window.addEventListener('appinstalled', dismissBanner);
+
+
+
+// ═══════════════════════════════════════════════
+// BACKUP / RESTORE
+// ═══════════════════════════════════════════════
+function downloadBackup() {
+  const fullState = {
+    data: state.data,
+    results: state.results,
+    completedSteps: Array.from(state.completedSteps),
+    currentStep: state.currentStep,
+    savedAt: new Date().toISOString(),
+    version: 'infoforge-v1'
+  };
+  const blob = new Blob([JSON.stringify(fullState, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `infoforge-backup-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert('✅ Backup descargado. Guardalo en tu Drive o computadora.');
+}
+
+function restoreBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if (!obj.data && !obj.results) {
+        alert('⚠️ Archivo no válido. Tiene que ser un backup de InfoForge.');
+        return;
+      }
+      if (!confirm('¿Estás segura? Esto va a sobrescribir tu progreso actual.')) return;
+      state.data = obj.data || {};
+      state.results = obj.results || {};
+      state.completedSteps = new Set(obj.completedSteps || []);
+      saveProgress();
+      alert('✅ Backup restaurado. Recargá la página para verlo.');
+      location.reload();
+    } catch(err) {
+      alert('⚠️ Error: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Auto-guardado cada 30 segundos por si acaso
+setInterval(() => { if (state.completedSteps.size > 0) saveProgress(); }, 30000);
+
 </script>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner" style="display:none;opacity:0;transition:opacity .3s;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 48px);max-width:420px;background:linear-gradient(135deg,#1a1229,#221a35);border:1px solid #7c3aed;border-radius:16px;padding:16px 20px;box-shadow:0 8px 40px rgba(124,58,237,0.4);align-items:center;gap:14px;">
+  <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#e879f9);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:serif;color:white;font-size:16px;flex-shrink:0">IF</div>
+  <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#f1eeff">Instalá InfoForge</div><div style="font-size:12px;color:#a89ec4;margin-top:2px">Funciona offline · como app nativa</div></div>
+  <button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:8px;padding:8px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button>
+  <button onclick="dismissBanner()" style="background:none;border:none;color:#6b5f8a;cursor:pointer;font-size:20px;line-height:1;padding:2px 6px">×</button>
+</div>
+
+<!-- MANUAL INSTALL -->
+<div id="install-manual" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:16px;padding:28px;max-width:400px;width:100%">
+    <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:16px;color:#f1eeff">📲 Cómo instalar InfoForge</h3>
+    <div style="font-size:14px;color:#a89ec4;line-height:1.9">
+      <p style="margin-bottom:12px"><strong style="color:#a78bfa">📱 Android (Chrome):</strong><br>Menú ⋮ → "Agregar a pantalla de inicio"</p>
+      <p style="margin-bottom:12px"><strong style="color:#a78bfa">🍎 iPhone/iPad (Safari):</strong><br>Botón compartir □↑ → "Añadir a inicio"</p>
+      <p style="margin-bottom:20px"><strong style="color:#a78bfa">💻 PC (Chrome / Edge):</strong><br>Ícono ⊕ en la barra de URL → "Instalar"<br><span style="font-size:12px">O menú ⋮ → "Instalar InfoForge"</span></p>
+    </div>
+    <button onclick="document.getElementById('install-manual').style.display='none'" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Entendido ✓</button>
+  </div>
+</div>
+
+<style>
+#install-fab{position:fixed;bottom:90px;right:16px;z-index:100;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:50px;padding:10px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.5);display:flex;align-items:center;gap:6px;transition:all .2s;}
+#install-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,0.6);}
+.is-pwa #install-fab{display:none!important;}
+@media(min-width:768px){#install-fab{bottom:24px;right:24px;}}
+</style>
+<button id="install-fab" onclick="installApp()" title="Instalar InfoForge como app">⬇ Instalar app</button>
+
+
+<!-- API KEY MODAL — GROQ -->
+<div id="apikey-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
+    <div style="font-size:28px;margin-bottom:8px">⚡</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">Configurar IA con Groq</h2>
+    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS · Sin tarjeta · Funciona desde GitHub Pages</div>
+    <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.8">
+      <strong style="color:#a78bfa">Cómo obtener tu key gratis (2 min):</strong><br>
+      1. Abrí <a href="https://console.groq.com" target="_blank" style="color:#e879f9;font-weight:700">console.groq.com</a><br>
+      2. Clic en <strong>Sign up</strong> → entrá con Google<br>
+      3. En el menú izquierdo → <strong>API Keys</strong><br>
+      4. Clic <strong>Create API Key</strong> → copiá la key<br>
+      <span style="color:#6b5f8a;font-size:12px">La key empieza con <strong style="color:#a78bfa">gsk_...</strong></span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin:0">TU API KEY DE GROQ</label>
+      <button onclick="toggleKeyVisibility()" id="toggle-key-btn" style="background:none;border:none;color:#6b5f8a;font-size:12px;cursor:pointer;padding:2px 6px">👁 Ver</button>
+    </div>
+    <input id="apikey-input" type="password" placeholder="gsk_..." 
+      style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
+      onkeydown="if(event.key==='Enter')saveApiKey()">
+    <div id="apikey-error" style="color:#f87171;font-size:12px;margin-bottom:12px;min-height:18px"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="document.getElementById('apikey-modal').style.display='none'" 
+        style="flex:1;background:transparent;color:#6b5f8a;border:1px solid #2d2245;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">
+        Cancelar
+      </button>
+      <button onclick="saveApiKey()" 
+        style="flex:2;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
+        ⚡ Activar Groq ✓
+      </button>
+    </div>
+    <p style="font-size:11px;color:#3d3060;text-align:center;margin-top:14px">Tu key se guarda en tu navegador. No pasa por ningún servidor — va directo a Groq.</p>
+  </div>
+</div>
+
 </body>
 </html>
