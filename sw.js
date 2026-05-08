@@ -1,20 +1,27 @@
-// InfoForge SW v3 — Sin caché agresivo
-const CACHE = 'infoforge-v3';
+// InfoForge — Service Worker
+// Versión actualizada — desactiva caché para siempre mostrar la última versión
 
-self.addEventListener('install', e => {
+const CACHE_NAME = 'infoforge-v4';
+
+// Al instalar — no cachear nada, siempre ir a la red
+self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  // Borrar todos los cachés viejos
-  e.waitUntil(
+// Al activar — borrar caches viejas
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => caches.delete(k)))
+      Promise.all(keys.map(key => caches.delete(key)))
     ).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', e => {
-  // NO cachear nada — siempre ir a la red
-  e.respondWith(fetch(e.request));
+// Fetch — siempre ir a la red primero, sin caché
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() =>
+      caches.match(event.request)
+    )
+  );
 });
