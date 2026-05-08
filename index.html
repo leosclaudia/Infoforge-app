@@ -4023,9 +4023,7 @@ Para cada script incluí:
       btn.textContent = '🔄 Regenerar scripts';
     })
     .catch(err => {
-      res.textContent = '⚠️ Error: ' + err.message + '
-
-Si tenés Groq configurado, esperá 30 segundos y reintentá. Si no, configurá tu clave en el botón "Groq Activo" arriba.';
+      res.textContent = '⚠️ Error: ' + err.message + '\n\nSi tenés Groq configurado, esperá 30 segundos y reintentá. Si no, configurá tu clave en el botón "Groq Activo" arriba.';
       btn.disabled = false;
       btn.textContent = '🔄 Reintentar';
     });
