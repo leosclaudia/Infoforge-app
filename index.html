@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -640,6 +640,22 @@ select { appearance: none; cursor: pointer; }
           </div>
         </div>
         <div class="tip"><div class="tip-icon">💡</div> Para infoproductos de entrada, los precios entre $17–$49 USD tienen mejor conversión en cold traffic de Meta Ads.</div>
+      </div>
+
+      <!-- AUTOPILOT CARD -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:#7c3aed;border-width:2px">
+        <div class="card-title" style="color:#f1eeff;font-size:16px">🤖 MODO AUTOPILOTO — Generar TODO en automático</div>
+        <p style="font-size:14px;color:#c4b5fd;margin-bottom:12px;line-height:1.65">
+          Completaste los datos básicos. Ahora la IA puede generar <strong style="color:#f1eeff">todos los pasos</strong> sola:<br>
+          investigación → avatar → oferta → ebook completo → landing → ads → emails.<br>
+          Tarda ~10 minutos. Solo dejá la pantalla encendida.
+        </p>
+        <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#9ca3af">
+          <strong style="color:#c4b5fd">Necesitás:</strong> clave Groq activa (el botón verde "Groq Activo" arriba) y tener completado el Paso 01 con tema y resultado.
+        </div>
+        <button class="btn-primary" onclick="runAutopilot()" id="btn-autopilot" style="width:100%;font-size:16px;padding:16px;background:linear-gradient(135deg,#7c3aed,#a855f7)">
+          🚀 Generar todo el kit automáticamente
+        </button>
       </div>
     </div>
 
@@ -1303,6 +1319,32 @@ select { appearance: none; cursor: pointer; }
     <div class="step-nav-info">Paso <strong id="current-step-display">1</strong> de <strong>16</strong></div>
     <button class="btn-next" id="btn-next" onclick="nextStep()">Siguiente →</button>
   </div>
+
+<!-- AUTOPILOT OVERLAY -->
+<div id="autopilot-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(5,3,14,0.97);align-items:center;justify-content:center;padding:24px;flex-direction:column">
+  <div style="max-width:520px;width:100%;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px" id="ap-icon">🤖</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#f1eeff;margin-bottom:8px">Modo Autopiloto activo</h2>
+    <p style="color:#9ca3af;font-size:14px;margin-bottom:28px">La IA está generando todo tu kit. No cierres la pantalla.</p>
+
+    <!-- Barra de progreso -->
+    <div style="background:rgba(255,255,255,0.06);border-radius:100px;height:10px;margin-bottom:20px;overflow:hidden">
+      <div id="ap-progress-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:100px;transition:width 0.5s ease;width:0%"></div>
+    </div>
+
+    <!-- Paso actual -->
+    <div id="ap-step-label" style="font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Iniciando...</div>
+    <div id="ap-step-detail" style="font-size:24px;font-weight:800;color:#f1eeff;font-family:'Syne',sans-serif;margin-bottom:20px;min-height:36px">Preparando...</div>
+    <div id="ap-countdown" style="font-size:13px;color:#6b7280;margin-bottom:28px;min-height:20px"></div>
+
+    <!-- Lista de pasos -->
+    <div style="text-align:left;background:rgba(0,0,0,0.3);border-radius:14px;padding:16px;max-height:320px;overflow-y:auto" id="ap-steps-list"></div>
+
+    <button onclick="stopAutopilot()" style="margin-top:20px;background:none;border:1px solid #3b1f6e;color:#6b7280;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px">
+      ✋ Detener autopiloto
+    </button>
+  </div>
+</div>
 
 </div><!-- end main -->
 
@@ -2964,805 +3006,476 @@ function loadImageAsBase64(url) {
   });
 }
 
-// ─── KIT ZIP PARA AFILIADOS ───────────────────────────────────────────────
-async function downloadAffiliateKit() {
-  const btn = document.getElementById('btn-zip');
-  const statusDiv = document.getElementById('zip-status');
-  const d = state.data;
-  const r = state.results;
+// ─── GENERADOR DE BANNERS ────────────────────────────────────────────────
+async function generateBanners() {
+  const topic = state.results.topic || state.topic || 'Productividad con IA';
+  const btn = document.getElementById('btn-banners');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando banners...'; }
 
-  if (!d.topic) {
-    alert('Completá el Paso 01 con el tema de tu producto primero.');
-    return;
-  }
-  if (typeof JSZip === 'undefined') {
-    alert('Error cargando JSZip. Verificá tu conexión a internet y recargá la página.');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Preparando kit...';
-  statusDiv.style.display = 'block';
-
-  const zip = new JSZip();
-  const topic = d.topic || 'Mi Producto';
-  const folderName = topic.replace(/[^\w\s]/g,'').replace(/\s+/g,'_').slice(0,30);
-
-  // ── 1. ARCHIVOS DE TEXTO ────────────────────────────────────────────────
-  statusDiv.textContent = '📝 Preparando archivos de texto...';
-
-  const now = new Date().toLocaleDateString('es-AR');
-
-  // README
-  const readme = `╔══════════════════════════════════════════════════╗
-║   KIT DE AFILIADOS — ${topic.slice(0,30)}
-║   Generado: ${now}
-╚══════════════════════════════════════════════════╝
-
-CONTENIDO DE ESTE KIT:
-━━━━━━━━━━━━━━━━━━━━━
-
-📁 banners/
-   ├── banner_250x250.png    → Banner cuadrado para blogs/email
-   ├── banner_300x250.png    → Banner rectángulo mediano
-   ├── banner_336x280.png    → Banner rectángulo grande
-   ├── banner_468x60.png     → Banner horizontal thin
-   ├── banner_728x90.png     → Leaderboard (header de web)
-   └── banner_160x600.png    → Skyscraper (lateral de web)
-
-📄 tweets.txt               → 5+ modelos de tweet listos para publicar
-📄 emails.txt               → Modelos de email para tu lista
-📄 scripts_video.txt        → Scripts para reels/videos cortos
-📄 copy_oferta.txt          → Texto de la oferta para compartir
-
-CÓMO USAR:
-━━━━━━━━━━
-1. Subí los banners a Hotmart en "Material para afiliados"
-2. Los textos son plantillas — personalizalos con tu experiencia
-3. Siempre incluí tu link de afiliado al final de cada publicación
-4. Política de Hotmart: no hagas spam, publicá valor real
-
-Link de producto: https://pay.hotmart.com/[TU-LINK]
-`;
-  zip.file('README.txt', readme);
-
-  // Tweets
-  const tweetsContent = r.ads || r.videoScripts || '';
-  let tweets = `MODELOS DE TWEET — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
-  if (tweetsContent) {
-    tweets += tweetsContent;
-  } else {
-    tweets += `TWEET 1 (curiosidad):
-¿Sabías que ${topic.toLowerCase()} puede cambiar completamente tus resultados?
-Descubrí cómo en este ebook → [TU LINK]
-#productividad #aprendizaje
-
-TWEET 2 (beneficio directo):
-✅ ${d.result || 'Resultados reales en menos tiempo'}
-Por solo $${d.price || '8'} USD 🔥
-→ [TU LINK]
-
-TWEET 3 (urgencia):
-Si querés ${d.result || 'mejorar tus resultados'} sin gastar una fortuna...
-Este ebook es para vos 👇
-[TU LINK]
-
-TWEET 4 (social proof):
-Cada día más personas están usando "${topic}" para transformar sus resultados.
-¿Sos el siguiente? → [TU LINK]
-
-TWEET 5 (story):
-Antes: perdía horas sin resultados.
-Después de ${topic}: todo cambió.
-El método completo acá → [TU LINK]`;
-  }
-  zip.file('tweets.txt', tweets);
-
-  // Emails
-  const emailContent = r.emailContent || r.emailLaunch || '';
-  let emails = `MODELOS DE EMAIL — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
-  if (emailContent) {
-    emails += emailContent;
-  } else {
-    emails += `EMAIL 1 — PRESENTACIÓN:
-Asunto: [Nombre], encontré algo que te puede cambiar el día
-
-Hola [Nombre],
-
-Quiero compartirte algo que me pareció increíble.
-
-Se llama "${topic}" y promete: ${d.result || 'resultados reales y medibles'}.
-
-Por solo $${d.price || '8'} USD.
-
-Lo podés conseguir acá: [TU LINK]
-
-[Tu nombre]
-
----
-
-EMAIL 2 — BENEFICIOS:
-Asunto: Esto es lo que vas a lograr con "${topic}"
-
-[Nombre],
-
-Imaginate poder ${d.result || 'lograr tus objetivos de forma sistemática'}.
-
-Eso es exactamente lo que este ebook te enseña.
-
-✅ Paso a paso
-✅ Sin vueltas innecesarias
-✅ Con resultados reales
-
-→ Conseguilo ahora: [TU LINK]
-
-[Tu nombre]
-
----
-
-EMAIL 3 — CIERRE/URGENCIA:
-Asunto: Última oportunidad
-
-[Nombre],
-
-¿Todavía no viste "${topic}"?
-
-Es la herramienta que más me ha servido últimamente para ${d.result || 'mejorar mis resultados'}.
-
-Precio: $${d.price || '8'} USD. Sin excusas.
-
-→ [TU LINK]
-
-[Tu nombre]`;
-  }
-  zip.file('emails.txt', emails);
-
-  // Scripts de video
-  const videoContent = r.videoScripts || r.ads || '';
-  let videos = `SCRIPTS DE VIDEO/REEL — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
-  if (videoContent && !r.ads) {
-    videos += videoContent;
-  } else {
-    videos += `SCRIPT 1 — REEL CORTO (30-60 seg):
-[GANCHO — 0-3 seg]: "¿Querés ${d.result || 'mejorar tus resultados'} sin gastar horas?"
-[PROBLEMA — 3-10 seg]: "La mayoría de la gente pierde tiempo porque no tiene el método correcto."
-[SOLUCIÓN — 10-25 seg]: "Por eso existe '${topic}'. Un ebook que te da el paso a paso completo."
-[CTA — 25-30 seg]: "Link en bio. Solo $${d.price || '8'} USD."
-
-SCRIPT 2 — VIDEO LARGO (2-3 min):
-[INTRO]: "Hoy te voy a hablar de algo que me cambió: ${topic}."
-[HISTORIA]: "Antes de conocer este método, yo también luchaba con [problema]..."
-[CONTENIDO]: "El ebook tiene 3 capítulos clave: [mencionar estructura]."
-[DEMOSTRACIÓN]: "Mirá este ejemplo de cómo aplicarlo..."
-[OFERTA]: "Lo conseguís por $${d.price || '8'} USD. El link está en la descripción."
-[CTA]: "Comentame si querés saber más. ¡Nos vemos en el próximo video!"
-
-SCRIPT 3 — STORY (15 seg):
-[Texto en pantalla]: "¿Buscás ${d.result || 'resultados concretos'}?"
-[Texto en pantalla]: "Este ebook lo explica todo"
-[Texto en pantalla]: "$${d.price || '8'} USD → Link en bio 👆"`;
-  }
-  zip.file('scripts_video.txt', videos);
-
-  // Copy de la oferta
-  const offerContent = r.offer || r.landing || '';
-  let oferta = `COPY DE LA OFERTA — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
-  oferta += offerContent || `Producto: ${topic}
-Precio: $${d.price || '8'} USD
-Promesa: ${d.result || 'Resultados reales'}
-Garantía: ${d.guarantee || '30 días'}
-Plataforma: Hotmart
-Link: [TU LINK DE AFILIADO]`;
-  zip.file('copy_oferta.txt', oferta);
-
-  // ── 2. BANNERS (imágenes con IA) ────────────────────────────────────────
-  const zipStyleVal = document.querySelector('input[name="zip-style"]:checked')?.value || 'warm';
-  const zipStyleMap = {
-    warm:    'warm lifestyle photography, natural light, food styling, cozy atmosphere, no text, no letters',
-    elegant: 'elegant premium design, clean background, studio photography, product mockup, no text, no letters',
-    bold:    'bold vivid colors, high contrast, modern graphic design, vibrant colors, no text, no letters',
-    modern:  'minimalist modern design, clean white background, soft shadows, editorial photography, no text, no letters',
-  };
-  const zipStyle = zipStyleMap[zipStyleVal];
-  const topicClean = topic.replace(/[^\w\s]/g, '').slice(0, 50);
-
-  const affiliateBanners = [
-    { file: 'banner_250x250', w: 250,  h: 250  },
-    { file: 'banner_300x250', w: 300,  h: 250  },
-    { file: 'banner_336x280', w: 336,  h: 280  },
-    { file: 'banner_468x60',  w: 468,  h: 60   },
-    { file: 'banner_728x90',  w: 728,  h: 90   },
-    { file: 'banner_160x600', w: 160,  h: 600  },
+  const bannerSizes = [
+    { label: 'Banner Principal Hotmart (1920×640)', w: 1920, h: 640, file: 'hotmart_banner_principal_1920x640' },
+    { label: 'Avatar Cuadrado Hotmart (600×600)',   w: 600,  h: 600,  file: 'hotmart_avatar_600x600' },
+    { label: 'Portada Vitrina Hotmart (600×900)',   w: 600,  h: 900,  file: 'hotmart_vitrina_600x900' },
+    { label: 'Afiliados 250×250',  w: 250, h: 250, file: 'afiliados_250x250' },
+    { label: 'Afiliados 300×250',  w: 300, h: 250, file: 'afiliados_300x250' },
+    { label: 'Afiliados 336×280',  w: 336, h: 280, file: 'afiliados_336x280' },
+    { label: 'Afiliados 468×60',   w: 468, h: 60,  file: 'afiliados_468x60' },
+    { label: 'Afiliados 728×90',   w: 728, h: 90,  file: 'afiliados_728x90' },
+    { label: 'Afiliados 160×600',  w: 160, h: 600, file: 'afiliados_160x600' },
+    { label: 'Facebook/LinkedIn (1200×628)', w: 1200, h: 628, file: 'redes_facebook_1200x628' },
+    { label: 'Instagram Post (1080×1080)',   w: 1080, h: 1080, file: 'redes_instagram_1080x1080' },
+    { label: 'Instagram Story (1080×1920)',  w: 1080, h: 1920, file: 'redes_story_1080x1920' },
   ];
 
-  const bannersFolder = zip.folder('banners');
-  let bannersOk = 0;
+  const container = document.getElementById('banners-output') || (() => {
+    const d = document.createElement('div'); d.id = 'banners-output';
+    btn.parentNode.appendChild(d); return d;
+  })();
+  container.style.display = 'block';
+  container.innerHTML = '<p style="color:#a78bfa">⏳ Generando imágenes una por una...</p>';
 
-  for (let i = 0; i < affiliateBanners.length; i++) {
-    const b = affiliateBanners[i];
-    statusDiv.textContent = `🖼️ Generando banner ${i + 1}/6: ${b.w}×${b.h}...`;
+  const basePromptText = encodeURIComponent(
+    `minimalist digital product banner, "${topic}", purple gradient background, glowing neon accents, no text, no words, no letters, no logo, abstract geometric shapes, modern tech aesthetic, professional`
+  );
 
-    // Ajustar para API
-    let fetchW = Math.max(64, Math.min(1024, b.w));
-    let fetchH = Math.max(64, Math.min(1024, b.h));
-    if (b.h < 100) { fetchW = 800; fetchH = Math.round(800 * (b.h / b.w)); fetchH = Math.max(fetchH, 64); }
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px">';
+  const results = [];
 
-    const orient = fetchW > fetchH ? 'wide horizontal' : fetchW === fetchH ? 'square' : 'vertical portrait';
-    const prompt = encodeURIComponent(`${zipStyle}, scene about "${topicClean}", ${orient} composition, NO text, NO words, NO letters, professional marketing image`);
-    const seed = Math.floor(Math.random() * 99999) + i * 333;
-    const url = `https://image.pollinations.ai/prompt/${prompt}?width=${fetchW}&height=${fetchH}&nologo=true&seed=${seed}`;
+  for (let i = 0; i < bannerSizes.length; i++) {
+    const s = bannerSizes[i];
+    const seed = Math.floor(Math.random() * 99999) + i * 1000;
+    // Use a reasonably sized version for display then resize with canvas
+    const fetchW = Math.min(s.w, 1200);
+    const fetchH = Math.min(s.h, 900);
+    const url = `https://image.pollinations.ai/prompt/${basePromptText}?width=${fetchW}&height=${fetchH}&nologo=true&seed=${seed}`;
+    results.push({ ...s, url });
+  }
 
+  // Generate all banners — show progress
+  let built = '';
+  for (let i = 0; i < results.length; i++) {
+    const s = results[i];
+    container.innerHTML = `<p style="color:#a78bfa">⏳ Generando ${i+1}/${results.length}: ${s.label}...</p>`;
     try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const blob = await resp.blob();
-
-      // Redimensionar al tamaño exacto con canvas
-      const imgBitmap = await createImageBitmap(blob);
-      const canvas = new OffscreenCanvas(b.w, b.h);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(imgBitmap, 0, 0, b.w, b.h);
-      const pngBlob = await canvas.convertToBlob({ type: 'image/png' });
-      const arrayBuf = await pngBlob.arrayBuffer();
-      bannersFolder.file(`${b.file}.png`, arrayBuf);
-      bannersOk++;
-    } catch(e) {
-      // Si falla, agregar un placeholder txt
-      bannersFolder.file(`${b.file}_ERROR.txt`, `No se pudo generar: ${e.message}. Generalo manualmente en canva.com en ${b.w}x${b.h}px.`);
-    }
-
-    if (i < affiliateBanners.length - 1) await new Promise(r => setTimeout(r, 1500));
-  }
-
-  // ── 3. GENERAR Y DESCARGAR ZIP ───────────────────────────────────────────
-  statusDiv.textContent = '📦 Comprimiendo archivos...';
-  try {
-    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
-      (meta) => { statusDiv.textContent = `📦 Comprimiendo... ${Math.round(meta.percent)}%`; }
-    );
-
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(zipBlob);
-    link.download = `kit_afiliados_${folderName}.zip`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-
-    btn.disabled = false;
-    btn.textContent = '📦 Generar y descargar kit ZIP';
-    statusDiv.textContent = `✅ ZIP descargado con ${bannersOk}/6 banners + 4 archivos de texto. ¡Subilo a Google Drive y pegá el link en Hotmart!`;
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = '📦 Generar y descargar kit ZIP';
-    statusDiv.textContent = '⚠️ Error generando el ZIP: ' + e.message;
-  }
-}
-
-// ─── GENERADOR DE BANNERS CON IA — Tamaños exactos Hotmart ───────────────
-async function generateBanners() {
-  const btn = document.getElementById('btn-banners');
-  const statusDiv = document.getElementById('banner-status');
-  const grid = document.getElementById('banner-grid');
-  const d = state.data;
-
-  if (!d.topic) {
-    alert('Primero completá el Paso 01 con el tema de tu producto.');
-    return;
-  }
-
-  const bannerGroup = document.querySelector('input[name="banner-group"]:checked')?.value || 'principal';
-  const styleVal = document.querySelector('input[name="banner-style"]:checked')?.value || 'warm';
-
-  const styleMap = {
-    warm:    'warm lifestyle photography, natural light, food styling, cozy kitchen, delicious food presentation, professional food photography, no text, no letters',
-    elegant: 'elegant professional design, premium quality, clean background, gradient, studio photography, product mockup, no text, no letters',
-    bold:    'bold vivid colors, energetic, high contrast, modern graphic design, vibrant food colors, appealing and appetizing, no text, no letters',
-    modern:  'minimalist modern design, clean white background, soft shadows, editorial photography, professional, lifestyle, no text, no letters',
-  };
-  const styleDesc = styleMap[styleVal];
-  const topicClean = (d.topic || 'infoproduct').replace(/[^\w\s]/g, '').slice(0, 50);
-
-  // Grupos de tamaños según Hotmart
-  const bannerGroups = {
-    principal: [
-      { label: '🖼️ Banner principal',        w: 1920, h: 640,  hint: 'Hotmart — banner página del producto (3:1)', file: 'hotmart_banner_principal' },
-      { label: '🟦 Avatar cuadrado',          w: 600,  h: 600,  hint: 'Hotmart — avatar/portada cuadrada (1:1)', file: 'hotmart_avatar_600x600' },
-      { label: '📘 Portada vitrina vertical', w: 600,  h: 900,  hint: 'Hotmart — portada para vitrina (2:3)', file: 'hotmart_portada_vitrina' },
-    ],
-    afiliados: [
-      { label: '🔹 Banner 250×250',  w: 250,  h: 250,  hint: 'Hotmart afiliados', file: 'hotmart_banner_250x250' },
-      { label: '🔹 Banner 300×250',  w: 300,  h: 250,  hint: 'Hotmart afiliados', file: 'hotmart_banner_300x250' },
-      { label: '🔹 Banner 336×280',  w: 336,  h: 280,  hint: 'Hotmart afiliados', file: 'hotmart_banner_336x280' },
-      { label: '🔹 Banner 468×60',   w: 468,  h: 60,   hint: 'Hotmart afiliados — horizontal thin', file: 'hotmart_banner_468x60' },
-      { label: '🔹 Banner 728×90',   w: 728,  h: 90,   hint: 'Hotmart afiliados — leaderboard', file: 'hotmart_banner_728x90' },
-      { label: '🔹 Banner 160×600',  w: 160,  h: 600,  hint: 'Hotmart afiliados — skyscraper', file: 'hotmart_banner_160x600' },
-    ],
-    redes: [
-      { label: '📘 Facebook/OG 1200×628', w: 1200, h: 628,  hint: 'Facebook Ads / Meta / WhatsApp preview', file: 'fb_banner_1200x628' },
-      { label: '📷 Instagram cuadrado',   w: 1080, h: 1080, hint: 'Instagram post cuadrado', file: 'ig_square_1080x1080' },
-      { label: '📱 Instagram story',      w: 1080, h: 1920, hint: 'Instagram / TikTok story vertical', file: 'ig_story_1080x1920' },
-      { label: '🐦 Twitter/X banner',     w: 1500, h: 500,  hint: 'Twitter/X header banner', file: 'twitter_banner_1500x500' },
-    ]
-  };
-
-  const selectedBanners = bannerGroups[bannerGroup] || bannerGroups.principal;
-
-  btn.disabled = true;
-  btn.textContent = `⏳ Generando ${selectedBanners.length} imágenes...`;
-  statusDiv.style.display = 'block';
-  grid.style.display = 'block';
-  grid.innerHTML = '';
-
-  for (let i = 0; i < selectedBanners.length; i++) {
-    const b = selectedBanners[i];
-    const total = selectedBanners.length;
-    statusDiv.textContent = `⏳ Imagen ${i + 1}/${total}: ${b.label}...`;
-
-    // Ajustar dimensiones para API (max 2048, min 64)
-    const apiW = Math.max(64, Math.min(2048, b.w));
-    const apiH = Math.max(64, Math.min(2048, b.h));
-
-    // Para banners muy anchos y bajos (468x60, 728x90), escalar
-    let fetchW = apiW, fetchH = apiH;
-    if (apiH < 100) { fetchW = Math.min(apiW, 1024); fetchH = Math.round(fetchW * (apiH / apiW)); fetchH = Math.max(fetchH, 64); }
-
-    const orient = fetchW > fetchH ? 'wide horizontal landscape composition' : fetchW === fetchH ? 'square composition centered' : 'vertical portrait composition';
-    const prompt = encodeURIComponent(
-      `${styleDesc}, scene related to "${topicClean}", ${orient}, ` +
-      `NO text, NO words, NO letters, NO watermark, photorealistic, ultra high quality, professional marketing image`
-    );
-    const seed = Math.floor(Math.random() * 99999) + i * 777;
-    const url = `https://image.pollinations.ai/prompt/${prompt}?width=${fetchW}&height=${fetchH}&nologo=true&seed=${seed}&enhance=true`;
-
-    // Placeholder card
-    const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid #2d1f4e';
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700;font-size:13px;color:#c4b5fd">${b.label}</div>
-        <div style="font-size:11px;color:#4b5563;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px">${b.w}×${b.h}px</div>
-      </div>
-      <div style="font-size:11px;color:#6b7280;margin-bottom:12px">${b.hint}</div>
-      <div style="text-align:center;padding:24px;color:#6b7280;font-size:13px;border:1px dashed #2d1f4e;border-radius:8px">⏳ Generando...</div>
-    `;
-    grid.appendChild(card);
-
-    try {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = url;
-        setTimeout(rej, 60000);
-      });
-
-      img.style.cssText = 'width:100%;border-radius:8px;display:block;max-height:400px;object-fit:cover';
-
-      const btnRow = document.createElement('div');
-      btnRow.style.cssText = 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap';
-
-      // Botón descargar (tamaño original, con canvas redimensionado)
-      const dlBtn = document.createElement('button');
-      dlBtn.style.cssText = 'flex:1;padding:8px 14px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer';
-      dlBtn.textContent = `⬇️ Descargar ${b.w}×${b.h}`;
-      dlBtn.onclick = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = b.w; canvas.height = b.h;
-        const ctx = canvas.getContext('2d');
-        const tmp = new Image();
-        tmp.crossOrigin = 'anonymous';
-        tmp.onload = () => {
-          ctx.drawImage(tmp, 0, 0, b.w, b.h);
-          const link = document.createElement('a');
-          link.download = `${b.file}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
+      // Fetch image and resize to exact dimensions via canvas
+      const dataUrl = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = s.w; canvas.height = s.h;
+          const ctx = canvas.getContext('2d');
+          // Fill background in case image doesn't cover fully
+          ctx.fillStyle = '#1a0533';
+          ctx.fillRect(0, 0, s.w, s.h);
+          // Draw image scaled to cover
+          const imgAspect = img.width / img.height;
+          const canvasAspect = s.w / s.h;
+          let drawW, drawH, dx, dy;
+          if (imgAspect > canvasAspect) {
+            drawH = s.h; drawW = drawH * imgAspect;
+            dx = (s.w - drawW) / 2; dy = 0;
+          } else {
+            drawW = s.w; drawH = drawW / imgAspect;
+            dx = 0; dy = (s.h - drawH) / 2;
+          }
+          ctx.drawImage(img, dx, dy, drawW, drawH);
+          resolve(canvas.toDataURL('image/jpeg', 0.9));
         };
-        tmp.onerror = () => window.open(url, '_blank');
-        tmp.src = url;
-      };
+        img.onerror = () => reject(new Error('Error cargando imagen de Pollinations'));
+        setTimeout(() => reject(new Error('Timeout')), 45000);
+        img.src = s.url;
+      });
+      built += `<div style="background:#1a1a2e;border-radius:8px;padding:8px;text-align:center">
+        <div style="color:#a78bfa;font-size:11px;margin-bottom:6px">${s.label}</div>
+        <img src="${dataUrl}" style="max-width:100%;max-height:140px;border-radius:4px;display:block;margin:0 auto"/>
+        <a href="${dataUrl}" download="${s.file}.jpg" style="display:inline-block;margin-top:6px;background:#7c3aed;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;text-decoration:none">⬇ Descargar ${s.w}×${s.h}</a>
+      </div>`;
+    } catch(e) {
+      built += `<div style="background:#1a1a2e;border-radius:8px;padding:8px;text-align:center;color:#f87171">
+        <div style="font-size:11px;margin-bottom:4px">${s.label}</div>
+        <div style="font-size:12px">⚠️ ${e.message}</div>
+        <a href="${s.url}" target="_blank" style="font-size:11px;color:#a78bfa">Ver en nueva pestaña</a>
+      </div>`;
+    }
+  }
 
-      // Botón abrir en nueva pestaña
-      const openBtn = document.createElement('button');
-      openBtn.style.cssText = 'padding:8px 14px;background:rgba(124,58,237,0.2);color:#c4b5fd;border:1px solid #7c3aed;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer';
-      openBtn.textContent = '🔗 Abrir';
-      openBtn.onclick = () => window.open(url, '_blank');
+  container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px">' + built + '</div>';
+  if (btn) { btn.disabled = false; btn.textContent = '🖼️ Regenerar Banners'; }
+}
 
-      btnRow.appendChild(dlBtn);
-      btnRow.appendChild(openBtn);
+// ─── ZIP KIT DE AFILIADOS ────────────────────────────────────────────────
+async function downloadAffiliateKit() {
+  const btn = document.getElementById('btn-zip');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Creando ZIP...'; }
 
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-weight:700;font-size:13px;color:#c4b5fd">${b.label}</div>
-          <div style="font-size:11px;color:#4b5563;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px">${b.w}×${b.h}px</div>
-        </div>
-        <div style="font-size:11px;color:#6b7280;margin-bottom:12px">${b.hint}</div>
-      `;
-      card.appendChild(img);
-      card.appendChild(btnRow);
+  try {
+    if (typeof JSZip === 'undefined') throw new Error('JSZip no está cargado. Recargá la página.');
 
-    } catch(err) {
-      card.innerHTML += `<div style="color:#f87171;font-size:12px;padding:10px;background:rgba(248,113,113,0.1);border-radius:8px;margin-top:8px">⚠️ No se pudo generar esta imagen. <button onclick="this.parentElement.parentElement.remove()" style="color:#f87171;background:none;border:none;cursor:pointer;font-size:11px;text-decoration:underline">Saltear</button></div>`;
+    const zip = new JSZip();
+    const topic  = state.results.topic || state.topic || 'Productividad con IA';
+    const price  = state.results.price || '47';
+
+    // ── Textos ──────────────────────────────────────────────
+    const tweets = state.results.adsContent ||
+      `🧵 TWEETS DE AFILIADO — ${topic}\n\n` +
+      `1. ¿Querés aprender ${topic} en horas, no en meses? Este ebook lo explica todo paso a paso. Link: [TU_LINK]\n\n` +
+      `2. Llevo semanas usando ${topic} y la diferencia en productividad es real. Te dejo el recurso que usé: [TU_LINK]\n\n` +
+      `3. Si sos como yo y perdés horas en tareas repetibles, esto te va a cambiar el juego. Solo $${price}: [TU_LINK]`;
+
+    const emails = state.results.emailContent ||
+      `📧 SECUENCIA DE EMAILS — ${topic}\n\n` +
+      `EMAIL 1 — Asunto: "Encontré algo que te va a ahorrar horas cada semana"\n` +
+      `Hola [Nombre],\nHoy quiero contarte sobre ${topic}. Probé este ebook y la verdad me sorprendió...\n[TU_LINK]\n\n` +
+      `EMAIL 2 — Asunto: "¿Todavía no lo viste? Te cuento qué incluye"\n` +
+      `Hola [Nombre],\nEl ebook sobre ${topic} incluye todo lo que necesitás para empezar...\n[TU_LINK]\n\n` +
+      `EMAIL 3 — Asunto: "Último aviso — precio sube mañana"\n` +
+      `Hola [Nombre],\nÚltima oportunidad de conseguir ${topic} a $${price}...\n[TU_LINK]`;
+
+    const scripts = state.results.videoScripts ||
+      `🎬 SCRIPTS DE VIDEO — ${topic}\n\n` +
+      `VIDEO 1 (60 segundos):\n¿Sabías que podés automatizar el 80% de tus tareas con ${topic}?\n` +
+      `Yo lo hice y hoy te muestro cómo. El ebook que uso está en el link de la bio. Solo $${price}.\n\n` +
+      `VIDEO 2 (30 segundos — Reels/Shorts):\n` +
+      `"${topic}" suena difícil pero con este ebook lo entendí en un fin de semana.\n` +
+      `Link en bio. [Mostrar pantalla del ebook]`;
+
+    const landing = state.results.landingContent ||
+      `🌐 COPY DE LANDING — ${topic}\n\n` +
+      (state.results.landingHTML || 'Generá primero el copy en el Paso 11.');
+
+    const offer = state.results.offerContent ||
+      `💎 OFERTA — ${topic}\n\nGenerá primero la oferta en el Paso 7.`;
+
+    zip.file('TWEETS_afiliado.txt', tweets);
+    zip.file('EMAILS_lanzamiento.txt', emails);
+    zip.file('VIDEO_SCRIPTS.txt', scripts);
+    zip.file('LANDING_copy.txt', landing);
+    zip.file('OFERTA.txt', offer);
+
+    if (state.results.ebookContent) {
+      zip.file('EBOOK_contenido.txt', state.results.ebookContent);
+    }
+    if (state.results.marketResearch) {
+      zip.file('INVESTIGACION_mercado.txt', state.results.marketResearch);
     }
 
-    if (i < selectedBanners.length - 1) await new Promise(r => setTimeout(r, 1500));
-  }
+    zip.file('LEEME.txt',
+      `KIT DE AFILIADO — ${topic}\n` +
+      `Precio: $${price} USD\n` +
+      `Generado con InfoForge\n\n` +
+      `Archivos incluidos:\n` +
+      `- TWEETS_afiliado.txt — 3 tweets listos para publicar\n` +
+      `- EMAILS_lanzamiento.txt — Secuencia de 3 emails\n` +
+      `- VIDEO_SCRIPTS.txt — Guiones para Reels/TikTok/YouTube Shorts\n` +
+      `- LANDING_copy.txt — Texto de la página de ventas\n` +
+      `- OFERTA.txt — Detalles de la oferta\n` +
+      `- EBOOK_contenido.txt — Contenido completo del ebook\n\n` +
+      `Instrucciones:\n` +
+      `1. Reemplazá [TU_LINK] con tu link de Hotmart\n` +
+      `2. Reemplazá [Nombre] con el nombre del suscriptor\n` +
+      `3. Personalizá los textos con tu voz y estilo`
+    );
 
-  btn.disabled = false;
-  btn.textContent = '🔄 Regenerar banners';
-  statusDiv.textContent = '✅ ¡Listo! Hacé click en "Descargar" en cada imagen. Podés agregar tu logo encima en Canva.';
-}
+    // ── Generar y descargar ZIP ──────────────────────────────
+    if (btn) btn.textContent = '⏳ Comprimiendo...';
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KIT_AFILIADO_${topic.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30)}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 
-function exportDoc(type) {
-  const d = state.data;
-  const r = state.results;
-  const platforms = d.platforms && d.platforms.length ? d.platforms : ['general'];
-  
-  // Si exportamos a múltiples plataformas, generar un archivo por cada una
-  if (type === 'multi' && platforms.length > 1) {
-    platforms.forEach(plat => exportForPlatform(plat));
-    return;
-  }
-  
-  let content = '';
-  const now = new Date().toLocaleDateString('es-AR');
-
-  if(type === 'full' || type === 'ebook') {
-    content += `═══════════════════════════════\n📖 EBOOK — ${d.topic}\n═══════════════════════════════\n\n`;
-    if(r.ebookStruct) content += `ESTRUCTURA:\n${r.ebookStruct}\n\n`;
-    if(r.ebookContent) content += `CONTENIDO:\n${r.ebookContent}\n\n`;
-  }
-  if(type === 'full' || type === 'landing') {
-    content += `═══════════════════════════════\n🌐 LANDING PAGE — ${d.topic}\n═══════════════════════════════\n\n`;
-    if(r.landing) content += `COPY COMPLETO:\n${r.landing}\n\n`;
-    if(r.landingStruct) content += `ESTRUCTURA Y WIREFRAME:\n${r.landingStruct}\n\n`;
-  }
-  if(type === 'full' || type === 'ads') {
-    content += `═══════════════════════════════\n📢 META ADS + SCRIPTS — ${d.topic}\n═══════════════════════════════\n\n`;
-    if(r.ads) content += `CREATIVOS:\n${r.ads}\n\n`;
-    if(r.scripts) content += `SCRIPTS:\n${r.scripts}\n\n`;
-  }
-  if(type === 'full') {
-    content += `═══════════════════════════════\n📊 INVESTIGACIÓN Y ESTRATEGIA\n═══════════════════════════════\n\n`;
-    if(r.market) content += `INVESTIGACIÓN DE MERCADO:\n${r.market}\n\n`;
-    if(r.competitive) content += `ANÁLISIS COMPETITIVO:\n${r.competitive}\n\n`;
-    if(r.avatar) content += `AVATAR:\n${r.avatar}\n\n`;
-    if(r.pain) content += `DOLORES Y DESEOS:\n${r.pain}\n\n`;
-    if(r.offer) content += `OFERTA:\n${r.offer}\n\n`;
-    if(r.pricing) content += `PRECIO Y GARANTÍA:\n${r.pricing}\n\n`;
-    if(r.emails) content += `EMAILS DE LANZAMIENTO:\n${r.emails}\n\n`;
-  }
-
-  if(!content.trim()) {
-    alert('Todavía no hay contenido generado para exportar. Completá algunos pasos primero.');
-    return;
-  }
-
-  const header = `InfoForge — Kit de Lanzamiento\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n${'─'.repeat(50)}\n\n`;
-  const blob = new Blob([header + content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `infoforge-${type}-${Date.now()}.txt`;
-  a.click(); URL.revokeObjectURL(url);
-}
-
-function exportAll() { exportDoc('full'); }
-
-function exportForPlatform(platform) {
-  const d = state.data;
-  const r = state.results;
-  const now = new Date().toLocaleDateString('es-AR');
-  
-  const platformNames = {
-    'hotmart': '🟧 HOTMART',
-    'shopify': '🟩 SHOPIFY',
-    'tiendanube': '☁️ TIENDA NUBE',
-    'mercadopago': '💙 MERCADOPAGO',
-    'gumroad': '🟣 GUMROAD',
-    'instagram': '📸 INSTAGRAM DM',
-    'whatsapp': '💬 WHATSAPP',
-    'propio': '🌐 SITIO PROPIO'
-  };
-  
-  const platformTips = {
-    'hotmart': '\n💡 TIPS PARA HOTMART:\n• Usar título corto y poderoso (máx 60 chars)\n• Agregar descripción larga con bullets\n• Subir 5-7 imágenes del producto\n• Configurar afiliados con 50% comisión\n• Activar Order Bump y Upsell',
-    'shopify': '\n💡 TIPS PARA SHOPIFY:\n• Usar tema gratis Dawn o pago como Impulse\n• Instalar app de reviews (Loox, Judge.me)\n• Configurar checkout en 1 paso\n• Activar abandoned cart emails\n• Agregar trust badges',
-    'tiendanube': '\n💡 TIPS PARA TIENDA NUBE:\n• Configurar MercadoPago como pasarela\n• Activar Mercado Envíos\n• Usar plantilla Atlas o Astro\n• Configurar cupones de bienvenida\n• Conectar con Instagram Shopping',
-    'mercadopago': '\n💡 TIPS PARA MERCADOPAGO:\n• Crear link de pago directo\n• Permitir pago en cuotas sin interés\n• Habilitar pago con efectivo (Rapipago/Pago Fácil)\n• Configurar checkout pro para tu landing\n• Activar suscripciones si es recurrente',
-    'gumroad': '\n💡 TIPS PARA GUMROAD:\n• Precio sugerido vs precio fijo\n• Permitir "pay what you want"\n• Subir mockups del producto\n• Configurar variantes de precio\n• Habilitar afiliados',
-    'instagram': '\n💡 TIPS PARA INSTAGRAM DM:\n• Usar Stories con sticker de pregunta\n• Configurar respuestas rápidas\n• Crear destacados con info del producto\n• Usar Manychat para automatizar\n• Agregar link de pago en bio',
-    'whatsapp': '\n💡 TIPS PARA WHATSAPP:\n• Crear catálogo de productos\n• Configurar mensaje de bienvenida\n• Usar etiquetas para clasificar leads\n• Activar respuestas automáticas\n• Conectar con CRM si tenés muchos leads',
-    'propio': '\n💡 TIPS PARA SITIO PROPIO:\n• Configurar Google Analytics\n• Instalar Pixel de Meta\n• Optimizar velocidad (PageSpeed >80)\n• Agregar SSL\n• Configurar email marketing'
-  };
-  
-  let content = `═══════════════════════════════════════\nINFOFORGE - PUBLICACIÓN PARA ${platformNames[platform] || platform.toUpperCase()}\nGenerado: ${now}\nProducto: ${d.topic || 'Sin nombre'}\n═══════════════════════════════════════\n`;
-  
-  content += platformTips[platform] || '';
-  content += '\n\n═══════════════════════════════════════\n📋 INFORMACIÓN DEL PRODUCTO\n═══════════════════════════════════════\n';
-  content += `Tema: ${d.topic}\nResultado: ${d.result}\nTipo: ${d.type}\nPrecio: ${d.price} ${d.currency || 'USD'}\nGarantía: ${d.guarantee || '30'} días\n`;
-  
-  if (r.offer) content += '\n\n═══════════════════════════════════════\n💎 OFERTA Y COPY DE VENTA\n═══════════════════════════════════════\n' + r.offer;
-  if (r.landing) content += '\n\n═══════════════════════════════════════\n🌐 COPY DE LANDING / DESCRIPCIÓN\n═══════════════════════════════════════\n' + r.landing;
-  if (r.pricing) content += '\n\n═══════════════════════════════════════\n🛡️ PRECIO Y GARANTÍA\n═══════════════════════════════════════\n' + r.pricing;
-  if (r.ads) content += '\n\n═══════════════════════════════════════\n📢 ADS PARA PROMOCIONAR\n═══════════════════════════════════════\n' + r.ads;
-  if (r.emails) content += '\n\n═══════════════════════════════════════\n📧 EMAILS DE LANZAMIENTO\n═══════════════════════════════════════\n' + r.emails;
-  
-  if (!content.includes('═══')) {
-    alert('Todavía no hay contenido suficiente. Generá los pasos primero.');
-    return;
-  }
-  
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; 
-  a.download = `infoforge-${platform}-${Date.now()}.txt`;
-  a.click(); 
-  URL.revokeObjectURL(url);
-}
-
-function confirmReset() {
-  if(confirm('¿Seguro que querés empezar una nueva sesión? Se perderá todo el contenido generado.')) {
-    // Limpiar estado
-    state = { currentStep: 0, completedSteps: new Set(), data: {}, results: {} };
-    // Limpiar localStorage (progreso guardado)
-    localStorage.removeItem('infoforge_progress');
-    localStorage.removeItem('infoforge_state');
-    // Limpiar todos los campos de texto, selects y textareas
-    document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => { el.value = ''; });
-    document.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
-    // Limpiar chips seleccionados
-    document.querySelectorAll('.chip.selected').forEach(el => el.classList.remove('selected'));
-    // Limpiar feat-cards seleccionadas
-    document.querySelectorAll('.feat-card.selected').forEach(el => el.classList.remove('selected'));
-    // Ocultar outputs
-    document.querySelectorAll('.output-box').forEach(el => { el.textContent = ''; });
-    document.querySelectorAll('[id$="-output"]').forEach(el => { el.style.display = 'none'; });
-    // Volver al paso 0
-    document.querySelectorAll('.step-page').forEach(p => p.style.display = 'none');
-    document.getElementById('step-0').style.display = 'block';
-    updateUI();
+    if (btn) { btn.disabled = false; btn.textContent = '✅ ZIP descargado — volver a descargar'; }
+  } catch(err) {
+    alert('Error creando ZIP: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = '📦 Descargar ZIP Kit de Afiliado'; }
   }
 }
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-document.querySelectorAll('.step-page').forEach((p,i) => { if(i > 0) p.style.display = 'none'; });
+// ─── MODO AUTOPILOTO ─────────────────────────────────────────────────────
+let autopilotRunning = false;
 
-// Cargar progreso guardado si existe
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    const restored = loadProgress();
-    if (restored && state.completedSteps.size > 0) {
-      // Mostrar notificación de progreso restaurado
-      const notif = document.createElement('div');
-      notif.style.cssText = 'position:fixed;top:80px;right:20px;z-index:9999;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;padding:14px 20px;border-radius:10px;box-shadow:0 8px 30px rgba(124,58,237,0.4);font-family:sans-serif;font-size:14px;font-weight:600;max-width:300px;animation:slideIn .4s';
-      notif.innerHTML = '✅ Tu progreso fue restaurado automáticamente<br><span style="font-size:12px;opacity:0.9;font-weight:400">' + state.completedSteps.size + ' pasos completados</span>';
-      document.body.appendChild(notif);
-      setTimeout(() => notif.remove(), 5000);
-      updateUI();
-    }
-  }, 500);
-});
+function stopAutopilot() {
+  autopilotRunning = false;
+  document.getElementById('autopilot-overlay').style.display = 'none';
+}
 
-updateUI();
+function apSetStep(label, detail, pct) {
+  document.getElementById('ap-step-label').textContent = label;
+  document.getElementById('ap-step-detail').textContent = detail;
+  document.getElementById('ap-progress-bar').style.width = pct + '%';
+}
 
+function apLog(emoji, text, done) {
+  const list = document.getElementById('ap-steps-list');
+  const id = 'ap-log-' + Date.now();
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px';
+  div.innerHTML = `<span style="font-size:16px">${emoji}</span><span style="color:${done?'#6ee7b7':'#c4b5fd'}">${text}</span>`;
+  list.appendChild(div);
+  list.scrollTop = list.scrollHeight;
+  return id;
+}
 
-// ═══ API KEY MANAGEMENT ═══
-
-function toggleKeyVisibility() {
-  const input = document.getElementById('apikey-input');
-  const btn = document.getElementById('toggle-key-btn');
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.textContent = '🙈 Ocultar';
-  } else {
-    input.type = 'password';
-    btn.textContent = '👁 Ver';
+async function apPause(seconds, reason) {
+  const cd = document.getElementById('ap-countdown');
+  for (let s = seconds; s > 0; s--) {
+    if (!autopilotRunning) return;
+    cd.textContent = `⏸ ${reason} — continuando en ${s}s...`;
+    await new Promise(r => setTimeout(r, 1000));
   }
+  cd.textContent = '';
 }
 
-function showApiKeyModal() {
-  document.getElementById('apikey-modal').style.display = 'flex';
-}
-function saveApiKey() {
-  const key = document.getElementById('apikey-input').value.trim();
-  if (key.length < 20) {
-    document.getElementById('apikey-error').textContent = 'La key parece inválida. Verificá que la copiaste completa.';
-    return;
-  }
-  if (!key.startsWith('gsk_')) {
-    document.getElementById('apikey-error').textContent = '⚠️ La key de Groq debe empezar con gsk_ — revisá que copiaste la correcta.';
-    return;
-  }
-  localStorage.setItem('if_apikey', key);
-  sessionStorage.setItem('if_apikey', key);
-  document.getElementById('apikey-modal').style.display = 'none';
-  document.getElementById('apikey-btn').textContent = '⚡ Groq Activo';
-  document.getElementById('apikey-btn').style.color = '#34d399';
-  document.getElementById('apikey-btn').style.borderColor = '#34d399';
-  document.getElementById('apikey-error').textContent = '';
-}
-function getApiKey() {
-  return localStorage.getItem('if_apikey') || sessionStorage.getItem('if_apikey') || '';
-}
-// Cargar key guardada al inicio
-window.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('apikey-btn');
+async function apCallGroq(prompt, systemPrompt, maxTokens) {
   const key = getApiKey();
-  if (btn && key && key.startsWith('gsk_')) {
-    btn.textContent = '⚡ Groq Activo';
-    btn.style.color = '#34d399';
-    btn.style.borderColor = '#34d399';
-  } else if (btn) {
-    btn.textContent = '✅ IA Lista';
-    btn.style.color = '#34d399';
-    btn.style.borderColor = '#34d399';
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 55000);
+
+  let response;
+  if (key && key.startsWith('gsk_')) {
+    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt || 'Sos un experto en marketing digital y creación de infoproductos. Respondé en español.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: maxTokens || 2500,
+        temperature: 0.75
+      })
+    });
+  } else {
+    response = await fetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'openai-large',
+        seed: Math.floor(Math.random() * 99999)
+      })
+    });
   }
-});
-
-// ═══════════════════════════════════════════════
-// PWA — SERVICE WORKER + INSTALL PROMPT
-// ═══════════════════════════════════════════════
-let deferredPrompt = null;
-
-// Service Worker deshabilitado para evitar caché
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  });
+  clearTimeout(tid);
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || data.text || '';
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const banner = document.getElementById('install-banner');
-  if (banner) { banner.style.display = 'flex'; setTimeout(() => banner.style.opacity = '1', 100); }
-});
-
-function installApp() {
-  if (!deferredPrompt) {
-    document.getElementById('install-manual').style.display = 'flex';
+async function runAutopilot() {
+  const d = state.data;
+  if (!d.topic) {
+    alert('Completá el Paso 01 primero: ingresá el tema y el resultado prometido del producto.');
     return;
   }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(choice => {
-    if (choice.outcome === 'accepted') dismissBanner();
-    deferredPrompt = null;
-  });
-}
+  const key = getApiKey();
+  if (!key || !key.startsWith('gsk_')) {
+    alert('Necesitás una clave Groq activa. Hacé click en "Configurar IA" primero.');
+    return;
+  }
 
-function dismissBanner() {
-  const banner = document.getElementById('install-banner');
-  if (banner) { banner.style.opacity = '0'; setTimeout(() => banner.style.display = 'none', 300); }
-}
+  autopilotRunning = true;
+  const overlay = document.getElementById('autopilot-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('ap-steps-list').innerHTML = '';
 
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-  document.body.classList.add('is-pwa');
-}
+  const topic = d.topic;
+  const result = d.result || 'transformación del cliente';
+  const price = d.price || '27';
+  const platform = d.platform || 'Hotmart';
+  const sys = `Sos un experto en marketing digital, copywriting y creación de infoproductos digitales.
+Producto: "${topic}" | Promesa: "${result}" | Precio: $${price} USD | Plataforma: ${platform}
+Respondé siempre en español latinoamericano claro y profesional. Sin saludos, directo al contenido.`;
 
-window.addEventListener('appinstalled', dismissBanner);
-
-
-
-// ═══════════════════════════════════════════════
-// BACKUP / RESTORE
-// ═══════════════════════════════════════════════
-function downloadBackup() {
-  const fullState = {
-    data: state.data,
-    results: state.results,
-    completedSteps: Array.from(state.completedSteps),
-    currentStep: state.currentStep,
-    savedAt: new Date().toISOString(),
-    version: 'infoforge-v1'
-  };
-  const blob = new Blob([JSON.stringify(fullState, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `infoforge-backup-${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  alert('✅ Backup descargado. Guardalo en tu Drive o computadora.');
-}
-
-function restoreBackup(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const obj = JSON.parse(e.target.result);
-      if (!obj.data && !obj.results) {
-        alert('⚠️ Archivo no válido. Tiene que ser un backup de InfoForge.');
-        return;
+  const steps = [
+    {
+      pct: 8, icon: '🔍', label: 'PASO 3 — Investigación de mercado', short: 'Investigando el mercado...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Hacé una investigación de mercado para el infoproducto "${topic}" que promete "${result}".
+Incluí: tamaño del mercado, tendencias actuales, canales de venta más efectivos, palabras clave de búsqueda, y oportunidades concretas. Datos específicos y accionables.`, sys, 2000);
+        state.results.market = text;
+        showResult('market-result', 'market-output', text);
       }
-      if (!confirm('¿Estás segura? Esto va a sobrescribir tu progreso actual.')) return;
-      state.data = obj.data || {};
-      state.results = obj.results || {};
-      state.completedSteps = new Set(obj.completedSteps || []);
+    },
+    {
+      pct: 16, icon: '🏆', label: 'PASO 4 — Análisis de competencia', short: 'Analizando competidores...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Analizá la competencia para un infoproducto sobre "${topic}". Describí: tipos de competidores existentes, sus precios, sus puntos débiles, y cómo diferenciarse claramente. Incluí oportunidades de posicionamiento.`, sys, 2000);
+        state.results.competitive = text;
+        showResult('comp-result', 'comp-output', text);
+      }
+    },
+    {
+      pct: 24, icon: '🎯', label: 'PASO 5 — Avatar del cliente', short: 'Definiendo el cliente ideal...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Creá el perfil detallado del cliente ideal (avatar) para el infoproducto "${topic}" que promete "${result}".
+Incluí: datos demográficos, situación actual, frustraciones, deseos, objeciones, lenguaje que usa, y por qué compraría.`, sys, 2000);
+        state.results.avatar = text;
+        showResult('avatar-result', 'avatar-output', text);
+      }
+    },
+    {
+      pct: 32, icon: '😤', label: 'PASO 6 — Dolores y deseos', short: 'Mapeando dolores y deseos...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Listá los 10 dolores más profundos y los 10 deseos más poderosos del cliente ideal de "${topic}".
+Escribilos en primera persona como si el cliente los dijera. Específicos, emocionales, reales.`, sys, 1800);
+        state.results.pain = text;
+        showResult('pain-result', 'pain-output', text);
+      }
+    },
+    {
+      pct: 40, icon: '💎', label: 'PASO 7 — Oferta irresistible', short: 'Construyendo la oferta...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Creá la oferta completa para el infoproducto "${topic}" a $${price} USD en ${platform}.
+Incluí: nombre del producto (3 opciones), promesa principal, qué incluye, bonos, valor percibido total, justificación del precio, garantía y urgencia.`, sys, 2500);
+        state.results.offer = text;
+        showResult('offer-result', 'offer-output', text);
+      }
+    },
+    {
+      pct: 47, icon: '💰', label: 'PASO 8 — Precio y garantía', short: 'Diseñando precio y garantía...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Redactá el bloque completo de precio y garantía para "${topic}" a $${price} USD.
+Incluí: redacción de la garantía, copy del bloque de precio, manejo de objeciones de precio (3), texto de urgencia (2 versiones) y microcopy del botón de compra (5 opciones).`, sys, 2000);
+        state.results.pricing = text;
+        showResult('pricing-result', 'pricing-output', text);
+      }
+    },
+    {
+      pct: 54, icon: '📋', label: 'PASO 9 — Estructura del ebook', short: 'Estructurando el ebook...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Creá la estructura completa del ebook "${topic}" que promete "${result}".
+Incluí: índice con introducción, 3 capítulos principales (con subtemas), conclusión. Para cada capítulo: título, objetivo, 3-4 subtemas y qué aprende el lector.`, sys, 2200);
+        state.results.ebookStruct = text;
+        showResult('ebook-struct-result', 'ebook-struct-output', text);
+      }
+    },
+    {
+      pct: 62, icon: '📖', label: 'PASO 10 — Contenido del ebook (5 partes)', short: 'Escribiendo el ebook completo...',
+      fn: async () => { await generateFullEbook(); }
+    },
+    {
+      pct: 72, icon: '🌐', label: 'PASO 11 — Copy de landing', short: 'Escribiendo landing page...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Escribí el copy COMPLETO de la landing page para "${topic}" a $${price} USD en ${platform}.
+Incluí todas estas secciones con copy listo: headline + subheadline (3 opciones), lead, sección de dolor, transformación, qué incluye, oferta y bonos, para quién es/no es, FAQ (4 preguntas), garantía, cierre + CTA urgente.`, sys, 3000);
+        state.results.landing = text;
+        showResult('landing-result', 'landing-output', text);
+      }
+    },
+    {
+      pct: 79, icon: '🏗️', label: 'PASO 12 — Estructura de landing', short: 'Diseñando wireframe...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Creá el wireframe de la landing page para "${topic}" en ${platform}.
+Formato: para cada sección escribí exactamente 3 líneas:
+▸ SECCIÓN: [nombre]
+  Elementos: [qué va visualmente]
+  Copy clave: [texto principal]
+Secciones obligatorias: Hero, Dolor, Transformación, Qué incluye, Oferta, Garantía, FAQ, CTA final.`, sys, 1800);
+        state.results.landingStruct = text;
+        showResult('landing-struct-result', 'landing-struct-output', text);
+      }
+    },
+    {
+      pct: 85, icon: '📢', label: 'PASO 13 — Meta Ads + Scripts', short: 'Creando anuncios...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Creá 5 creativos completos de Meta Ads para "${topic}" a $${price} USD.
+Para cada uno: hook (ángulo: dolor / transformación / resultado / urgencia / social proof), copy principal, headline, descripción, CTA y sugerencia visual.
+También incluí 3 scripts de video ad de 30 segundos para Reels/TikTok.`, sys, 2500);
+        state.results.ads = text;
+        showResult('ads-result', 'ads-output', text);
+      }
+    },
+    {
+      pct: 91, icon: '🎬', label: 'PASO 14 — Scripts de video', short: 'Escribiendo guiones...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Escribí scripts completos para videos sobre "${topic}":
+1. Reel/TikTok 30 segundos (gancho, problema, solución, CTA)
+2. Story 15 segundos (3 pantallas de texto)
+3. Video largo 2-3 minutos (intro, historia, desarrollo, oferta, CTA)
+Scripts listos para grabar, naturales y que conviertan.`, sys, 2000);
+        state.results.videoScripts = text;
+        showResult('scripts-result', 'scripts-output', text);
+      }
+    },
+    {
+      pct: 97, icon: '📧', label: 'PASO 15 — Secuencia de emails', short: 'Escribiendo emails...',
+      fn: async () => {
+        const text = await apCallGroq(
+          `Escribí una secuencia de 3 emails de lanzamiento para "${topic}" a $${price} USD:
+Email 1: Anuncio del lanzamiento (asunto + cuerpo completo)
+Email 2: Recordatorio de beneficios con historia (asunto + cuerpo completo)
+Email 3: Último aviso con urgencia (asunto + cuerpo completo)
+Cada email: concreto, emocional, con CTA claro.`, sys, 2500);
+        state.results.emailContent = text;
+        showResult('emails-result', 'emails-output', text);
+      }
+    },
+  ];
+
+  function showResult(outputId, containerId, text) {
+    const el = document.getElementById(outputId);
+    const cont = document.getElementById(containerId);
+    if (el) el.textContent = text;
+    if (cont) cont.style.display = 'block';
+  }
+
+  let completedCount = 0;
+
+  for (let i = 0; i < steps.length; i++) {
+    if (!autopilotRunning) break;
+    const step = steps[i];
+
+    apSetStep('Paso ' + (i + 1) + ' de ' + steps.length, step.short, step.pct);
+    apLog(step.icon, step.label, false);
+
+    try {
+      await step.fn();
+      completedCount++;
+      apLog('✅', step.label + ' — listo', true);
+      state.completedSteps.add(3 + i);
+      updateUI();
       saveProgress();
-      alert('✅ Backup restaurado. Recargá la página para verlo.');
-      location.reload();
     } catch(err) {
-      alert('⚠️ Error: ' + err.message);
+      apLog('⚠️', step.label + ' — error: ' + err.message.slice(0,60), false);
     }
-  };
-  reader.readAsText(file);
+
+    // Pausa 22s entre pasos (el ebook ya tiene sus propias pausas)
+    if (i < steps.length - 1 && step.icon !== '📖') {
+      await apPause(22, 'esperando para el siguiente paso');
+    }
+  }
+
+  if (autopilotRunning) {
+    apSetStep('¡COMPLETADO!', '🎉 Kit listo — ' + completedCount + '/' + steps.length + ' pasos', 100);
+    document.getElementById('ap-icon').textContent = '🎉';
+    document.getElementById('ap-countdown').textContent = '';
+    apLog('🚀', 'Kit completo generado — yendo al Paso 16 (Exportar)...', true);
+    setTimeout(() => {
+      stopAutopilot();
+      goToStep(16);
+    }, 3000);
+  }
 }
-
-// Auto-guardado cada 30 segundos por si acaso
-setInterval(() => { if (state.completedSteps.size > 0) saveProgress(); }, 30000);
-
 </script>
-
-<!-- INSTALL BANNER -->
-<div id="install-banner" style="display:none;opacity:0;transition:opacity .3s;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 48px);max-width:420px;background:linear-gradient(135deg,#1a1229,#221a35);border:1px solid #7c3aed;border-radius:16px;padding:16px 20px;box-shadow:0 8px 40px rgba(124,58,237,0.4);align-items:center;gap:14px;">
-  <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#e879f9);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:serif;color:white;font-size:16px;flex-shrink:0">IF</div>
-  <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:#f1eeff">Instalá InfoForge</div><div style="font-size:12px;color:#a89ec4;margin-top:2px">Funciona offline · como app nativa</div></div>
-  <button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:8px;padding:8px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">Instalar</button>
-  <button onclick="dismissBanner()" style="background:none;border:none;color:#6b5f8a;cursor:pointer;font-size:20px;line-height:1;padding:2px 6px">×</button>
-</div>
-
-<!-- MANUAL INSTALL -->
-<div id="install-manual" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:24px;">
-  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:16px;padding:28px;max-width:400px;width:100%">
-    <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:16px;color:#f1eeff">📲 Cómo instalar InfoForge</h3>
-    <div style="font-size:14px;color:#a89ec4;line-height:1.9">
-      <p style="margin-bottom:12px"><strong style="color:#a78bfa">📱 Android (Chrome):</strong><br>Menú ⋮ → "Agregar a pantalla de inicio"</p>
-      <p style="margin-bottom:12px"><strong style="color:#a78bfa">🍎 iPhone/iPad (Safari):</strong><br>Botón compartir □↑ → "Añadir a inicio"</p>
-      <p style="margin-bottom:20px"><strong style="color:#a78bfa">💻 PC (Chrome / Edge):</strong><br>Ícono ⊕ en la barra de URL → "Instalar"<br><span style="font-size:12px">O menú ⋮ → "Instalar InfoForge"</span></p>
-    </div>
-    <button onclick="document.getElementById('install-manual').style.display='none'" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Entendido ✓</button>
-  </div>
-</div>
-
-<style>
-#install-fab{position:fixed;bottom:90px;right:16px;z-index:100;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:50px;padding:10px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.5);display:flex;align-items:center;gap:6px;transition:all .2s;}
-#install-fab:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,58,237,0.6);}
-.is-pwa #install-fab{display:none!important;}
-@media(min-width:768px){#install-fab{bottom:24px;right:24px;}}
-</style>
-<button id="install-fab" onclick="installApp()" title="Instalar InfoForge como app">⬇ Instalar app</button>
-
-
-<!-- API KEY MODAL — GROQ -->
-<div id="apikey-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;padding:24px;">
-  <div style="background:#1a1229;border:1px solid #7c3aed;border-radius:18px;padding:32px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(124,58,237,0.4);">
-    <div style="font-size:28px;margin-bottom:8px">⚡</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:8px;color:#f1eeff">Configurar IA con Groq</h2>
-    <div style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#34d399;font-weight:700;">✅ 100% GRATIS · Sin tarjeta · Funciona desde GitHub Pages</div>
-    <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;color:#c4b5fd;line-height:1.8">
-      <strong style="color:#a78bfa">Cómo obtener tu key gratis (2 min):</strong><br>
-      1. Abrí <a href="https://console.groq.com" target="_blank" style="color:#e879f9;font-weight:700">console.groq.com</a><br>
-      2. Clic en <strong>Sign up</strong> → entrá con Google<br>
-      3. En el menú izquierdo → <strong>API Keys</strong><br>
-      4. Clic <strong>Create API Key</strong> → copiá la key<br>
-      <span style="color:#6b5f8a;font-size:12px">La key empieza con <strong style="color:#a78bfa">gsk_...</strong></span>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <label style="display:block;font-size:11px;font-weight:700;color:#6b5f8a;letter-spacing:2px;margin:0">TU API KEY DE GROQ</label>
-      <button onclick="toggleKeyVisibility()" id="toggle-key-btn" style="background:none;border:none;color:#6b5f8a;font-size:12px;cursor:pointer;padding:2px 6px">👁 Ver</button>
-    </div>
-    <input id="apikey-input" type="password" placeholder="gsk_..." 
-      style="width:100%;background:#09070f;border:1px solid #3d3060;color:#f1eeff;font-family:monospace;font-size:13px;padding:12px 16px;border-radius:8px;outline:none;margin-bottom:8px;"
-      onkeydown="if(event.key==='Enter')saveApiKey()">
-    <div id="apikey-error" style="color:#f87171;font-size:12px;margin-bottom:12px;min-height:18px"></div>
-    <div style="display:flex;gap:10px;">
-      <button onclick="document.getElementById('apikey-modal').style.display='none'" 
-        style="flex:1;background:transparent;color:#6b5f8a;border:1px solid #2d2245;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">
-        Cancelar
-      </button>
-      <button onclick="saveApiKey()" 
-        style="flex:2;background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
-        ⚡ Activar Groq ✓
-      </button>
-    </div>
-    <p style="font-size:11px;color:#3d3060;text-align:center;margin-top:14px">Tu key se guarda en tu navegador. No pasa por ningún servidor — va directo a Groq.</p>
-  </div>
-</div>
-
 </body>
 </html>
