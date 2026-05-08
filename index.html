@@ -2710,52 +2710,63 @@ async function exportEbookPDF() {
       setStatus('✅ Avatar listo', 18);
     } catch(e) { setStatus('⚠️ Avatar omitido — continuando...', 18); }
 
-    // Paso 2: Generar imagen de portada con IA
+    // ── Helper: carga con reintento y fallback sin imagen ──────────────────
+    async function tryLoadImg(url, timeoutMs = 40000) {
+      try {
+        return await Promise.race([
+          loadImageAsBase64(url),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs))
+        ]);
+      } catch(e) { return null; }
+    }
+
+    // Paso 2: Portada con IA (si falla → portada sin imagen, el PDF sigue igual)
     setStatus('🎨 Generando portada con IA...', 20);
     const coverPrompt = encodeURIComponent(
       `beautiful artistic illustration about ${topicCleanEn}, ` +
       `no text, no words, no letters, professional editorial photography, ` +
       `soft lighting, vibrant colors, modern minimalist style, magazine quality, clean composition`
     );
-    const coverImgUrl = `https://image.pollinations.ai/prompt/${coverPrompt}?width=800&height=1000&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
-    
-    const coverImg = await loadImageAsBase64(coverImgUrl);
-    setStatus('✅ Portada lista', 35);
-    
-    // Paso 3: Generar imágenes para cada capítulo
+    const coverImg = await tryLoadImg(
+      `https://image.pollinations.ai/prompt/${coverPrompt}?width=800&height=1000&nologo=true&seed=${Math.floor(Math.random()*10000)}`
+    );
+    setStatus(coverImg ? '✅ Portada lista' : '⚠️ Portada sin imagen — continuando...', 35);
+
+    // Paso 3: Imágenes de capítulos (cada una independiente, si falla → sin imagen)
     setStatus('🖼️ Generando ilustraciones de capítulos...', 40);
     const chapterImages = [];
-    const chapterTopics = ['introduction concept', 'problem analysis', 'solution method', 'practical application', 'conclusion success'];
-    
+    const chapterTopics = ['introduction concept', 'problem analysis', 'solution method'];
     for (let i = 0; i < 3; i++) {
       const imgPrompt = encodeURIComponent(`${chapterTopics[i]} related to ${topicCleanEn}, no text, no words, no letters, professional photography, modern illustration, vibrant colors, magazine style`);
-      const imgUrl = `https://image.pollinations.ai/prompt/${imgPrompt}?width=600&height=400&nologo=true&seed=${Math.floor(Math.random()*10000)}`;
-      try {
-        const img = await loadImageAsBase64(imgUrl);
-        chapterImages.push(img);
-      } catch(e) { chapterImages.push(null); }
-      setStatus(`🖼️ Imagen ${i+1}/3 lista`, 40 + (i+1) * 10);
+      const img = await tryLoadImg(
+        `https://image.pollinations.ai/prompt/${imgPrompt}?width=600&height=400&nologo=true&seed=${Math.floor(Math.random()*10000)}`
+      );
+      chapterImages.push(img);
+      setStatus(`🖼️ Ilustración ${i+1}/3 ${img ? 'lista' : 'omitida'}`, 40 + (i+1) * 10);
     }
     
-    // Paso 3: Crear el PDF
+    // Paso 4: Crear el PDF
     setStatus('📄 Diseñando el PDF...', 80);
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
     const W = 210, H = 297;
     
-    // PORTADA - imagen full size con overlay y título encima
+    // PORTADA - imagen full size
     if (coverImg) {
-      // Imagen ocupa toda la página
-      pdf.addImage(coverImg, 'JPEG', 0, 0, W, H, '', 'FAST');
-      
-      // Overlay oscuro semi-transparente para que se lea el título
+      try { pdf.addImage(coverImg, 'JPEG', 0, 0, W, H, '', 'FAST'); } catch(e) {}
+      // Franja oscura superior (compatible con todos los navegadores - sin GState)
       pdf.setFillColor(15, 11, 26);
-      pdf.setGState(new pdf.GState({opacity: 0.55}));
-      pdf.rect(0, 0, W, H, 'F');
-      pdf.setGState(new pdf.GState({opacity: 1}));
+      pdf.rect(0, 0, W, 90, 'F');        // bloque oscuro arriba
+      pdf.rect(0, H - 65, W, 65, 'F');  // bloque oscuro abajo
     } else {
-      pdf.setFillColor(15, 11, 26);
+      // Portada sin imagen: gradiente simulado con rectángulos
+      pdf.setFillColor(9, 7, 15);
       pdf.rect(0, 0, W, H, 'F');
+      pdf.setFillColor(20, 15, 35);
+      pdf.rect(0, H*0.3, W, H*0.4, 'F');
+      // Acento de color
+      pdf.setFillColor(124, 58, 237);
+      pdf.rect(0, H*0.35, 4, H*0.3, 'F');
     }
     
     // Línea decorativa arriba
@@ -3136,41 +3147,67 @@ async function exportEbookPDF() {
     pdf.setTextColor(220, 220, 255);
     pdf.text('Gracias por leer este ebook 💜', W/2, 200, { align: 'center' });
     
-    setStatus('✅ ¡PDF listo!', 100);
+    setStatus('✅ ¡PDF listo! Guardando...', 100);
     
     // Descargar
     const fileName = (d.topic || 'ebook').toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 30);
     pdf.save(`infoforge-${fileName}-${Date.now()}.pdf`);
     
     setTimeout(() => {
-      document.getElementById('pdf-progress').remove();
-    }, 1500);
-    
-  } catch(err) {
-    setStatus('❌ Error: ' + err.message, 0);
-    setTimeout(() => {
       const p = document.getElementById('pdf-progress');
       if (p) p.remove();
-    }, 3000);
+    }, 2000);
+    
+  } catch(err) {
+    console.error('PDF error:', err);
+    const errMsg = err.message || String(err);
+    // Mostrar error con opción de reintentar
+    const progressEl = document.getElementById('pdf-progress');
+    if (progressEl) {
+      progressEl.querySelector('div').innerHTML = `
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:20px;margin-bottom:10px;color:#f1eeff">Error al generar el PDF</h2>
+        <p style="font-size:13px;color:#a89ec4;margin-bottom:16px;line-height:1.6">${errMsg.slice(0,120)}</p>
+        <p style="font-size:12px;color:#6b5f8a;margin-bottom:20px">Esto suele pasar cuando las imágenes de IA tardan demasiado en cargar. El PDF se genera igual sin imágenes.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button onclick="document.getElementById('pdf-progress').remove();exportEbookPDF();" 
+            style="background:linear-gradient(135deg,#7c3aed,#e879f9);color:white;border:none;border-radius:10px;padding:12px 20px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">
+            🔄 Reintentar
+          </button>
+          <button onclick="document.getElementById('pdf-progress').remove();" 
+            style="background:transparent;color:#a89ec4;border:1px solid #2d2245;border-radius:10px;padding:12px 20px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">
+            Cerrar
+          </button>
+        </div>
+      `;
+    }
   }
 }
 
-function loadImageAsBase64(url) {
+function loadImageAsBase64(url, timeoutMs = 50000) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
+    const timer = setTimeout(() => reject(new Error('Timeout')), timeoutMs);
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+      clearTimeout(timer);
       try {
-        resolve(canvas.toDataURL('image/jpeg', 0.85));
+        // Limitar tamaño máximo del canvas para evitar errores de memoria
+        const maxDim = 1200;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          const scale = Math.min(maxDim/w, maxDim/h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.80));
       } catch(e) { reject(e); }
     };
-    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
-    setTimeout(() => reject(new Error('Timeout cargando imagen')), 30000);
+    img.onerror = () => { clearTimeout(timer); reject(new Error('Error cargando imagen')); };
     img.src = url;
   });
 }
@@ -3182,128 +3219,185 @@ async function generateBanners() {
   const grid = document.getElementById('banner-grid');
   const d = state.data;
 
-  if (!d.topic) {
-    alert('Primero completá el Paso 01 con el tema de tu producto.');
-    return;
-  }
+  if (!d.topic) { alert('Primero completá el Paso 01 con el tema de tu producto.'); return; }
 
   btn.disabled = true;
-  btn.textContent = '⏳ Generando banners...';
-  statusDiv.style.display = 'block';
+  btn.textContent = '⏳ Generando imágenes base...';
+  statusDiv.textContent = '⏳ Paso 1/2 — Descargando imágenes base con IA (solo 3 requests)...';
   grid.innerHTML = '';
 
   const styleVal = document.querySelector('input[name="banner-style"]:checked')?.value || 'modern';
   const styleMap = {
-    modern:  'minimalist modern design, clean white and purple gradient, professional corporate, no text, geometric shapes, soft shadows',
-    bold:    'bold dynamic design, high contrast, vibrant colors, energetic, powerful visual impact, no text, dramatic lighting',
-    elegant: 'elegant premium design, gold and dark tones, luxury feel, sophisticated, premium quality product, no text, soft bokeh',
-    warm:    'warm lifestyle photography, natural light, happy person working on laptop, cozy home office, authentic, no text, golden hour'
+    modern:  'minimalist modern design, purple gradient, professional corporate, no text, geometric shapes',
+    bold:    'bold dynamic design, high contrast, vibrant colors, energetic, no text, dramatic lighting',
+    elegant: 'elegant premium design, gold dark tones, luxury feel, sophisticated, no text, soft bokeh',
+    warm:    'warm lifestyle, natural light, person working on laptop, cozy office, authentic, no text'
   };
   const styleDesc = styleMap[styleVal];
-  const topicClean = (d.topic || 'infoproduct').replace(/[^\w\s]/g, '').slice(0, 60);
+  const topicClean = (d.topic || 'productivity').replace(/[^\w\s]/g,'').slice(0,50);
+  const seed = Math.floor(Math.random()*99999);
 
-  // TODOS LOS FORMATOS HOTMART + REDES
-  const BANNERS = [
-    // HOTMART - Producto
-    { group: '🏪 HOTMART — Producto',     label: '🖼️ Banner Principal',   file: 'hotmart_banner_principal',   w:1920, h:640,  hint:"Personalizar producto → Banner — 1920×640px" },
-    { group: null,                         label: '🟦 Avatar del producto', file: 'hotmart_avatar',             w:600,  h:600,  hint:"Personalizar producto → Avatar — 600×600px" },
-    { group: null,                         label: '📋 Portada vitrina',     file: 'hotmart_portada_vitrina',    w:600,  h:900,  hint:"Personalizar producto → Portadas vitrina — 600×900px" },
-    // HOTMART - Afiliados
-    { group: '👥 HOTMART — Afiliados',    label: '🔹 Banner 250×250',     file: 'hotmart_afiliado_250x250',   w:250,  h:250,  hint:"Material afiliados Hotmart — 250×250px" },
-    { group: null,                         label: '🔹 Banner 300×250',     file: 'hotmart_afiliado_300x250',   w:300,  h:250,  hint:"Material afiliados Hotmart — 300×250px" },
-    { group: null,                         label: '🔹 Banner 336×280',     file: 'hotmart_afiliado_336x280',   w:336,  h:280,  hint:"Material afiliados Hotmart — 336×280px" },
-    { group: null,                         label: '🔹 Banner 468×60',      file: 'hotmart_afiliado_468x60',    w:468,  h:60,   hint:"Material afiliados Hotmart — 468×60px" },
-    { group: null,                         label: '🔹 Banner 728×90',      file: 'hotmart_afiliado_728x90',    w:728,  h:90,   hint:"Material afiliados Hotmart — 728×90px (leaderboard)" },
-    { group: null,                         label: '🔹 Banner 160×600',     file: 'hotmart_afiliado_160x600',   w:160,  h:600,  hint:"Material afiliados Hotmart — 160×600px (skyscraper)" },
-    // REDES
-    { group: '📱 Redes Sociales',          label: '📣 Meta Ads',           file: 'meta_ads_1200x628',          w:1200, h:628,  hint:"Facebook / Instagram Ads — 1200×628px" },
-    { group: null,                         label: '📷 Instagram Post',      file: 'instagram_1080x1080',        w:1080, h:1080, hint:"Instagram cuadrado — 1080×1080px" },
-  ];
+  // ── PASO 1: Solo 3 requests — una por orientación ──────────────────────
+  // Todos los banners se generan a partir de estas 3 imágenes base vía canvas
+  const BASE_IMGS = {
+    wide:   { w: 1280, h: 427,  orient: 'wide horizontal landscape panoramic' },   // ratio ~3:1
+    square: { w: 800,  h: 800,  orient: 'square composition centered'          },   // 1:1
+    tall:   { w: 600,  h: 900,  orient: 'vertical portrait tall composition'   },   // 2:3
+  };
 
-  // Generar solo 1 imagen base y reutilizar/redimensionar
-  // Las APIs de imagen generan a distintas resoluciones según aspect ratio
-  const baseSeeds = { wide: Math.floor(Math.random()*99999), square: Math.floor(Math.random()*99999)+1000, tall: Math.floor(Math.random()*99999)+2000 };
-  const total = BANNERS.length;
-
-  for (let i = 0; i < BANNERS.length; i++) {
-    const b = BANNERS[i];
-    statusDiv.textContent = `⏳ Generando ${i+1}/${total}: ${b.label}...`;
-
-    // Header de grupo
-    if (b.group) {
-      const groupHeader = document.createElement('div');
-      groupHeader.style.cssText = 'font-size:11px;font-weight:700;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #2d2245';
-      groupHeader.textContent = b.group;
-      grid.appendChild(groupHeader);
-    }
-
-    // Calcular dimensiones para la API (máx 1280 en cualquier eje)
-    const ratio = b.w / b.h;
-    let fw, fh;
-    if (b.h < 100) { fw = Math.min(b.w, 1280); fh = Math.max(60, Math.round(fw * b.h / b.w)); }
-    else if (b.w >= b.h) { fw = Math.min(b.w, 1280); fh = Math.min(b.h, 1280); }
-    else { fh = Math.min(b.h, 1280); fw = Math.min(b.w, 1280); }
-    const orient = b.w > b.h ? 'wide horizontal landscape' : b.w === b.h ? 'square' : 'vertical portrait';
-    const seed = b.h < 100 ? baseSeeds.wide : (b.w === b.h ? baseSeeds.square : baseSeeds.tall);
-
-    const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d1f4e';
-    card.innerHTML = `
-      <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:2px">${b.label}</div>
-      <div style="font-size:11px;color:#6b7280;margin-bottom:10px">${b.hint}</div>
-      <div style="text-align:center;padding:16px;color:#6b7280;font-size:12px">⏳ Cargando imagen...</div>
-    `;
-    grid.appendChild(card);
-
-    try {
-      const prompt = encodeURIComponent(
-        `${styleDesc}, illustration about "${topicClean}", ${orient} composition, ` +
-        `no text, no words, no letters, no watermark, professional marketing banner, ultra clean`
-      );
-      const url = `https://image.pollinations.ai/prompt/${prompt}?width=${fw}&height=${fh}&nologo=true&seed=${seed+i*7}&enhance=true`;
-
+  // Helper: cargar imagen con timeout y crossOrigin
+  async function fetchImg(url, timeoutMs = 60000) {
+    return new Promise((res, rej) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      await new Promise((res, rej) => { img.onload=res; img.onerror=rej; img.src=url; setTimeout(rej,60000); });
+      const t = setTimeout(() => rej(new Error('timeout')), timeoutMs);
+      img.onload  = () => { clearTimeout(t); res(img); };
+      img.onerror = () => { clearTimeout(t); rej(new Error('error')); };
+      img.src = url;
+    });
+  }
 
-      img.style.cssText = 'width:100%;border-radius:8px;display:block;max-height:280px;object-fit:cover';
+  // Helper: imagen → canvas → base64
+  function imgToCanvas(img, tw, th) {
+    const c = document.createElement('canvas');
+    c.width = tw; c.height = th;
+    const ctx = c.getContext('2d');
+    // cover: recortar al centro para llenar el canvas sin distorsión
+    const scaleW = tw / img.naturalWidth;
+    const scaleH = th / img.naturalHeight;
+    const scale  = Math.max(scaleW, scaleH);
+    const sw = tw / scale, sh = th / scale;
+    const sx = (img.naturalWidth  - sw) / 2;
+    const sy = (img.naturalHeight - sh) / 2;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+    return c;
+  }
 
-      const dlBtn = document.createElement('button');
-      dlBtn.style.cssText = 'display:inline-block;margin-top:10px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer';
-      dlBtn.textContent = `⬇️ Descargar ${b.w}×${b.h}`;
-      dlBtn.onclick = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = b.w; canvas.height = b.h;
-        const ctx = canvas.getContext('2d');
-        const tmp = new Image(); tmp.crossOrigin = 'anonymous';
-        tmp.onload = () => {
-          ctx.drawImage(tmp, 0, 0, b.w, b.h);
-          const a = document.createElement('a');
-          a.download = `${b.file}.png`;
-          a.href = canvas.toDataURL('image/png');
-          a.click();
-        };
-        tmp.onerror = () => window.open(img.src, '_blank');
-        tmp.src = img.src;
-      };
+  // Descargar las 3 imágenes base
+  const bases = {};
+  for (const [key, cfg] of Object.entries(BASE_IMGS)) {
+    statusDiv.textContent = `⏳ Descargando imagen ${key}...`;
+    const prompt = encodeURIComponent(
+      `${styleDesc}, illustration about "${topicClean}", ${cfg.orient}, ` +
+      `no text, no words, no letters, no watermark, ultra clean, studio quality`
+    );
+    const url = `https://image.pollinations.ai/prompt/${prompt}?width=${cfg.w}&height=${cfg.h}&nologo=true&seed=${seed}&enhance=true`;
+    try {
+      bases[key] = await fetchImg(url, 70000);
+      statusDiv.textContent = `✅ Imagen ${key} lista`;
+    } catch(e) {
+      bases[key] = null;
+      statusDiv.textContent = `⚠️ Imagen ${key} no disponible — se usará placeholder`;
+    }
+    await new Promise(r => setTimeout(r, 800)); // pequeña pausa entre requests
+  }
 
-      card.innerHTML = `
-        <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:2px">${b.label}</div>
-        <div style="font-size:11px;color:#6b7280;margin-bottom:10px">${b.hint}</div>
-      `;
-      card.appendChild(img);
-      card.appendChild(dlBtn);
+  // ── PASO 2: Renderizar todos los banners en canvas local (sin red) ──────
+  btn.textContent = '⏳ Creando los 11 formatos...';
+  statusDiv.textContent = '⏳ Paso 2/2 — Creando todos los formatos en canvas local...';
 
-    } catch(err) {
-      card.innerHTML += `<div style="color:#f87171;font-size:12px;margin-top:6px">⚠️ Error — recargá la página o esperá y regenerá</div>`;
+  // Asignar imagen base según aspect ratio del banner
+  function pickBase(bw, bh) {
+    const r = bw / bh;
+    if (r >= 1.8)  return bases.wide   || bases.square || bases.tall;   // muy ancho
+    if (r <= 0.75) return bases.tall   || bases.square || bases.wide;   // alto/vertical
+    return              bases.square  || bases.wide   || bases.tall;    // cuadrado/mixto
+  }
+
+  // Placeholder canvas si no hay ninguna imagen
+  function makePlaceholder(tw, th, label) {
+    const c = document.createElement('canvas');
+    c.width = tw; c.height = th;
+    const ctx = c.getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, tw, th);
+    g.addColorStop(0, '#1a1229'); g.addColorStop(1, '#2d1f4e');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, tw, th);
+    ctx.fillStyle = '#7c3aed'; ctx.fillRect(0, 0, tw, 4); ctx.fillRect(0, th-4, tw, 4);
+    ctx.fillStyle = '#c4b5fd'; ctx.font = `bold ${Math.min(tw/8, 18)}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, tw/2, th/2);
+    return c;
+  }
+
+  const BANNERS = [
+    { group:'🏪 HOTMART — Producto',  label:'🖼️ Banner Principal',   file:'hotmart_banner_principal',  w:1920,h:640  ,hint:'Personalizar producto → Banner — 1920×640px' },
+    { group:null,                      label:'🟦 Avatar del producto', file:'hotmart_avatar',            w:600, h:600 ,hint:'Personalizar producto → Avatar — 600×600px' },
+    { group:null,                      label:'📋 Portada vitrina',     file:'hotmart_portada_vitrina',   w:600, h:900 ,hint:'Personalizar producto → Portadas vitrina — 600×900px' },
+    { group:'👥 HOTMART — Afiliados', label:'🔹 Banner 250×250',      file:'hotmart_afiliado_250x250',  w:250, h:250 ,hint:'Material afiliados Hotmart — 250×250px' },
+    { group:null,                      label:'🔹 Banner 300×250',      file:'hotmart_afiliado_300x250',  w:300, h:250 ,hint:'Material afiliados Hotmart — 300×250px' },
+    { group:null,                      label:'🔹 Banner 336×280',      file:'hotmart_afiliado_336x280',  w:336, h:280 ,hint:'Material afiliados Hotmart — 336×280px' },
+    { group:null,                      label:'🔹 Banner 468×60',       file:'hotmart_afiliado_468x60',   w:468, h:60  ,hint:'Material afiliados Hotmart — 468×60px' },
+    { group:null,                      label:'🔹 Banner 728×90',       file:'hotmart_afiliado_728x90',   w:728, h:90  ,hint:'Material afiliados Hotmart — 728×90px' },
+    { group:null,                      label:'🔹 Banner 160×600',      file:'hotmart_afiliado_160x600',  w:160, h:600 ,hint:'Material afiliados Hotmart — 160×600px' },
+    { group:'📱 Redes Sociales',       label:'📣 Meta Ads',             file:'meta_ads_1200x628',         w:1200,h:628 ,hint:'Facebook / Instagram Ads — 1200×628px' },
+    { group:null,                      label:'📷 Instagram Post',       file:'instagram_1080x1080',       w:1080,h:1080,hint:'Instagram cuadrado — 1080×1080px' },
+  ];
+
+  let ok = 0;
+  for (const b of BANNERS) {
+    // Header de grupo
+    if (b.group) {
+      const gh = document.createElement('div');
+      gh.style.cssText = 'font-size:11px;font-weight:700;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #2d2245';
+      gh.textContent = b.group;
+      grid.appendChild(gh);
     }
 
-    if (i < BANNERS.length-1) await new Promise(r => setTimeout(r, 1500));
+    const baseImg = pickBase(b.w, b.h);
+    // Usar canvas para recortar al tamaño exacto (sin nueva request de red)
+    // Para banners muy pequeños (≤200px), usar tamaño real; para los grandes, preview reducido
+    const PREVIEW_MAX = 800;
+    const scale = Math.min(1, PREVIEW_MAX / Math.max(b.w, b.h));
+    const pw = Math.round(b.w * scale), ph = Math.round(b.h * scale);
+
+    let previewCanvas, finalCanvas;
+    try {
+      finalCanvas   = baseImg ? imgToCanvas(baseImg, b.w, b.h) : makePlaceholder(b.w, b.h, `${b.w}×${b.h}`);
+      previewCanvas = baseImg ? imgToCanvas(baseImg, pw, ph)    : makePlaceholder(pw, ph, `${b.w}×${b.h}`);
+      ok++;
+    } catch(e) {
+      finalCanvas   = makePlaceholder(b.w, b.h, `${b.w}×${b.h}`);
+      previewCanvas = makePlaceholder(pw, ph, `${b.w}×${b.h}`);
+    }
+
+    const previewDataUrl = previewCanvas.toDataURL('image/jpeg', 0.85);
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #2d1f4e';
+
+    const previewImg = document.createElement('img');
+    previewImg.src = previewDataUrl;
+    previewImg.style.cssText = 'width:100%;border-radius:8px;display:block;max-height:260px;object-fit:contain;background:#09070f';
+
+    const dlBtn = document.createElement('button');
+    dlBtn.style.cssText = 'display:inline-block;margin-top:10px;padding:8px 18px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer';
+    dlBtn.textContent = `⬇️ Descargar ${b.w}×${b.h}`;
+    dlBtn.onclick = () => {
+      // Descargar en tamaño real desde el canvas ya generado
+      try {
+        const a = document.createElement('a');
+        a.download = `${b.file}.png`;
+        a.href = finalCanvas.toDataURL('image/png');
+        a.click();
+      } catch(e) { alert('Error al descargar. Intentá con un banner más pequeño.'); }
+    };
+
+    const header = document.createElement('div');
+    header.innerHTML = `
+      <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:2px">${b.label}</div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:10px">${b.hint}</div>
+    `;
+    card.appendChild(header);
+    card.appendChild(previewImg);
+    card.appendChild(dlBtn);
+    grid.appendChild(card);
+
+    // Ceder el hilo para no bloquear la UI
+    await new Promise(r => setTimeout(r, 30));
   }
 
   btn.disabled = false;
   btn.textContent = '🔄 Regenerar todos los banners';
-  statusDiv.textContent = `✅ ¡${total} banners listos! Descargá cada uno con el botón.`;
+  statusDiv.textContent = `✅ ¡${BANNERS.length} banners listos (${ok} con imagen IA)! Hacé click en "Descargar" en cada uno.`;
 }
 
 // ─── EXPORTAR BONOS COMO PDF ──────────────────────────────────────────────
