@@ -1256,31 +1256,15 @@ select { appearance: none; cursor: pointer; }
       <!-- BANNERS HOTMART COMPLETOS -->
       <div class="card" style="margin-top:20px">
         <div class="card-title">🎨 BANNERS CON IA — Hotmart completo + Redes sociales</div>
-        <p style="font-size:13px;color:#9ca3af;margin-bottom:6px;line-height:1.6">Todos los tamaños exactos que pide Hotmart para afiliados, más formatos para Meta Ads e Instagram.</p>
-        
-        <div style="background:rgba(0,0,0,0.25);border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;color:#6b7280">
-          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">HOTMART — PRODUCTO</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-            <div>🖼️ <strong style="color:#9ca3af">Banner principal</strong><br>1920 × 640 px</div>
-            <div>🟦 <strong style="color:#9ca3af">Avatar del producto</strong><br>600 × 600 px</div>
-            <div>📋 <strong style="color:#9ca3af">Portada vitrina</strong><br>600 × 900 px</div>
-          </div>
-          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">HOTMART — MATERIAL PARA AFILIADOS</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-            <div>🔹 250 × 250 px</div>
-            <div>🔹 300 × 250 px</div>
-            <div>🔹 336 × 280 px</div>
-            <div>🔹 468 × 60 px</div>
-            <div>🔹 728 × 90 px</div>
-            <div>🔹 160 × 600 px</div>
-          </div>
-          <div style="color:#a78bfa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">REDES SOCIALES</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-            <div>📣 Meta Ads<br>1200 × 628 px</div>
-            <div>📷 Instagram post<br>1080 × 1080 px</div>
-          </div>
-        </div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Generá 11 banners publicitarios con tu título, precio y CTA — listos para subir a Hotmart y redes.</p>
 
+        <!-- BOTÓN PRINCIPAL ARRIBA — siempre visible -->
+        <button class="btn-primary" onclick="generateBanners()" id="btn-banners" style="width:100%;font-size:15px;padding:15px;margin-bottom:14px">
+          🎨 Generar todos los banners con IA (11 formatos)
+        </button>
+        <div id="banner-status" style="font-size:13px;color:#c4b5fd;margin-bottom:10px;text-align:center"></div>
+
+        <!-- Estilo -->
         <div id="banner-style-row" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
           <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
             <input type="radio" name="banner-style" value="modern" checked> Moderno / Minimalista
@@ -1295,10 +1279,6 @@ select { appearance: none; cursor: pointer; }
             <input type="radio" name="banner-style" value="warm"> Cálido / Lifestyle
           </label>
         </div>
-        <button class="btn-primary" onclick="generateBanners()" id="btn-banners" style="width:100%">
-          🎨 Generar todos los banners con IA (11 formatos)
-        </button>
-        <div id="banner-status" style="font-size:13px;color:#c4b5fd;margin-top:10px;text-align:center"></div>
         <div id="banner-grid" style="margin-top:16px"></div>
       </div>
     </div>
