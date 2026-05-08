@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -19,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -1249,6 +1250,48 @@ select { appearance: none; cursor: pointer; }
         <p style="font-size:11px;color:#4b5563;margin-top:8px;text-align:center">Las imágenes se generan sin texto. Para agregar logo y texto usá <strong style="color:#6b7280">Canva.com</strong> (gratis)</p>
         <div id="banner-status" style="display:none;font-size:13px;color:#c4b5fd;margin-top:10px;text-align:center;padding:8px;background:rgba(124,58,237,0.1);border-radius:8px"></div>
         <div id="banner-grid" style="margin-top:16px"></div>
+      </div>
+
+      <!-- KIT ZIP AFILIADOS -->
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(5,150,105,0.08));border-color:#059669">
+        <div class="card-title" style="color:#6ee7b7">📦 KIT COMPLETO PARA AFILIADOS — Descargar ZIP</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Un solo archivo ZIP con todo el material para tus afiliados: banners en los 6 tamaños de Hotmart + modelos de email + tweets + scripts de video.</p>
+
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">El ZIP incluye:</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#9ca3af">
+            <div>🖼️ 6 banners para afiliados</div>
+            <div>📧 Modelos de email (txt)</div>
+            <div>🐦 Modelos de tweet (txt)</div>
+            <div>🎥 Scripts de video (txt)</div>
+            <div>📋 Copy de la oferta (txt)</div>
+            <div>📖 README instrucciones</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;font-weight:700;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:6px">Estilo visual de los banners en el ZIP:</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
+              <input type="radio" name="zip-style" value="warm" checked> 🍽️ Lifestyle
+            </label>
+            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
+              <input type="radio" name="zip-style" value="elegant"> ✨ Elegante
+            </label>
+            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
+              <input type="radio" name="zip-style" value="bold"> 🔥 Bold
+            </label>
+            <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#6ee7b7;display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid #065f46">
+              <input type="radio" name="zip-style" value="modern"> 🎯 Moderno
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="downloadAffiliateKit()" id="btn-zip" style="width:100%;background:linear-gradient(135deg,#059669,#047857)">
+          📦 Generar y descargar kit ZIP
+        </button>
+        <div id="zip-status" style="display:none;font-size:13px;color:#6ee7b7;margin-top:10px;text-align:center;padding:8px;background:rgba(5,150,105,0.15);border-radius:8px"></div>
+        <p style="font-size:11px;color:#4b5563;margin-top:8px;text-align:center">Después subí el ZIP a Google Drive y pegá el link en Hotmart → Material para afiliados → "Link para una carpeta en la nube"</p>
       </div>
     </div>
 
@@ -2919,6 +2962,279 @@ function loadImageAsBase64(url) {
     setTimeout(() => reject(new Error('Timeout cargando imagen')), 30000);
     img.src = url;
   });
+}
+
+// ─── KIT ZIP PARA AFILIADOS ───────────────────────────────────────────────
+async function downloadAffiliateKit() {
+  const btn = document.getElementById('btn-zip');
+  const statusDiv = document.getElementById('zip-status');
+  const d = state.data;
+  const r = state.results;
+
+  if (!d.topic) {
+    alert('Completá el Paso 01 con el tema de tu producto primero.');
+    return;
+  }
+  if (typeof JSZip === 'undefined') {
+    alert('Error cargando JSZip. Verificá tu conexión a internet y recargá la página.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Preparando kit...';
+  statusDiv.style.display = 'block';
+
+  const zip = new JSZip();
+  const topic = d.topic || 'Mi Producto';
+  const folderName = topic.replace(/[^\w\s]/g,'').replace(/\s+/g,'_').slice(0,30);
+
+  // ── 1. ARCHIVOS DE TEXTO ────────────────────────────────────────────────
+  statusDiv.textContent = '📝 Preparando archivos de texto...';
+
+  const now = new Date().toLocaleDateString('es-AR');
+
+  // README
+  const readme = `╔══════════════════════════════════════════════════╗
+║   KIT DE AFILIADOS — ${topic.slice(0,30)}
+║   Generado: ${now}
+╚══════════════════════════════════════════════════╝
+
+CONTENIDO DE ESTE KIT:
+━━━━━━━━━━━━━━━━━━━━━
+
+📁 banners/
+   ├── banner_250x250.png    → Banner cuadrado para blogs/email
+   ├── banner_300x250.png    → Banner rectángulo mediano
+   ├── banner_336x280.png    → Banner rectángulo grande
+   ├── banner_468x60.png     → Banner horizontal thin
+   ├── banner_728x90.png     → Leaderboard (header de web)
+   └── banner_160x600.png    → Skyscraper (lateral de web)
+
+📄 tweets.txt               → 5+ modelos de tweet listos para publicar
+📄 emails.txt               → Modelos de email para tu lista
+📄 scripts_video.txt        → Scripts para reels/videos cortos
+📄 copy_oferta.txt          → Texto de la oferta para compartir
+
+CÓMO USAR:
+━━━━━━━━━━
+1. Subí los banners a Hotmart en "Material para afiliados"
+2. Los textos son plantillas — personalizalos con tu experiencia
+3. Siempre incluí tu link de afiliado al final de cada publicación
+4. Política de Hotmart: no hagas spam, publicá valor real
+
+Link de producto: https://pay.hotmart.com/[TU-LINK]
+`;
+  zip.file('README.txt', readme);
+
+  // Tweets
+  const tweetsContent = r.ads || r.videoScripts || '';
+  let tweets = `MODELOS DE TWEET — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
+  if (tweetsContent) {
+    tweets += tweetsContent;
+  } else {
+    tweets += `TWEET 1 (curiosidad):
+¿Sabías que ${topic.toLowerCase()} puede cambiar completamente tus resultados?
+Descubrí cómo en este ebook → [TU LINK]
+#productividad #aprendizaje
+
+TWEET 2 (beneficio directo):
+✅ ${d.result || 'Resultados reales en menos tiempo'}
+Por solo $${d.price || '8'} USD 🔥
+→ [TU LINK]
+
+TWEET 3 (urgencia):
+Si querés ${d.result || 'mejorar tus resultados'} sin gastar una fortuna...
+Este ebook es para vos 👇
+[TU LINK]
+
+TWEET 4 (social proof):
+Cada día más personas están usando "${topic}" para transformar sus resultados.
+¿Sos el siguiente? → [TU LINK]
+
+TWEET 5 (story):
+Antes: perdía horas sin resultados.
+Después de ${topic}: todo cambió.
+El método completo acá → [TU LINK]`;
+  }
+  zip.file('tweets.txt', tweets);
+
+  // Emails
+  const emailContent = r.emailContent || r.emailLaunch || '';
+  let emails = `MODELOS DE EMAIL — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
+  if (emailContent) {
+    emails += emailContent;
+  } else {
+    emails += `EMAIL 1 — PRESENTACIÓN:
+Asunto: [Nombre], encontré algo que te puede cambiar el día
+
+Hola [Nombre],
+
+Quiero compartirte algo que me pareció increíble.
+
+Se llama "${topic}" y promete: ${d.result || 'resultados reales y medibles'}.
+
+Por solo $${d.price || '8'} USD.
+
+Lo podés conseguir acá: [TU LINK]
+
+[Tu nombre]
+
+---
+
+EMAIL 2 — BENEFICIOS:
+Asunto: Esto es lo que vas a lograr con "${topic}"
+
+[Nombre],
+
+Imaginate poder ${d.result || 'lograr tus objetivos de forma sistemática'}.
+
+Eso es exactamente lo que este ebook te enseña.
+
+✅ Paso a paso
+✅ Sin vueltas innecesarias
+✅ Con resultados reales
+
+→ Conseguilo ahora: [TU LINK]
+
+[Tu nombre]
+
+---
+
+EMAIL 3 — CIERRE/URGENCIA:
+Asunto: Última oportunidad
+
+[Nombre],
+
+¿Todavía no viste "${topic}"?
+
+Es la herramienta que más me ha servido últimamente para ${d.result || 'mejorar mis resultados'}.
+
+Precio: $${d.price || '8'} USD. Sin excusas.
+
+→ [TU LINK]
+
+[Tu nombre]`;
+  }
+  zip.file('emails.txt', emails);
+
+  // Scripts de video
+  const videoContent = r.videoScripts || r.ads || '';
+  let videos = `SCRIPTS DE VIDEO/REEL — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
+  if (videoContent && !r.ads) {
+    videos += videoContent;
+  } else {
+    videos += `SCRIPT 1 — REEL CORTO (30-60 seg):
+[GANCHO — 0-3 seg]: "¿Querés ${d.result || 'mejorar tus resultados'} sin gastar horas?"
+[PROBLEMA — 3-10 seg]: "La mayoría de la gente pierde tiempo porque no tiene el método correcto."
+[SOLUCIÓN — 10-25 seg]: "Por eso existe '${topic}'. Un ebook que te da el paso a paso completo."
+[CTA — 25-30 seg]: "Link en bio. Solo $${d.price || '8'} USD."
+
+SCRIPT 2 — VIDEO LARGO (2-3 min):
+[INTRO]: "Hoy te voy a hablar de algo que me cambió: ${topic}."
+[HISTORIA]: "Antes de conocer este método, yo también luchaba con [problema]..."
+[CONTENIDO]: "El ebook tiene 3 capítulos clave: [mencionar estructura]."
+[DEMOSTRACIÓN]: "Mirá este ejemplo de cómo aplicarlo..."
+[OFERTA]: "Lo conseguís por $${d.price || '8'} USD. El link está en la descripción."
+[CTA]: "Comentame si querés saber más. ¡Nos vemos en el próximo video!"
+
+SCRIPT 3 — STORY (15 seg):
+[Texto en pantalla]: "¿Buscás ${d.result || 'resultados concretos'}?"
+[Texto en pantalla]: "Este ebook lo explica todo"
+[Texto en pantalla]: "$${d.price || '8'} USD → Link en bio 👆"`;
+  }
+  zip.file('scripts_video.txt', videos);
+
+  // Copy de la oferta
+  const offerContent = r.offer || r.landing || '';
+  let oferta = `COPY DE LA OFERTA — ${topic}\nGenerado: ${now}\n${'═'.repeat(50)}\n\n`;
+  oferta += offerContent || `Producto: ${topic}
+Precio: $${d.price || '8'} USD
+Promesa: ${d.result || 'Resultados reales'}
+Garantía: ${d.guarantee || '30 días'}
+Plataforma: Hotmart
+Link: [TU LINK DE AFILIADO]`;
+  zip.file('copy_oferta.txt', oferta);
+
+  // ── 2. BANNERS (imágenes con IA) ────────────────────────────────────────
+  const zipStyleVal = document.querySelector('input[name="zip-style"]:checked')?.value || 'warm';
+  const zipStyleMap = {
+    warm:    'warm lifestyle photography, natural light, food styling, cozy atmosphere, no text, no letters',
+    elegant: 'elegant premium design, clean background, studio photography, product mockup, no text, no letters',
+    bold:    'bold vivid colors, high contrast, modern graphic design, vibrant colors, no text, no letters',
+    modern:  'minimalist modern design, clean white background, soft shadows, editorial photography, no text, no letters',
+  };
+  const zipStyle = zipStyleMap[zipStyleVal];
+  const topicClean = topic.replace(/[^\w\s]/g, '').slice(0, 50);
+
+  const affiliateBanners = [
+    { file: 'banner_250x250', w: 250,  h: 250  },
+    { file: 'banner_300x250', w: 300,  h: 250  },
+    { file: 'banner_336x280', w: 336,  h: 280  },
+    { file: 'banner_468x60',  w: 468,  h: 60   },
+    { file: 'banner_728x90',  w: 728,  h: 90   },
+    { file: 'banner_160x600', w: 160,  h: 600  },
+  ];
+
+  const bannersFolder = zip.folder('banners');
+  let bannersOk = 0;
+
+  for (let i = 0; i < affiliateBanners.length; i++) {
+    const b = affiliateBanners[i];
+    statusDiv.textContent = `🖼️ Generando banner ${i + 1}/6: ${b.w}×${b.h}...`;
+
+    // Ajustar para API
+    let fetchW = Math.max(64, Math.min(1024, b.w));
+    let fetchH = Math.max(64, Math.min(1024, b.h));
+    if (b.h < 100) { fetchW = 800; fetchH = Math.round(800 * (b.h / b.w)); fetchH = Math.max(fetchH, 64); }
+
+    const orient = fetchW > fetchH ? 'wide horizontal' : fetchW === fetchH ? 'square' : 'vertical portrait';
+    const prompt = encodeURIComponent(`${zipStyle}, scene about "${topicClean}", ${orient} composition, NO text, NO words, NO letters, professional marketing image`);
+    const seed = Math.floor(Math.random() * 99999) + i * 333;
+    const url = `https://image.pollinations.ai/prompt/${prompt}?width=${fetchW}&height=${fetchH}&nologo=true&seed=${seed}`;
+
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const blob = await resp.blob();
+
+      // Redimensionar al tamaño exacto con canvas
+      const imgBitmap = await createImageBitmap(blob);
+      const canvas = new OffscreenCanvas(b.w, b.h);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgBitmap, 0, 0, b.w, b.h);
+      const pngBlob = await canvas.convertToBlob({ type: 'image/png' });
+      const arrayBuf = await pngBlob.arrayBuffer();
+      bannersFolder.file(`${b.file}.png`, arrayBuf);
+      bannersOk++;
+    } catch(e) {
+      // Si falla, agregar un placeholder txt
+      bannersFolder.file(`${b.file}_ERROR.txt`, `No se pudo generar: ${e.message}. Generalo manualmente en canva.com en ${b.w}x${b.h}px.`);
+    }
+
+    if (i < affiliateBanners.length - 1) await new Promise(r => setTimeout(r, 1500));
+  }
+
+  // ── 3. GENERAR Y DESCARGAR ZIP ───────────────────────────────────────────
+  statusDiv.textContent = '📦 Comprimiendo archivos...';
+  try {
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      (meta) => { statusDiv.textContent = `📦 Comprimiendo... ${Math.round(meta.percent)}%`; }
+    );
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(zipBlob);
+    link.download = `kit_afiliados_${folderName}.zip`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+
+    btn.disabled = false;
+    btn.textContent = '📦 Generar y descargar kit ZIP';
+    statusDiv.textContent = `✅ ZIP descargado con ${bannersOk}/6 banners + 4 archivos de texto. ¡Subilo a Google Drive y pegá el link en Hotmart!`;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '📦 Generar y descargar kit ZIP';
+    statusDiv.textContent = '⚠️ Error generando el ZIP: ' + e.message;
+  }
 }
 
 // ─── GENERADOR DE BANNERS CON IA — Tamaños exactos Hotmart ───────────────
