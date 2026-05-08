@@ -1323,9 +1323,68 @@ select { appearance: none; cursor: pointer; }
               👁 Previsualizar aquí
             </button>
           </div>
-          <div id="video-preview-wrap" style="display:none;margin-top:12px;border-radius:10px;overflow:hidden;border:2px solid rgba(251,191,36,0.4)">
-            <iframe id="video-preview-frame" style="width:100%;height:520px;border:none"></iframe>
+          <div id="video-preview-wrap" style="display:none;margin-top:12px">
+            <!-- Preview nativo — sin iframe -->
+            <div id="vp-tabs" style="display:flex;background:#0f0b1a;border-radius:10px 10px 0 0;overflow:hidden;border:1px solid rgba(251,191,36,0.3)">
+              <button onclick="vpTab('reel',this)"  class="vp-tab vp-active">📱 Reel</button>
+              <button onclick="vpTab('story',this)" class="vp-tab">📖 Story</button>
+              <button onclick="vpTab('vsl',this)"   class="vp-tab">🎬 VSL</button>
+              <button onclick="vpTab('tp',this)"    class="vp-tab">📜 Teleprompter</button>
+            </div>
+            <div id="vp-body" style="background:#09070f;border-radius:0 0 10px 10px;padding:16px;border:1px solid rgba(251,191,36,0.3);border-top:none;min-height:360px">
+              <!-- REEL -->
+              <div id="vp-reel" class="vp-panel">
+                <div style="max-width:300px;margin:0 auto">
+                  <div id="vp-screen" style="width:100%;aspect-ratio:9/16;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;position:relative;transition:background .6s;background:linear-gradient(135deg,#7c3aed,#e879f9)">
+                    <div id="vp-tipo" style="position:absolute;top:12px;left:12px;font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.3);padding:3px 8px;border-radius:20px"></div>
+                    <div id="vp-num"  style="position:absolute;top:12px;right:12px;font-size:10px;color:rgba(255,255,255,.6)"></div>
+                    <div id="vp-txt"  style="font-size:clamp(18px,5vw,28px);font-weight:900;line-height:1.2;margin-bottom:10px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)"></div>
+                    <div id="vp-sub"  style="font-size:clamp(12px,3vw,15px);color:rgba(255,255,255,.85);line-height:1.5"></div>
+                  </div>
+                  <div style="height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:10px;overflow:hidden">
+                    <div id="vp-prog" style="height:100%;background:#fff;border-radius:2px;width:0%;transition:width linear"></div>
+                  </div>
+                  <div id="vp-dots" style="display:flex;justify-content:center;gap:5px;margin-top:8px"></div>
+                  <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
+                    <button onclick="vpNav(-1)" style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;border:none;font-weight:700;cursor:pointer">← Ant</button>
+                    <button onclick="vpToggle()" id="vp-play-btn" style="padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;border:none;font-weight:700;cursor:pointer">▶ Play</button>
+                    <button onclick="vpNav(1)"  style="padding:8px 14px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;border:none;font-weight:700;cursor:pointer">Sig →</button>
+                  </div>
+                  <p style="font-size:11px;color:#4b5563;text-align:center;margin-top:6px">💡 Play pasa las pantallas automático al ritmo del reel</p>
+                </div>
+              </div>
+              <!-- STORY -->
+              <div id="vp-story" class="vp-panel" style="display:none">
+                <p style="font-size:12px;color:#6b5f8a;margin-bottom:12px;text-align:center">Cada pantalla dura los segundos indicados</p>
+                <div id="vp-story-cards"></div>
+              </div>
+              <!-- VSL -->
+              <div id="vp-vsl" class="vp-panel" style="display:none">
+                <p style="font-size:13px;color:#9ca3af;margin-bottom:12px">Script para video de 60-90 segundos</p>
+                <div id="vp-vsl-cards"></div>
+              </div>
+              <!-- TELEPROMPTER -->
+              <div id="vp-tp" class="vp-panel" style="display:none">
+                <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                  <button onclick="vpTpToggle()" id="vp-tp-btn" style="padding:8px 14px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#e879f9);color:#fff;border:none;font-weight:700;font-size:12px;cursor:pointer">▶ Iniciar</button>
+                  <button onclick="vpTpSpd(-1)" style="padding:8px 12px;border-radius:8px;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);font-weight:700;font-size:12px;cursor:pointer">🐢 Lento</button>
+                  <button onclick="vpTpSpd(1)"  style="padding:8px 12px;border-radius:8px;background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3);font-weight:700;font-size:12px;cursor:pointer">🐇 Rápido</button>
+                  <button onclick="vpTpReset()" style="padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.08);color:#9ca3af;border:none;font-weight:700;font-size:12px;cursor:pointer">↺ Reiniciar</button>
+                </div>
+                <div style="background:#09070f;border-radius:10px;padding:18px;height:300px;overflow:hidden;position:relative;border:1px solid #2d2245">
+                  <div style="position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(to bottom,#09070f,transparent);z-index:2;pointer-events:none"></div>
+                  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,#09070f,transparent);z-index:2;pointer-events:none"></div>
+                  <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(124,58,237,.5);z-index:3"></div>
+                  <div id="vp-tp-text" style="font-size:18px;line-height:1.9;color:#fff;white-space:pre-wrap;transition:transform .1s linear"></div>
+                </div>
+                <div id="vp-tp-spd" style="font-size:11px;color:#6b5f8a;text-align:center;margin-top:6px">Velocidad: media</div>
+              </div>
+            </div>
           </div>
+          <style>
+          .vp-tab{flex:1;padding:10px 4px;text-align:center;cursor:pointer;font-weight:700;font-size:12px;color:#6b5f8a;border:none;background:none;transition:all .2s}
+          .vp-active{color:#fff!important;border-bottom:2px solid #fbbf24;background:rgba(251,191,36,.08)!important}
+          </style>
           <div style="margin-top:10px">
             <div class="output-label" style="margin-bottom:6px">SCRIPT TEXTO</div>
             <div class="output-box" id="video-scripts-result" style="white-space:pre-wrap;font-size:12px;line-height:1.7;max-height:250px;overflow-y:auto"></div>
@@ -4099,16 +4158,162 @@ Español rioplatense. Textos cortos e impactantes. Emojis donde corresponda.`;
 
 function previewVideoHTML() {
   const json  = window._videoData;
-  const topic = window._videoTopic || 'mi-producto';
-  const price = window._videoPrice || '8';
   if (!json) { generateVideoPromo(); return; }
-  const html  = buildVideoHTML(json, topic, price);
-  const wrap  = document.getElementById('video-preview-wrap');
-  const frame = document.getElementById('video-preview-frame');
-  const blob  = new Blob([html], { type:'text/html;charset=utf-8' });
-  frame.src   = URL.createObjectURL(blob);
-  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+
+  const wrap = document.getElementById('video-preview-wrap');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = 'block';
+    vpInit(json);
+  } else {
+    wrap.style.display = 'none';
+  }
 }
+
+// ── PREVIEW NATIVO — sin iframe ───────────────────────────────────────────
+let vpData = null, vpIdx = 0, vpPlaying = false, vpTimer = null;
+let vpTpRun = false, vpTpInt = null, vpTpPos = 0, vpTpSpdIdx = 2;
+const VP_SPEEDS = [0.5, 0.8, 1.2, 1.8, 2.5, 3.5];
+const VP_SPDNAMES = ['muy lenta','lenta','media','rápida','muy rápida','ultra'];
+const VP_COLORS = { gancho:['#7c3aed','#e879f9'], problema:['#1e1535','#4c1d95'], solucion:['#065f46','#10b981'], beneficio:['#92400e','#f59e0b'], oferta:['#7c3aed','#e879f9'] };
+
+function vpInit(json) {
+  vpData = json;
+  vpIdx = 0; vpPlaying = false;
+  clearTimeout(vpTimer);
+
+  // Dots del reel
+  const dots = document.getElementById('vp-dots');
+  if (dots) {
+    dots.innerHTML = '';
+    (json.reel?.pantallas||[]).forEach((_,i) => {
+      const d = document.createElement('div');
+      d.style.cssText = `width:${i===0?'16px':'7px'};height:7px;border-radius:4px;background:${i===0?'#fff':'rgba(255,255,255,.25)'};transition:all .3s;cursor:pointer;display:inline-block;margin:0 2px`;
+      d.onclick = () => { vpIdx = i; vpShowSlide(); };
+      dots.appendChild(d);
+    });
+  }
+  vpShowSlide();
+
+  // Story cards
+  const sc = document.getElementById('vp-story-cards');
+  if (sc) {
+    sc.innerHTML = '';
+    (json.story||[]).forEach((p,i) => {
+      sc.innerHTML += `<div style="background:linear-gradient(135deg,#1a1229,#2d1f4e);border-radius:14px;padding:18px;margin-bottom:10px;text-align:center;border:1px solid #3d3060">
+        <div style="font-size:9px;color:#a78bfa;font-weight:800;letter-spacing:2px;margin-bottom:8px">PANTALLA ${i+1} — ${p.seg}s</div>
+        <div style="font-size:18px;font-weight:900;margin-bottom:6px;color:#fff;white-space:pre-line">${p.texto}</div>
+        <div style="font-size:13px;color:#c4b5fd">${p.sub}</div>
+      </div>`;
+    });
+  }
+
+  // VSL cards
+  const vc = document.getElementById('vp-vsl-cards');
+  if (vc) {
+    vc.innerHTML = '';
+    const colors = ['#7c3aed','#ef4444','#10b981','#f59e0b','#3b82f6','#e879f9'];
+    (json.vsl||[]).forEach((s,i) => {
+      vc.innerHTML += `<div style="background:#1a1229;border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid ${colors[i%colors.length]}">
+        <div style="color:#a78bfa;font-size:10px;font-weight:700;letter-spacing:2px;margin-bottom:6px">${s.titulo}</div>
+        <div style="color:#e5e7eb;font-size:14px;line-height:1.7">${s.script}</div>
+      </div>`;
+    });
+  }
+
+  // Teleprompter
+  const tp = document.getElementById('vp-tp-text');
+  if (tp) {
+    const voz = json.reel?.voz || '';
+        const vslText = (json.vsl||[]).map(s => '[' + s.titulo + '] ' + s.script).join(' | ');
+    const full = (voz + ' ' + vslText);
+  }
+}
+
+function vpShowSlide() {
+  if (!vpData) return;
+  const slides = vpData.reel?.pantallas || [];
+  const s = slides[vpIdx]; if (!s) return;
+  const [c1,c2] = VP_COLORS[s.tipo] || ['#1a1229','#7c3aed'];
+  const screen = document.getElementById('vp-screen');
+  if (screen) screen.style.background = `linear-gradient(135deg,${c1},${c2})`;
+  const txt = document.getElementById('vp-txt'); if (txt) txt.textContent = s.texto;
+  const sub = document.getElementById('vp-sub'); if (sub) sub.textContent = s.sub;
+  const tipo = document.getElementById('vp-tipo'); if (tipo) tipo.textContent = (s.tipo||'').toUpperCase();
+  const num = document.getElementById('vp-num'); if (num) num.textContent = (vpIdx+1)+'/'+slides.length;
+  // Dots
+  const dots = document.getElementById('vp-dots');
+  if (dots) dots.querySelectorAll('div').forEach((d,i) => {
+    d.style.width = i===vpIdx ? '16px' : '7px';
+    d.style.background = i===vpIdx ? '#fff' : 'rgba(255,255,255,.25)';
+  });
+}
+
+function vpNav(dir) {
+  const slides = vpData?.reel?.pantallas || [];
+  vpIdx = Math.max(0, Math.min(slides.length-1, vpIdx+dir));
+  vpShowSlide();
+}
+
+function vpToggle() {
+  vpPlaying = !vpPlaying;
+  const btn = document.getElementById('vp-play-btn');
+  if (btn) btn.textContent = vpPlaying ? '⏸ Pausar' : '▶ Play';
+  if (vpPlaying) vpAutoPlay(); else {
+    clearTimeout(vpTimer);
+    const p = document.getElementById('vp-prog');
+    if (p) { p.style.transition='none'; p.style.width='0%'; }
+  }
+}
+
+function vpAutoPlay() {
+  if (!vpPlaying || !vpData) return;
+  const slides = vpData.reel?.pantallas || [];
+  const s = slides[vpIdx]; if (!s) { vpIdx=0; vpShowSlide(); vpAutoPlay(); return; }
+  const dur = (s.seg||4) * 1000;
+  const prog = document.getElementById('vp-prog');
+  if (prog) { prog.style.transition='none'; prog.style.width='0%'; setTimeout(()=>{ prog.style.transition='width '+dur+'ms linear'; prog.style.width='100%'; },30); }
+  vpTimer = setTimeout(() => {
+    if (prog) { prog.style.transition='none'; prog.style.width='0%'; }
+    if (vpIdx < slides.length-1) { vpIdx++; vpShowSlide(); vpAutoPlay(); }
+    else { vpPlaying=false; const btn=document.getElementById('vp-play-btn'); if(btn) btn.textContent='▶ Reiniciar'; vpIdx=0; vpShowSlide(); }
+  }, dur);
+}
+
+function vpTab(id, btn) {
+  document.querySelectorAll('.vp-panel').forEach(p => p.style.display='none');
+  document.querySelectorAll('.vp-tab').forEach(t => { t.classList.remove('vp-active'); t.style.color=''; t.style.background=''; });
+  const panel = document.getElementById('vp-'+id);
+  if (panel) panel.style.display = 'block';
+  btn.classList.add('vp-active');
+}
+
+function vpTpToggle() {
+  vpTpRun = !vpTpRun;
+  const btn = document.getElementById('vp-tp-btn');
+  if (btn) btn.textContent = vpTpRun ? '⏸ Pausar' : '▶ Iniciar';
+  if (vpTpRun) {
+    vpTpInt = setInterval(() => {
+      vpTpPos += VP_SPEEDS[vpTpSpdIdx];
+      const tp = document.getElementById('vp-tp-text');
+      if (tp) tp.style.transform = 'translateY(-'+vpTpPos+'px)';
+    }, 50);
+  } else clearInterval(vpTpInt);
+}
+
+function vpTpSpd(dir) {
+  vpTpSpdIdx = Math.max(0, Math.min(VP_SPEEDS.length-1, vpTpSpdIdx+dir));
+  const lbl = document.getElementById('vp-tp-spd');
+  if (lbl) lbl.textContent = 'Velocidad: ' + VP_SPDNAMES[vpTpSpdIdx];
+}
+
+function vpTpReset() {
+  vpTpPos=0; vpTpRun=false; clearInterval(vpTpInt);
+  const tp = document.getElementById('vp-tp-text');
+  if (tp) tp.style.transform='translateY(0)';
+  const btn = document.getElementById('vp-tp-btn');
+  if (btn) btn.textContent='▶ Iniciar';
+}
+
 
 function buildDefaultVideoData(topic, result, price, oldp, guar) {
   return {
