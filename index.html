@@ -923,34 +923,43 @@ select { appearance: none; cursor: pointer; }
       </div>
 
       <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(232,121,249,0.1));border-color:#7c3aed">
-        <div class="card-title" style="color:#f1eeff">🚀 GENERAR EBOOK COMPLETO (automático)</div>
-        <p style="font-size:14px;color:#c4b5fd;margin-bottom:16px;line-height:1.6">Un solo click y la IA genera TODO el ebook: introducción + capítulos 1, 2, 3 + conclusión. Tarda 2-3 minutos.</p>
+        <div class="card-title" style="color:#f1eeff">🚀 OPCIÓN A — Generar TODO automático</div>
+        <p style="font-size:14px;color:#c4b5fd;margin-bottom:16px;line-height:1.6">La IA genera las 5 partes seguidas con pausas de 20s entre cada una. Tarda ~5 minutos. Necesitás tu clave Groq activa.</p>
+        <div id="ebook-full-status" style="display:none;padding:10px;background:rgba(124,58,237,0.15);border-radius:8px;margin-bottom:12px;font-size:13px;color:#c4b5fd;"></div>
         <button class="btn-primary" onclick="generateFullEbook()" id="btn-full-ebook" style="width:100%">
           ⚡ Generar ebook completo automático
         </button>
       </div>
 
       <div class="card">
-        <div class="card-title">O generar sección por sección</div>
-        <div class="input-group">
-          <label>Elegí qué sección generar</label>
-          <select id="s10-section" onchange="saveField('section', this.value)">
-            <option value="intro">Introducción + Historia del autor</option>
-            <option value="cap1">Capítulo 1 — El problema principal</option>
-            <option value="cap2">Capítulo 2 — El método central</option>
-            <option value="cap3">Capítulo 3 — Aplicación paso a paso</option>
-            <option value="conclusion">Conclusión + Llamada a la acción</option>
-          </select>
+        <div class="card-title">📝 OPCIÓN B — Generar parte por parte (más confiable)</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:16px">Generá cada parte por separado. Esperá que aparezca el texto antes de hacer click en el siguiente.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn-secondary" onclick="generateSingleSection('intro','📖 INTRODUCCIÓN','Introducción y presentación del método')" id="btn-s-intro" style="text-align:left;padding:12px 16px;font-size:14px">
+            📖 1. Generar INTRODUCCIÓN
+          </button>
+          <button class="btn-secondary" onclick="generateSingleSection('cap1','📘 CAPÍTULO 1','El problema principal y por qué persiste')" id="btn-s-cap1" style="text-align:left;padding:12px 16px;font-size:14px">
+            📘 2. Generar CAPÍTULO 1 — El problema
+          </button>
+          <button class="btn-secondary" onclick="generateSingleSection('cap2','📗 CAPÍTULO 2','El método o sistema central')" id="btn-s-cap2" style="text-align:left;padding:12px 16px;font-size:14px">
+            📗 3. Generar CAPÍTULO 2 — El método
+          </button>
+          <button class="btn-secondary" onclick="generateSingleSection('cap3','📙 CAPÍTULO 3','Aplicación paso a paso')" id="btn-s-cap3" style="text-align:left;padding:12px 16px;font-size:14px">
+            📙 4. Generar CAPÍTULO 3 — Aplicación
+          </button>
+          <button class="btn-secondary" onclick="generateSingleSection('conclusion','🎯 CONCLUSIÓN','Próximos pasos y llamada a la acción')" id="btn-s-conclusion" style="text-align:left;padding:12px 16px;font-size:14px">
+            🎯 5. Generar CONCLUSIÓN
+          </button>
         </div>
-        <button class="btn-primary" onclick="generateEbookContent()" id="btn-ebook-content">
-          ✍️ Generar esta sección
-        </button>
+        <div style="margin-top:12px;padding:10px;background:rgba(0,0,0,0.2);border-radius:8px">
+          <p style="font-size:12px;color:#6b7280;margin:0">💡 Cada sección se AGREGA al ebook acumulado — no reemplaza. El botón "Copiar todo" al final copia el ebook completo.</p>
+        </div>
       </div>
 
       <div id="ebook-content-output" style="display:none">
         <div class="output-header">
-          <div class="output-label">📖 Contenido del ebook</div>
-          <button class="copy-btn" onclick="copyOutput('ebook-content-result')">Copiar</button>
+          <div class="output-label">📖 Contenido del ebook (acumulado)</div>
+          <button class="copy-btn" onclick="copyOutput('ebook-content-result')">Copiar todo</button>
         </div>
         <div class="output-box" id="ebook-content-result"></div>
       </div>
@@ -1191,6 +1200,37 @@ select { appearance: none; cursor: pointer; }
           📤 Generar archivos por plataforma
         </button>
         <p style="font-size:12px;color:#a89ec4;margin-top:10px;text-align:center">Te descarga 1 archivo por cada plataforma seleccionada en el Paso 02</p>
+      </div>
+
+      <!-- BANNERS HOTMART -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">🎨 BANNERS CON IA — Para Hotmart y redes sociales</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:6px;line-height:1.6">Generá imágenes profesionales con IA en todos los tamaños que pide Hotmart, Gumroad y redes.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;font-size:12px;color:#6b7280;background:rgba(0,0,0,0.2);border-radius:8px;padding:12px">
+          <div>📦 <strong style="color:#9ca3af">Portada producto</strong><br>1280 × 720 px</div>
+          <div>🟦 <strong style="color:#9ca3af">Thumbnail cuadrado</strong><br>800 × 800 px</div>
+          <div>📘 <strong style="color:#9ca3af">Tapa del ebook</strong><br>600 × 900 px</div>
+          <div>📣 <strong style="color:#9ca3af">Banner horizontal</strong><br>1200 × 628 px</div>
+        </div>
+        <div id="banner-style-row" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="modern" checked> Moderno / Minimalista
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="bold"> Impacto / Bold
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="elegant"> Elegante / Premium
+          </label>
+          <label style="font-size:12px;text-transform:none;letter-spacing:0;color:#c4b5fd;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="banner-style" value="warm"> Cálido / Lifestyle
+          </label>
+        </div>
+        <button class="btn-primary" onclick="generateBanners()" id="btn-banners" style="width:100%">
+          🎨 Generar banners con IA
+        </button>
+        <div id="banner-status" style="display:none;font-size:13px;color:#c4b5fd;margin-top:10px;text-align:center"></div>
+        <div id="banner-grid" style="display:none;margin-top:16px;display:none"></div>
       </div>
     </div>
 
@@ -1875,178 +1915,191 @@ ESTRUCTURA SUGERIDA:
   setTimeout(() => { document.getElementById('btn-ebook-struct').disabled = false; document.getElementById('btn-ebook-struct').textContent = '🔄 Regenerar'; }, 5000);
 }
 
-async function generateFullEbook() {
-  const btn = document.getElementById('btn-full-ebook');
-  const output = document.getElementById('ebook-content-result');
-  const container = document.getElementById('ebook-content-output');
-  
-  btn.disabled = true;
-  container.style.display = 'block';
-  output.textContent = '';
-  output.classList.remove('loading');
-  
-  const sections = [
-    { id: 'intro', name: '📖 INTRODUCCIÓN', desc: 'Introducción y presentación del método' },
-    { id: 'cap1', name: '📘 CAPÍTULO 1', desc: 'El problema principal y por qué persiste' },
-    { id: 'cap2', name: '📗 CAPÍTULO 2', desc: 'El método o sistema central' },
-    { id: 'cap3', name: '📙 CAPÍTULO 3', desc: 'Aplicación paso a paso' },
-    { id: 'conclusion', name: '🎯 CONCLUSIÓN', desc: 'Próximos pasos y llamada a la acción' }
-  ];
-  
+// ─── helper compartido para generar UN capítulo ───────────────────────────
+async function _buildChapterText(sectionId, sectionName, sectionDesc) {
   const d = state.data;
-  let fullEbook = '';
-  
-  for (let idx = 0; idx < sections.length; idx++) {
-    const section = sections[idx];
-    btn.textContent = `⏳ Generando ${idx + 1}/5: ${section.name}...`;
-    
-    output.textContent = fullEbook + '\n\n[' + section.name + ' - generando...]';
-    output.scrollTop = output.scrollHeight;
-    
-    const prompt = `Escribí el capítulo "${section.desc}" para el libro "${d.topic}" (resultado: "${d.result}").
+  const prompt = `Escribí el capítulo "${sectionDesc}" para el libro "${d.topic}" (resultado prometido: "${d.result || 'transformación del lector'}").
 
-ESTRUCTURA OBLIGATORIA del capítulo:
+ESTRUCTURA OBLIGATORIA:
 1. Apertura (1 párrafo): conectá emocionalmente con el problema del lector
-2. Desarrollo (3-5 secciones con subtítulos): explicá el concepto con ejemplos REALES y datos concretos
-3. Caso práctico: una historia breve o ejemplo aplicable
+2. Desarrollo (3-5 secciones con subtítulos): explicá con ejemplos REALES y datos concretos
+3. Caso práctico: historia breve o ejemplo aplicable
 4. Cierre con acción: 3-5 pasos específicos que el lector puede aplicar HOY
 
 REGLAS DE ESCRITURA:
-- Mínimo 1000 palabras
-- Español rioplatense correcto (vos, tenés, sabés) — sin errores ortográficos
-- Subtítulos en negrita usando ** **
-- Listas claras cuando sea útil
+- Mínimo 900 palabras
+- Español rioplatense (vos, tenés, sabés) — sin errores ortográficos
+- Subtítulos usando mayúsculas o guiones
 - Datos verificables, números específicos, ejemplos reales
-- Terminá la sección completa, NO la dejes a medias
+- Terminá la sección COMPLETA — no la dejes a medias
 - Calidad de libro editorial publicado
-- NO uses palabras raras como "Julís", "vislumbrá" — usá lenguaje claro y natural
-- NO mezcles dialectos (no uses "tú" si estás usando "vos")
 
-Empezá con el subtítulo principal del capítulo. No saludes, no introduzcas, no escribas "Aquí tienes". Solo el contenido del capítulo.`;
+Empezá directo con el contenido. Sin saludos, sin "Aquí tienes", sin introducciones.`;
 
-    const systemPrompt = `Eres un escritor profesional especializado en libros prácticos para el mercado hispanohablante.
-
-REGLAS OBLIGATORIAS:
-- Español rioplatense natural y correcto (vos, tenés, sabés)
-- CERO errores ortográficos, palabras inventadas o spanglish
-- Frases claras, oraciones bien construidas
-- Información precisa, datos reales, ejemplos concretos
-- Tono profesional y cercano, calidad de libro publicado en editorial
-- Estructura impecable: introducción, desarrollo, cierre
-- Si das ejercicios, números o pasos, deben ser claros y aplicables
-- NUNCA uses palabras raras, traducciones literales del inglés, ni mezcles dialectos
-
+  const systemPrompt = `Sos un escritor profesional de libros prácticos para el mercado hispanohablante.
 LIBRO: ${d.topic}
-PROMESA: ${d.result}
-LECTOR: ${d.gender || 'adulto'}, ${d.age || '25-35'} años
+PROMESA: ${d.result || ''}
+LECTOR: ${d.gender || 'adulto'}, ${d.age || '25-45'} años
+Español rioplatense natural. Calidad editorial. Sin palabras raras ni spanglish.`;
 
-Escribí directamente, sin saludos. Revisá tu texto antes de entregarlo. Calidad editorial profesional.`;
+  const storedKey = getApiKey();
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 55000);
+
+  let response;
+  if (storedKey && storedKey.startsWith('gsk_')) {
+    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${storedKey}` },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        max_tokens: 2800,
+        temperature: 0.75
+      })
+    });
+  } else {
+    response = await fetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+        model: 'openai-large',
+        seed: Math.floor(Math.random() * 99999)
+      })
+    });
+  }
+  clearTimeout(tid);
+
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => '');
+    throw new Error(`HTTP ${response.status} — ${errBody.slice(0, 120)}`);
+  }
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || data.text || '';
+}
+
+// ─── OPCIÓN B: generar UN capítulo y agregar al ebook acumulado ────────────
+async function generateSingleSection(sectionId, sectionName, sectionDesc) {
+  const btnId = 'btn-s-' + sectionId;
+  const btn = document.getElementById(btnId);
+  const output = document.getElementById('ebook-content-result');
+  const container = document.getElementById('ebook-content-output');
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Generando...';
+  container.style.display = 'block';
+
+  try {
+    const text = await _buildChapterText(sectionId, sectionName, sectionDesc);
+    if (!text) throw new Error('Respuesta vacía — intentá de nuevo');
+
+    // AGREGAR al ebook acumulado (no reemplazar)
+    const separator = '\n\n═══════════════════════════════════\n' + sectionName + '\n═══════════════════════════════════\n\n';
+    const existing = state.results.ebookContent || '';
+    // Si ya existe esta sección, reemplazarla; si no, agregarla
+    const sectionMarker = '═══════════════════════════════════\n' + sectionName;
+    if (existing.includes(sectionMarker)) {
+      // Reemplazar la sección existente
+      const before = existing.slice(0, existing.indexOf(sectionMarker) - 2);
+      const afterMarker = existing.indexOf(sectionMarker) + sectionMarker.length;
+      const nextSep = existing.indexOf('\n\n═══', afterMarker);
+      const after = nextSep !== -1 ? existing.slice(nextSep) : '';
+      state.results.ebookContent = before + separator + text + after;
+    } else {
+      state.results.ebookContent = existing + separator + text;
+    }
+
+    output.textContent = state.results.ebookContent;
+    output.scrollTop = output.scrollHeight;
+    saveProgress();
+    state.completedSteps.add(state.currentStep);
+    updateUI();
+    btn.textContent = '✅ ' + originalText.replace(/^\S+\s\d+\.\s/, '') + ' — Regenerar';
+  } catch(err) {
+    alert('Error generando ' + sectionName + ':\n' + err.message + '\n\nEsperá 30 segundos y volvé a intentar.');
+    btn.textContent = originalText;
+  }
+  btn.disabled = false;
+}
+
+// ─── OPCIÓN A: generar TODO automático ────────────────────────────────────
+async function generateFullEbook() {
+  const btn = document.getElementById('btn-full-ebook');
+  const statusDiv = document.getElementById('ebook-full-status');
+  const output = document.getElementById('ebook-content-result');
+  const container = document.getElementById('ebook-content-output');
+
+  btn.disabled = true;
+  container.style.display = 'block';
+  output.textContent = '';
+  statusDiv.style.display = 'block';
+
+  const sections = [
+    { id: 'intro',      name: '📖 INTRODUCCIÓN', desc: 'Introducción y presentación del método' },
+    { id: 'cap1',       name: '📘 CAPÍTULO 1',   desc: 'El problema principal y por qué persiste' },
+    { id: 'cap2',       name: '📗 CAPÍTULO 2',   desc: 'El método o sistema central' },
+    { id: 'cap3',       name: '📙 CAPÍTULO 3',   desc: 'Aplicación paso a paso' },
+    { id: 'conclusion', name: '🎯 CONCLUSIÓN',   desc: 'Próximos pasos y llamada a la acción' }
+  ];
+
+  let fullEbook = '';
+  const storedKey = getApiKey();
+  if (!storedKey || !storedKey.startsWith('gsk_')) {
+    statusDiv.textContent = '⚠️ No encontré tu clave Groq. Hacé click en "Configurar IA" primero.';
+    btn.disabled = false;
+    btn.textContent = '⚡ Generar ebook completo automático';
+    return;
+  }
+
+  for (let idx = 0; idx < sections.length; idx++) {
+    const section = sections[idx];
+    const prog = `(${idx + 1}/5)`;
+    btn.textContent = `⏳ ${prog} Escribiendo ${section.name}...`;
+    statusDiv.textContent = `⏳ ${prog} Generando: ${section.name} — esperá...`;
+    output.textContent = fullEbook + '\n\n[' + section.name + ' — generando...]';
+    output.scrollTop = output.scrollHeight;
 
     try {
-      const storedKey = getApiKey();
-      const ebookCtrl = new AbortController();
-      const ebookTid = setTimeout(() => ebookCtrl.abort(), 45000);
-
-      let response;
-      if (storedKey && storedKey.startsWith('gsk_')) {
-        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${storedKey}`
-          },
-          signal: ebookCtrl.signal,
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: 3000,
-            temperature: 0.7
-          })
-        });
-      } else {
-        response = await fetch('https://text.pollinations.ai/openai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: ebookCtrl.signal,
-          body: JSON.stringify({
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: prompt }
-            ],
-            model: 'openai-large',
-            seed: Math.floor(Math.random() * 100000)
-          })
-        });
-      }
-      clearTimeout(ebookTid);
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      const text = data.choices?.[0]?.message?.content || data.text || '';
-
-      if (text) {
-        fullEbook += '\n\n═══════════════════════════════════\n' + section.name + '\n═══════════════════════════════════\n\n' + text;
-        output.textContent = fullEbook;
-        output.scrollTop = output.scrollHeight;
-      }
-
-      // Pausa entre capítulos para no agotar el límite de tokens por minuto de Groq
-      if (idx < sections.length - 1) {
-        for (let s = 15; s > 0; s--) {
-          btn.textContent = `⏳ Pausa ${s}s antes del capítulo ${idx + 2}/${sections.length}...`;
-          await new Promise(r => setTimeout(r, 1000));
-        }
-      }
-
-    } catch(err) {
-      fullEbook += '\n\n[⚠️ Error en ' + section.name + ': ' + err.message + '. Continuando con el siguiente...]';
+      const text = await _buildChapterText(section.id, section.name, section.desc);
+      if (!text) throw new Error('Respuesta vacía');
+      fullEbook += '\n\n═══════════════════════════════════\n' + section.name + '\n═══════════════════════════════════\n\n' + text;
       output.textContent = fullEbook;
-      await new Promise(r => setTimeout(r, 3000));
+      output.scrollTop = output.scrollHeight;
+      statusDiv.textContent = `✅ ${prog} ${section.name} listo — ${text.split(' ').length} palabras`;
+    } catch(err) {
+      const errMsg = err.message || String(err);
+      statusDiv.textContent = `⚠️ ${prog} Error en ${section.name}: ${errMsg.slice(0,100)}`;
+      fullEbook += '\n\n[⚠️ ERROR en ' + section.name + ': ' + errMsg.slice(0,80) + ']';
+      output.textContent = fullEbook;
+      await new Promise(r => setTimeout(r, 5000));
+    }
+
+    // Pausa de 20 segundos entre capítulos (límite TPM de Groq)
+    if (idx < sections.length - 1) {
+      for (let s = 20; s > 0; s--) {
+        btn.textContent = `⏳ Pausa ${s}s antes de ${sections[idx+1].name}...`;
+        statusDiv.textContent = `⏸ Pausa ${s}s para no superar el límite de Groq...`;
+        await new Promise(r => setTimeout(r, 1000));
+      }
     }
   }
-  
+
   state.results.ebookContent = fullEbook;
-  saveProgress(); // backup automático
+  saveProgress();
   state.completedSteps.add(state.currentStep);
   updateUI();
-  
   btn.disabled = false;
-  btn.textContent = '✅ Ebook completo generado — Regenerar';
+  btn.textContent = '✅ Ebook completo — Regenerar';
+  statusDiv.textContent = '🎉 ¡Ebook completo! Scrolleá abajo para ver todo el contenido.';
 }
 
 function generateEbookContent() {
-  const d = state.data;
-  const section = d.section || 'intro';
-  const sectionNames = {
-    intro: 'Introducción y presentación del autor/método',
-    cap1: 'Capítulo 1 — El problema principal y por qué persiste',
-    cap2: 'Capítulo 2 — El método o sistema central',
-    cap3: 'Capítulo 3 — Aplicación paso a paso',
-    conclusion: 'Conclusión, próximos pasos y llamada a la acción',
-    todo: 'Introducción + Capítulo 1 + Capítulo 2 resumidos'
-  };
-
-  const prompt = `Escribí el contenido completo de la sección: "${sectionNames[section]}" para el ebook sobre "${d.topic}".
-
-Resultado que promete el ebook: "${d.result}"
-Avatar: ${d.gender || 'adulto'}, ${d.age || '25-35'} años, ${d.situation || 'busca solución al problema'}
-Estilo: ${d.style || 'práctico, directo, en segunda persona (vos)'}
-
-Escribí el contenido real y completo de esta sección:
-- Mínimo 600-800 palabras
-- Incluí ejemplos concretos, datos o anécdotas
-- Usá subtítulos internos para dividir el contenido
-- Terminá con un resumen o ejercicio práctico
-- Tono: hablarle directamente al lector usando "vos"
-
-Escribí el contenido directamente, sin introducirlo.`;
-  callClaude(prompt, 'ebook-content-result', 'ebook-content-output', 'ebookContent');
-  document.getElementById('btn-ebook-content').disabled = true;
-  document.getElementById('btn-ebook-content').textContent = '⏳ Escribiendo...';
-  setTimeout(() => { document.getElementById('btn-ebook-content').disabled = false; document.getElementById('btn-ebook-content').textContent = '🔄 Generar otra sección'; }, 5000);
+  // Función legacy — redirige a generateSingleSection
+  generateSingleSection('intro', '📖 INTRODUCCIÓN', 'Introducción y presentación del método');
 }
 
 function generateLandingCopy() {
@@ -2848,6 +2901,123 @@ function loadImageAsBase64(url) {
     setTimeout(() => reject(new Error('Timeout cargando imagen')), 30000);
     img.src = url;
   });
+}
+
+// ─── GENERADOR DE BANNERS CON IA ─────────────────────────────────────────
+async function generateBanners() {
+  const btn = document.getElementById('btn-banners');
+  const statusDiv = document.getElementById('banner-status');
+  const grid = document.getElementById('banner-grid');
+  const d = state.data;
+
+  if (!d.topic) {
+    alert('Primero completá el Paso 01 con el tema de tu producto.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando banners...';
+  statusDiv.style.display = 'block';
+  grid.style.display = 'none';
+  grid.innerHTML = '';
+
+  const styleVal = document.querySelector('input[name="banner-style"]:checked')?.value || 'modern';
+  const styleMap = {
+    modern:  'minimalist modern design, clean white and purple gradient, professional corporate, no text, geometric shapes, soft shadows',
+    bold:    'bold dynamic design, high contrast, vibrant colors, energetic, powerful visual impact, no text, dramatic lighting',
+    elegant: 'elegant premium design, gold and dark tones, luxury feel, sophisticated, premium quality product, no text, soft bokeh',
+    warm:    'warm lifestyle photography, natural light, happy person working on laptop, cozy home office, authentic, no text, golden hour'
+  };
+  const styleDesc = styleMap[styleVal];
+
+  const topicClean = (d.topic || 'infoproduct').replace(/[^\w\s]/g, '').slice(0, 60);
+
+  const banners = [
+    { label: '📦 Portada producto',   w: 1280, h: 720,  hint: 'Hotmart — imagen principal del producto' },
+    { label: '🟦 Thumbnail cuadrado', w: 800,  h: 800,  hint: 'Hotmart / Gumroad / Instagram' },
+    { label: '📘 Tapa del ebook',     w: 600,  h: 900,  hint: 'Amazon KDP / Payhip — portada vertical' },
+    { label: '📣 Banner horizontal',  w: 1200, h: 628,  hint: 'Facebook Ads / LinkedIn / OG image' },
+  ];
+
+  for (let i = 0; i < banners.length; i++) {
+    const b = banners[i];
+    statusDiv.textContent = `⏳ Generando ${i + 1}/4: ${b.label}...`;
+
+    try {
+      const prompt = encodeURIComponent(
+        `${styleDesc}, illustration related to "${topicClean}", professional marketing banner, ` +
+        `${b.w > b.h ? 'landscape' : b.w === b.h ? 'square' : 'portrait'} composition, ` +
+        `no text, no words, no letters, no watermark, ultra clean, studio quality`
+      );
+      const seed = Math.floor(Math.random() * 99999) + i * 1000;
+      const url = `https://image.pollinations.ai/prompt/${prompt}?width=${b.w}&height=${b.h}&nologo=true&seed=${seed}`;
+
+      // Crear tarjeta placeholder mientras carga
+      const card = document.createElement('div');
+      card.style.cssText = 'background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid #2d1f4e';
+      card.innerHTML = `
+        <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:4px">${b.label}</div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:12px">${b.hint} — ${b.w}×${b.h}px</div>
+        <div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">⏳ Generando imagen...</div>
+      `;
+      grid.style.display = 'block';
+      grid.appendChild(card);
+
+      // Cargar imagen
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = rej;
+        img.src = url;
+        setTimeout(rej, 45000);
+      });
+
+      img.style.cssText = `width:100%;border-radius:8px;display:block`;
+      const dlBtn = document.createElement('a');
+      dlBtn.style.cssText = 'display:inline-block;margin-top:10px;padding:8px 18px;background:#7c3aed;color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer';
+      dlBtn.textContent = `⬇️ Descargar ${b.w}×${b.h}`;
+
+      // Download via canvas
+      dlBtn.onclick = async () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = b.w; canvas.height = b.h;
+          const ctx = canvas.getContext('2d');
+          const tmpImg = new Image();
+          tmpImg.crossOrigin = 'anonymous';
+          tmpImg.onload = () => {
+            ctx.drawImage(tmpImg, 0, 0, b.w, b.h);
+            const link = document.createElement('a');
+            link.download = `banner-${b.label.replace(/[^\w]/g,'_')}-${b.w}x${b.h}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+          tmpImg.src = img.src;
+        } catch(e) {
+          window.open(img.src, '_blank');
+        }
+      };
+
+      card.innerHTML = `
+        <div style="font-weight:700;font-size:13px;color:#c4b5fd;margin-bottom:4px">${b.label}</div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:12px">${b.hint} — ${b.w}×${b.h}px</div>
+      `;
+      card.appendChild(img);
+      card.appendChild(dlBtn);
+
+    } catch(err) {
+      const errCard = grid.lastChild;
+      if (errCard) errCard.innerHTML += `<div style="color:#f87171;font-size:12px;margin-top:8px">⚠️ Error cargando imagen — intentá regenerar</div>`;
+    }
+
+    // Pequeña pausa entre imágenes
+    if (i < banners.length - 1) await new Promise(r => setTimeout(r, 2000));
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔄 Regenerar banners';
+  statusDiv.textContent = '✅ ¡Banners listos! Hacé click en "Descargar" en cada uno.';
 }
 
 function exportDoc(type) {
