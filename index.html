@@ -1281,6 +1281,80 @@ select { appearance: none; cursor: pointer; }
         </div>
         <div id="banner-grid" style="margin-top:16px"></div>
       </div>
+
+      <!-- VIDEO SCRIPT -->
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(245,158,11,0.04));border-color:rgba(251,191,36,0.3)">
+        <div class="card-title" style="color:#fbbf24">🎬 SCRIPTS DE VIDEO — Listos para grabar</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">3 formatos listos: Reel/TikTok (30s), Story (15s) y Video largo (60-90s). Generados con los datos de tu producto.</p>
+        <button class="btn-primary" onclick="generateAndShowVideoScripts()" id="btn-video-scripts" style="width:100%;background:linear-gradient(135deg,#d97706,#f59e0b)">
+          🎬 Generar scripts de video con IA
+        </button>
+        <div id="video-scripts-output" style="display:none;margin-top:16px">
+          <div class="output-header">
+            <div class="output-label">🎬 Scripts listos para grabar</div>
+            <button class="copy-btn" onclick="copyOutput('video-scripts-result')">Copiar todo</button>
+          </div>
+          <div class="output-box" id="video-scripts-result" style="white-space:pre-wrap;font-size:13px;line-height:1.7"></div>
+        </div>
+      </div>
+
+      <!-- GUIA GOOGLE DRIVE -->
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(37,99,235,0.04));border-color:rgba(59,130,246,0.3)">
+        <div class="card-title" style="color:#60a5fa">📁 QUE SUBIR A GOOGLE DRIVE — Estructura completa</div>
+        <p style="font-size:13px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Organiza todos tus archivos antes de subir a Hotmart. Asi tenes todo ordenado y no perdes nada.</p>
+        <button class="btn-secondary" onclick="document.getElementById('drive-guide').style.display=document.getElementById('drive-guide').style.display==='none'?'block':'none'" style="width:100%;border-color:rgba(59,130,246,0.4);color:#60a5fa;margin-bottom:12px">
+          📁 Ver estructura de carpetas y checklist
+        </button>
+        <div id="drive-guide" style="display:none">
+          <div style="background:#09070f;border-radius:10px;padding:16px;font-family:monospace;font-size:12px;line-height:2;color:#c4b5fd;margin-bottom:14px">
+            <div style="color:#60a5fa;font-weight:700;margin-bottom:4px" id="drive-folder-name">📁 MI_PRODUCTO/</div>
+            <div style="margin-left:16px">
+              <div style="color:#fbbf24">📁 01_PRODUCTO/</div>
+              <div style="margin-left:16px;color:#9ca3af">📕 ebook_completo.pdf<br>📄 ebook_texto.txt</div>
+              <div style="color:#34d399">📁 02_BONOS/</div>
+              <div style="margin-left:16px;color:#9ca3af">🎁 bono1_checklist_IA.pdf<br>🎁 bono2_rutina.pdf<br>🎁 bono3_prompts.pdf</div>
+              <div style="color:#e879f9">📁 03_BANNERS_HOTMART/</div>
+              <div style="margin-left:16px;color:#9ca3af">🖼️ banner_principal_1920x640.png<br>🟦 avatar_600x600.png<br>📋 portada_vitrina_600x900.png</div>
+              <div style="color:#e879f9">📁 04_BANNERS_AFILIADOS/</div>
+              <div style="margin-left:16px;color:#9ca3af">🔹 banner_250x250.png<br>🔹 banner_300x250.png<br>🔹 banner_336x280.png<br>🔹 banner_468x60.png<br>🔹 banner_728x90.png<br>🔹 banner_160x600.png</div>
+              <div style="color:#f87171">📁 05_REDES_SOCIALES/</div>
+              <div style="margin-left:16px;color:#9ca3af">📣 meta_ads_1200x628.png<br>📷 instagram_1080x1080.png</div>
+              <div style="color:#a78bfa">📁 06_COPY_MARKETING/</div>
+              <div style="margin-left:16px;color:#9ca3af">📧 emails_lanzamiento.txt<br>📢 ads_meta.txt<br>🌐 copy_landing.txt<br>🐦 tweets_ig.txt<br>🎬 scripts_video.txt</div>
+            </div>
+          </div>
+
+          <div style="font-size:13px;color:#9ca3af;line-height:1.8">
+            <div style="color:#60a5fa;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:10px">CHECKLIST ANTES DE SUBIR A HOTMART</div>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>PDF del ebook generado y descargado</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>3 PDFs de bonos generados y descargados</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>11 banners descargados y separados en carpetas</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>Scripts de video copiados (boton "Copiar todo")</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>Kit completo .txt exportado (emails + ads + landing + tweets)</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;cursor:pointer"><input type="checkbox" style="margin-top:3px;accent-color:#7c3aed"><span>Carpetas subidas a Google Drive con la estructura de arriba</span></label>
+
+            <div style="margin-top:14px;padding:14px;background:rgba(59,130,246,0.1);border-radius:8px;border:1px solid rgba(59,130,246,0.25)">
+              <div style="color:#60a5fa;font-weight:700;margin-bottom:10px;font-size:12px;letter-spacing:1px">ORDEN PARA SUBIR EN HOTMART</div>
+              <div style="color:#9ca3af;font-size:12px;line-height:2.2">
+                1. <strong style="color:#c4b5fd">Producto → Contenido</strong> → subi el PDF del ebook<br>
+                2. <strong style="color:#c4b5fd">Personalizar → Banner</strong> → subi 1920x640<br>
+                3. <strong style="color:#c4b5fd">Personalizar → Avatar</strong> → subi 600x600<br>
+                4. <strong style="color:#c4b5fd">Personalizar → Portadas vitrina</strong> → subi 600x900<br>
+                5. <strong style="color:#c4b5fd">Material afiliados → Banners</strong> → subi los 6 banners uno por uno<br>
+                6. <strong style="color:#c4b5fd">Material afiliados → Modelo de email</strong> → pega el email 1<br>
+                7. <strong style="color:#c4b5fd">Material afiliados → Modelo de tweet</strong> → pega los tweets<br>
+                8. <strong style="color:#c4b5fd">Material afiliados → Video</strong> → subi tu video grabado<br>
+                9. <strong style="color:#34d399">Comision para afiliados: 40-50%</strong> — recomendado
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="exportDoc('full')" style="width:100%;margin-top:16px">
+            📦 Descargar Kit completo .txt
+          </button>
+        </div>
+      </div>
+
     </div>
 
   </div><!-- end content-wrap -->
@@ -3869,6 +3943,92 @@ async function exportBonoPDF(type) {
 
   const filename = `bono${type==='checklist'?'1':type==='plantilla'?'2':'3'}_${(topic||'infoforge').toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25)}.pdf`;
   pdf.save(filename);
+}
+
+function generateAndShowVideoScripts() {
+  const d = state.data;
+  const btn = document.getElementById('btn-video-scripts');
+  const out = document.getElementById('video-scripts-output');
+  const res = document.getElementById('video-scripts-result');
+
+  // Si ya hay scripts del paso 14, mostramos esos directamente
+  if (state.results.scripts) {
+    res.textContent = state.results.scripts;
+    out.style.display = 'block';
+    btn.textContent = '✅ Scripts listos — Regenerar en Paso 14';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando scripts...';
+  out.style.display = 'block';
+  res.textContent = '⏳ Generando scripts con IA...';
+
+  const prompt = `Escribi 3 scripts de video para promocionar el infoproducto "${d.topic || 'mi producto'}" a ${d.price || '8'} USD. Resultado prometido: "${d.result || 'transformar tu productividad'}".
+
+──────────────────────────────────────
+📱 SCRIPT 1 — REEL / TIKTOK (30 segundos)
+──────────────────────────────────────
+[GANCHO — 0 a 3 segundos, texto en pantalla en grande]:
+[PROBLEMA — 3 a 10 segundos, hablando a cámara]:
+[SOLUCION — 10 a 25 segundos]:
+[CTA — 25 a 30 segundos]:
+
+──────────────────────────────────────
+📖 SCRIPT 2 — STORY (15 segundos)
+──────────────────────────────────────
+[Pantalla 1 — texto grande]:
+[Pantalla 2 — beneficio]:
+[Pantalla 3 — precio]:
+[Pantalla 4 — CTA]:
+
+──────────────────────────────────────
+🎬 SCRIPT 3 — VIDEO LARGO (60-90 segundos)
+──────────────────────────────────────
+[INTRO — hook]:
+[HISTORIA / PROBLEMA]:
+[SOLUCION — mostrar el producto]:
+[OFERTA Y PRECIO]:
+[GARANTIA]:
+[CTA final]:
+
+Para cada script incluí:
+- Las palabras EXACTAS a decir (listo para leer)
+- Que sugerís mostrar en pantalla
+- Tono: natural, no publicitario, como si hablaras con un amigo
+- Espanol rioplatense (vos, tenes, sabes)`;
+
+  const storedKey = getApiKey();
+  const fetchOpts = storedKey && storedKey.startsWith('gsk_')
+    ? {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        body: JSON.stringify({ model:'llama-3.3-70b-versatile', messages:[{role:'user',content:prompt}], max_tokens:2000, temperature:0.75 }),
+        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${storedKey}` }
+      }
+    : {
+        url: 'https://text.pollinations.ai/openai',
+        body: JSON.stringify({ messages:[{role:'user',content:prompt}], model:'openai-large' }),
+        headers: { 'Content-Type':'application/json' }
+      };
+
+  fetch(fetchOpts.url, { method:'POST', headers:fetchOpts.headers, body:fetchOpts.body })
+    .then(r => r.json())
+    .then(data => {
+      const text = data.choices?.[0]?.message?.content || data.text || '';
+      if (!text) throw new Error('Respuesta vacía');
+      res.textContent = text;
+      state.results.scripts = text;
+      saveProgress();
+      btn.disabled = false;
+      btn.textContent = '🔄 Regenerar scripts';
+    })
+    .catch(err => {
+      res.textContent = '⚠️ Error: ' + err.message + '
+
+Si tenés Groq configurado, esperá 30 segundos y reintentá. Si no, configurá tu clave en el botón "Groq Activo" arriba.';
+      btn.disabled = false;
+      btn.textContent = '🔄 Reintentar';
+    });
 }
 
 function exportDoc(type) {
