@@ -423,6 +423,17 @@ select { appearance: none; cursor: pointer; }
   #install-fab { bottom: 70px; }
 }
 
+/* ── STEP 14 TABS ── */
+.s14-tab {
+  padding: 9px 18px; border-radius: 8px; font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--border2); background: transparent; color: var(--text3);
+  transition: all .15s;
+}
+.s14-tab:hover { border-color: var(--v1); color: var(--va); }
+.s14-tab.active { background: linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15)); border-color: var(--v1); color: var(--vb); }
+@keyframes blink-tp { 0%,100%{opacity:1}50%{opacity:0} }
+
 /* ── MEJORAS v4 ── */
 
 /* Botón de descarga individual */
@@ -1396,49 +1407,200 @@ body.beginner .mode-toggle { border-color:var(--yellow); color:var(--yellow); ba
       </div>
     </div>
 
-    <!-- ═══ STEP 14: VIDEO SCRIPTS ═══ -->
+    <!-- ═══ STEP 14: VIDEO SCRIPTS + TELEPROMPTER + BANNERS ═══ -->
     <div id="step-14" class="step-page content" style="display:none">
       <div class="step-header">
         <div class="step-eyebrow">
           <span class="step-num">PASO 14</span>
-          <span class="step-tag">Scripts para video ads</span>
+          <span class="step-tag">Videos, Teleprompter & Banners</span>
         </div>
-        <h1>Guiones para videos que <em>convierten</em></h1>
-        <p>Scripts para Reels, Stories y video ads de 15, 30 y 60 segundos. Listos para grabar.</p>
+        <h1>Todo para <em>grabar y publicar</em> hoy</h1>
+        <p>Scripts con IA, teleprompter integrado para grabar tu video, y generador de banners para redes.</p>
       </div>
-      <div class="beginner-tip"><div class="bt-title">📱 ¿Cómo uso estos scripts?</div>Los scripts son los guiones exactos de lo que vas a decir frente a la cámara. Simplemente los lees o memorizas. Después subís el video a Instagram/TikTok como Reel, o a Facebook como anuncio. La IA también te dice qué mostrar en pantalla mientras hablás.</div>
 
-      <div class="card">
-        <div class="input-group">
-          <label>Formato de video</label>
-          <div class="chip-group">
-            <div class="chip selected" onclick="toggleChip(this)">📱 Reel / TikTok (15-30s)</div>
-            <div class="chip selected" onclick="toggleChip(this)">📖 Story (15s)</div>
-            <div class="chip" onclick="toggleChip(this)">🎬 VSL largo (2-5 min)</div>
+      <!-- TABS -->
+      <div id="s14-tabs" style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">
+        <button onclick="showS14Tab('scripts')" id="s14t-scripts" class="s14-tab active">🎬 Scripts con IA</button>
+        <button onclick="showS14Tab('teleprompter')" id="s14t-teleprompter" class="s14-tab">📱 Teleprompter & Video</button>
+        <button onclick="showS14Tab('banners')" id="s14t-banners" class="s14-tab">🖼️ Generador de Banners</button>
+      </div>
+
+      <!-- TAB 1: SCRIPTS -->
+      <div id="s14-scripts">
+        <div class="beginner-tip"><div class="bt-title">📱 ¿Cómo uso estos scripts?</div>Son los guiones exactos de lo que vas a decir frente a la cámara. Generalos acá, después pasá a la pestaña "Teleprompter" para grabar el video directamente.</div>
+        <div class="card">
+          <div class="input-group">
+            <label>Formato de video</label>
+            <div class="chip-group">
+              <div class="chip selected" onclick="toggleChip(this)">📱 Reel / TikTok (30s)</div>
+              <div class="chip selected" onclick="toggleChip(this)">📖 Story (15s)</div>
+              <div class="chip" onclick="toggleChip(this)">🎬 VSL largo (2-5 min)</div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="generateScripts()" id="btn-scripts">🎬 Generar scripts con IA</button>
+        </div>
+        <div id="scripts-output" style="display:none">
+          <div class="output-header">
+            <div class="output-label">🎬 Scripts generados</div>
+            <button class="copy-btn" onclick="copyOutput('scripts-result')">Copiar todo</button>
+          </div>
+          <div class="output-box" id="scripts-result"></div>
+          <div class="output-actions" style="margin-top:10px">
+            <button class="btn-download" onclick="downloadTextFile('scripts-result','scripts-reels')">⬇️ Descargar .txt</button>
+            <button class="btn-download" onclick="showS14Tab('teleprompter')" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:var(--v1);color:var(--vb)">📱 Ir al Teleprompter →</button>
+            <button class="btn-download" onclick="downloadReelHTML()" style="background:rgba(232,121,249,0.1);border-color:rgba(232,121,249,0.35);color:var(--accent)">⬇️ Pack HTML imprimible</button>
           </div>
         </div>
-        <button class="btn-primary" onclick="generateScripts()" id="btn-scripts">
-          🎬 Generar scripts con IA
-        </button>
-      </div>
-
-      <div id="scripts-output" style="display:none">
-        <div class="output-header">
-          <div class="output-label">🎬 Scripts para videos</div>
-          <button class="copy-btn" onclick="copyOutput('scripts-result')">Copiar todo</button>
-        </div>
-        <div class="output-box" id="scripts-result"></div>
-        <div class="output-actions">
-          <button class="btn-download" onclick="downloadTextFile('scripts-result','scripts-reels')">⬇️ Descargar scripts (.txt)</button>
-          <button class="btn-download" onclick="showReelCards()" style="background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.4);color:var(--va)">📱 Ver como teleprompter</button>
-          <button class="btn-download" onclick="downloadReelHTML()" style="background:rgba(232,121,249,0.1);border-color:rgba(232,121,249,0.35);color:var(--accent)">⬇️ Descargar cards HTML</button>
+        <div id="reel-cards-section" style="display:none;margin-top:20px">
+          <div class="card-title" style="color:var(--va);margin-bottom:12px;font-family:'Syne',sans-serif;font-weight:700">📱 CARDS DE TELEPROMPTER</div>
+          <div id="reel-cards-container" class="reel-cards"></div>
         </div>
       </div>
 
-      <!-- Reel Cards (teleprompter) -->
-      <div id="reel-cards-section" style="display:none; margin-top:20px;">
-        <div class="card-title" style="color:var(--va);margin-bottom:12px;font-family:'Syne',sans-serif;font-weight:700">📱 MODO TELEPROMPTER — scripts listos para grabar</div>
-        <div id="reel-cards-container" class="reel-cards"></div>
+      <!-- TAB 2: TELEPROMPTER EMBEBIDO -->
+      <div id="s14-teleprompter" style="display:none">
+        <div class="beginner-tip"><div class="bt-title">🎬 ¿Cómo grabo el video?</div>1. Generá los scripts en la pestaña anterior. 2. Hacé click en "Cargar script" abajo. 3. Presioná ▶ para que el texto se desplace solo mientras mirás la pantalla. 4. En Chrome/Edge podés grabar con ⏺ y descargar el video.</div>
+
+        <!-- Teleprompter UI embebido -->
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;min-height:520px">
+
+          <!-- LEFT: controles -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title">CARGAR SCRIPT</div>
+              <textarea id="tp-script-input" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:12px;border-radius:8px;outline:none;resize:vertical;min-height:120px;line-height:1.7" placeholder="Pegá el script generado acá, o hacé click en 'Cargar desde Paso 14'"></textarea>
+              <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                <button class="btn-download" onclick="loadScriptFromStep14()" style="flex:1;justify-content:center">📥 Cargar script generado</button>
+                <button class="btn-download" onclick="parseTPScript()" style="background:linear-gradient(135deg,var(--v1),var(--accent2));color:white;border:none;flex:1;justify-content:center">🎬 Preparar teleprompter</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:0">
+              <div class="card-title">CONFIGURACIÓN</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:5px">FONDO</div>
+                  <select id="tp-bg" onchange="updateTPTheme()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:6px;font-size:12px;outline:none">
+                    <option value="purple">🟣 Violeta</option>
+                    <option value="black">⚫ Negro</option>
+                    <option value="green">🟢 Verde</option>
+                    <option value="red">🔴 Rojo</option>
+                    <option value="blue">🔵 Azul</option>
+                    <option value="white">⬜ Blanco</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:5px">TEXTO</div>
+                  <select id="tp-fontsize" onchange="tpFontSize=+this.value" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:6px;font-size:12px;outline:none">
+                    <option value="38">Chico</option>
+                    <option value="50" selected>Mediano</option>
+                    <option value="64">Grande</option>
+                    <option value="78">Muy grande</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top:10px">
+                <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:6px">⚡ VELOCIDAD</div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <input type="range" id="tp-speed" min="1" max="10" value="4" oninput="tpSpeed=+this.value;document.getElementById('tp-speed-v').textContent=this.value" style="flex:1;accent-color:var(--v1)">
+                  <span id="tp-speed-v" style="font-size:13px;color:var(--va);font-weight:700;min-width:20px">4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cards de scripts -->
+            <div id="tp-cards-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+
+          <!-- RIGHT: canvas teleprompter -->
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <!-- topbar -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+              <span id="tp-name" style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;flex:1;color:var(--text2)">Teleprompter listo</span>
+              <div id="tp-recdot" style="width:8px;height:8px;border-radius:50%;background:var(--red);display:none;animation:blink-tp .7s infinite"></div>
+              <span id="tp-rectimer" style="font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:var(--red);display:none">00:00</span>
+            </div>
+
+            <!-- Canvas -->
+            <div id="tp-wrap" style="background:#000;border-radius:10px;overflow:hidden;position:relative;flex:1;min-height:320px;display:flex;align-items:center;justify-content:center">
+              <div id="tp-idle" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;background:linear-gradient(160deg,#0d0a1a,#1a1229)">
+                <div style="font-size:36px;margin-bottom:10px">📱</div>
+                <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text2)">Cargá un script para empezar</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:6px">Generá scripts en la primera pestaña</div>
+              </div>
+              <canvas id="tp-canvas" style="max-width:100%;max-height:100%;display:none"></canvas>
+            </div>
+
+            <!-- Progress bar -->
+            <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+              <div id="tp-prog" style="height:100%;background:linear-gradient(90deg,var(--v1),var(--accent2));width:0%;transition:width .1s"></div>
+            </div>
+
+            <!-- Controls -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+              <button id="tp-btn-play" onclick="tpPlayPause()" style="background:linear-gradient(135deg,var(--v1),var(--accent2));color:white;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;padding:10px;border-radius:8px;border:none;cursor:pointer">▶ Play</button>
+              <button id="tp-btn-rec"  onclick="tpToggleRec()" style="background:linear-gradient(135deg,#dc2626,#ef4444);color:white;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;padding:10px;border-radius:8px;border:none;cursor:pointer">⏺ Grabar</button>
+              <button onclick="tpStop()" style="background:var(--surface2);color:var(--text2);font-family:'Syne',sans-serif;font-weight:800;font-size:12px;padding:10px;border-radius:8px;border:1px solid var(--border2);cursor:pointer">■ Stop</button>
+            </div>
+            <button id="tp-btn-dl" onclick="tpDownload()" disabled style="background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.3);font-family:'Syne',sans-serif;font-weight:800;font-size:12px;padding:10px;border-radius:8px;cursor:pointer;width:100%">⬇️ Descargar video WebM → MP4</button>
+            <div style="font-size:11px;color:var(--text3);text-align:center">Espacio=Play/Pause · R=Grabar · S=Stop</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: BANNERS -->
+      <div id="s14-banners" style="display:none">
+        <div class="beginner-tip"><div class="bt-title">🖼️ ¿Para qué sirven los banners?</div>Son las imágenes que usás en Instagram, Facebook, Stories y anuncios. La IA los genera automáticamente con el nombre de tu producto, el precio y el CTA. Los descargás como PNG y los subís directo a tus redes.</div>
+
+        <div class="card">
+          <div class="card-title">CONFIGURAR BANNER</div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Título del banner</label>
+              <input type="text" id="bn-title" placeholder="Dormí Profundo, Viví Saludable">
+            </div>
+            <div class="input-group">
+              <label>Subtítulo / CTA</label>
+              <input type="text" id="bn-sub" placeholder="Método en 7 días. Garantía 30 días.">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Precio</label>
+              <input type="text" id="bn-price" placeholder="$27 USD">
+            </div>
+            <div class="input-group">
+              <label>Color principal</label>
+              <select id="bn-color" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px;border-radius:6px;outline:none">
+                <option value="purple">🟣 Violeta (recomendado)</option>
+                <option value="blue">🔵 Azul</option>
+                <option value="green">🟢 Verde</option>
+                <option value="orange">🟠 Naranja</option>
+                <option value="red">🔴 Rojo</option>
+                <option value="dark">⚫ Negro dorado</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Tipo de formato</label>
+            <div class="chip-group">
+              <div class="chip selected" onclick="toggleChip(this)" id="bn-sq">⬜ Cuadrado (1080×1080)</div>
+              <div class="chip selected" onclick="toggleChip(this)" id="bn-st">📱 Story (1080×1920)</div>
+              <div class="chip selected" onclick="toggleChip(this)" id="bn-fb">📘 Facebook (1200×628)</div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="generateBanners()" id="btn-banners">🖼️ Generar banners</button>
+        </div>
+
+        <!-- Banner preview grid -->
+        <div id="banners-output" style="display:none;margin-top:16px">
+          <div class="output-header">
+            <div class="output-label">🖼️ Banners generados</div>
+            <button class="copy-btn" onclick="downloadAllBanners()">⬇️ Descargar todos (ZIP)</button>
+          </div>
+          <div id="banners-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:12px"></div>
+        </div>
       </div>
     </div>
 
@@ -3883,7 +4045,425 @@ async function generateTestimonialScript() {
   } catch(e) { out.textContent='⚠️ Error: '+e.message; }
 }
 
-// ── MOBILE STEP MENU ──
+// ══════════════════════════════════════════
+// ★ STEP 14 — TABS
+// ══════════════════════════════════════════
+function showS14Tab(tab) {
+  ['scripts','teleprompter','banners'].forEach(t => {
+    const el = document.getElementById('s14-'+t);
+    const btn = document.getElementById('s14t-'+t);
+    if (el) el.style.display = t===tab ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', t===tab);
+  });
+  if (tab === 'teleprompter') initTP();
+}
+
+// ══════════════════════════════════════════
+// ★ TELEPROMPTER EMBEBIDO
+// ══════════════════════════════════════════
+let tpScripts=[], tpActiveIdx=0, tpPlaying=false, tpRecording=false;
+let tpMediaRec=null, tpChunks=[], tpRecInt=null, tpRecSecs=0, tpBlob=null;
+let tpRafId=null, tpScrollY=0, tpTotalH=0, tpSpeed=4, tpFontSize=50;
+let tpBgOff=0, tpFontsOk=false, tpInited=false;
+
+const TP_THEMES = {
+  purple:{bg:['#09070f','#1a0a3a','#0a0a1a'],text:'#f1eeff',hook:'#f0abfc',cta:'#34d399',acc:'#7c3aed',hi:'#c4b5fd'},
+  black:{bg:['#0a0800','#1a1200','#0d0c00'],text:'#fef3c7',hook:'#f59e0b',cta:'#34d399',acc:'#d97706',hi:'#fcd34d'},
+  green:{bg:['#021209','#031a0c','#010e07'],text:'#d1fae5',hook:'#10b981',cta:'#f0abfc',acc:'#059669',hi:'#6ee7b7'},
+  red:{bg:['#150303','#1f0505','#100202'],text:'#fee2e2',hook:'#ef4444',cta:'#34d399',acc:'#dc2626',hi:'#fca5a5'},
+  blue:{bg:['#030a1a','#05112a','#020815'],text:'#dbeafe',hook:'#60a5fa',cta:'#34d399',acc:'#2563eb',hi:'#93c5fd'},
+  white:{bg:['#ffffff','#f8faff','#f0f4ff'],text:'#1a1a2e',hook:'#7c3aed',cta:'#059669',acc:'#7c3aed',hi:'#4c1d95'},
+};
+let tpTheme = TP_THEMES.purple;
+let tpCv, tpCtx;
+
+function initTP() {
+  if (tpInited) return;
+  tpInited = true;
+  tpCv = document.getElementById('tp-canvas');
+  if (!tpCv) return;
+  tpCtx = tpCv.getContext('2d');
+  tpResizeCanvas();
+  window.addEventListener('resize', tpResizeCanvas);
+  document.fonts.ready.then(() => { tpFontsOk=true; tpLoop(); }).catch(() => { tpFontsOk=true; tpLoop(); });
+  setTimeout(() => { if(!tpFontsOk){tpFontsOk=true;tpLoop();} }, 2000);
+}
+
+function tpResizeCanvas() {
+  if (!tpCv) return;
+  tpCv.width=1080; tpCv.height=1920;
+  const wrap=document.getElementById('tp-wrap');
+  if (!wrap) return;
+  const mw=wrap.clientWidth, mh=wrap.clientHeight||380;
+  const r=1080/1920; let dw=mw,dh=mw/r;
+  if(dh>mh){dh=mh;dw=mh*r;}
+  tpCv.style.width=Math.floor(dw)+'px'; tpCv.style.height=Math.floor(dh)+'px';
+}
+
+function tpLoop() {
+  if (!tpFontsOk || !tpCtx) { tpRafId=requestAnimationFrame(tpLoop); return; }
+  if (tpPlaying) {
+    tpScrollY += tpSpeed*0.8;
+    if (tpScrollY >= tpTotalH-1920*0.5) {
+      tpScrollY=Math.max(0,tpTotalH-1920*0.5);
+      tpPlaying=false;
+      const pb=document.getElementById('tp-btn-play');
+      if(pb)pb.textContent='▶ Repetir';
+      if(tpRecording) tpStopRec();
+    }
+  }
+  tpScripts.length && tpScripts[tpActiveIdx] ? tpDrawScript(tpScripts[tpActiveIdx]) : tpDrawIdle();
+  tpRafId=requestAnimationFrame(tpLoop);
+}
+
+function tpDrawIdle() {
+  const cx=tpCtx,W=1080,H=1920;
+  tpBgOff+=0.003;
+  const g=cx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#09070f'); g.addColorStop(0.5+Math.sin(tpBgOff)*0.2,'#1a0a3a'); g.addColorStop(1,'#0a0a1a');
+  cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  const pulse=0.05+Math.abs(Math.sin(tpBgOff*1.5))*0.05;
+  const rg=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.6);
+  rg.addColorStop(0,`rgba(124,58,237,${pulse})`); rg.addColorStop(1,'transparent');
+  cx.fillStyle=rg; cx.fillRect(0,0,W,H);
+  cx.globalAlpha=0.2; cx.fillStyle='#a78bfa';
+  cx.font=`800 ${Math.round(W*.07)}px Syne,sans-serif`;
+  cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillText('InfoForge',W/2,H/2-60);
+  cx.font=`600 ${Math.round(W*.038)}px DM Sans,sans-serif`;
+  cx.fillText('Cargá un script →',W/2,H/2+60);
+  cx.globalAlpha=1;
+}
+
+function tpDrawScript(s) {
+  const cx=tpCtx,W=1080,H=1920,t=tpTheme;
+  tpBgOff+=0.002;
+  const g=cx.createLinearGradient(W/2+Math.sin(tpBgOff)*W*.25,0,W/2+Math.cos(tpBgOff*.7)*W*.25,H);
+  g.addColorStop(0,t.bg[0]); g.addColorStop(.5,t.bg[1]); g.addColorStop(1,t.bg[2]);
+  cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  const rg=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.6);
+  rg.addColorStop(0,tpHA(t.acc,.12)); rg.addColorStop(1,'transparent');
+  cx.fillStyle=rg; cx.fillRect(0,0,W,H);
+  const lh=tpFontSize*1.6, px=Math.round(W*.08), tw=W-px*2;
+  let cum=0; const rows=[];
+  s.lines.forEach(line=>{
+    const words=line.text.split(' '); let cur=''; const wrapped=[];
+    cx.font=`700 ${tpFontSize}px 'Syne',sans-serif`;
+    words.forEach(w=>{const tt=cur?cur+' '+w:w;if(cx.measureText(tt).width>tw&&cur){wrapped.push({text:cur,type:line.type});cur=w;}else cur=tt;});
+    if(cur)wrapped.push({text:cur,type:line.type});
+    wrapped.forEach(wl=>{rows.push({y:H*.5-tpScrollY+cum,text:wl.text,type:wl.type});cum+=lh;});
+    cum+=lh*.25;
+  });
+  tpTotalH=cum+H*.5;
+  rows.forEach(r=>{
+    const d=Math.abs(r.y-H/2),md=H*.45;
+    const a=Math.max(0,1-d/md); if(a<.03)return;
+    const sc=.72+.28*(1-d/md);
+    const col=r.type==='hook'?t.hook:r.type==='cta'?t.cta:t.text;
+    cx.save(); cx.translate(W/2,r.y); cx.scale(sc,sc); cx.globalAlpha=a;
+    if(d<lh*.7){cx.shadowColor=r.type==='hook'?t.hook:r.type==='cta'?t.cta:t.acc;cx.shadowBlur=28;}
+    cx.font=`${r.type==='hook'?'800':r.type==='cta'?'700':'600'} ${tpFontSize}px 'Syne',sans-serif`;
+    cx.fillStyle=col; cx.textAlign='center'; cx.textBaseline='middle';
+    cx.fillText(r.text,0,0); cx.shadowBlur=0; cx.restore();
+  });
+  const ar=rows.find(r=>Math.abs(r.y-H/2)<lh);
+  if(ar){cx.globalAlpha=.65;cx.fillStyle=ar.type==='hook'?t.hook:ar.type==='cta'?t.cta:t.hi;cx.font=`800 ${Math.round(tpFontSize*.42)}px 'Syne',sans-serif`;cx.textAlign='center';cx.textBaseline='top';cx.fillText({hook:'🔥 HOOK',body:'📖 BODY',cta:'📣 CTA'}[ar.type]||'',W/2,56);cx.globalAlpha=1;}
+  const pct=Math.min(1,tpScrollY/Math.max(1,tpTotalH-H));
+  cx.fillStyle=tpHA(t.acc,.35);cx.fillRect(0,H-7,W,7);cx.fillStyle=t.acc;cx.fillRect(0,H-7,W*pct,7);
+  const prog=document.getElementById('tp-prog'); if(prog)prog.style.width=(pct*100)+'%';
+  cx.globalAlpha=.12;cx.fillStyle=t.hi;cx.font=`600 ${Math.round(tpFontSize*.26)}px 'Syne',sans-serif`;cx.textAlign='right';cx.textBaseline='bottom';cx.fillText('InfoForge',W-24,H-14);cx.globalAlpha=1;
+}
+
+function tpHA(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
+
+function loadScriptFromStep14() {
+  const src=document.getElementById('scripts-result');
+  if(src&&src.textContent.trim()){
+    document.getElementById('tp-script-input').value=src.textContent;
+    showToast('✅ Script cargado — presioná Preparar teleprompter');
+  } else {
+    showToast('⚠️ Primero generá los scripts en la pestaña Scripts');
+  }
+}
+
+function parseTPScript() {
+  const raw=document.getElementById('tp-script-input').value.trim();
+  if(!raw){showToast('⚠️ Pegá un script primero');return;}
+  let blocks=raw.split(/\n(?=SCRIPT\s*\d)/i);
+  if(blocks.length<2)blocks=[raw];
+  tpScripts=blocks.filter(b=>b.trim().length>15).map((block,i)=>{
+    const lines=block.split('\n').filter(l=>l.trim());
+    const title=(lines[0]||`Script ${i+1}`).replace(/^SCRIPT\s*\d+\s*[—-]?\s*/i,'').replace(/[*#📱📖🎬]/g,'').trim().slice(0,60)||`Script ${i+1}`;
+    const parsed=lines.slice(1).map(line=>{
+      const l=line.trim();if(!l)return null;
+      const low=l.toLowerCase();
+      let type='body';
+      if(low.startsWith('hook:')||low.startsWith('gancho:'))type='hook';
+      else if(low.startsWith('cta:')||low.includes('link en bio')||low.includes('guardá')||low.includes('seguime'))type='cta';
+      return{text:l.replace(/^(hook:|gancho:|cta:)/i,'').trim(),type};
+    }).filter(Boolean);
+    return{title,lines:parsed};
+  });
+  if(!tpScripts.length){showToast('No se pudo parsear');return;}
+  renderTPCards(); tpLoadScript(0);
+  document.getElementById('tp-idle').style.display='none';
+  document.getElementById('tp-canvas').style.display='block';
+  showToast(`✅ ${tpScripts.length} script${tpScripts.length>1?'s':''} listos`);
+}
+
+function renderTPCards(){
+  const c=document.getElementById('tp-cards-list');
+  if(!c)return;
+  const COLS=['#7c3aed','#10b981','#f59e0b'];
+  c.innerHTML=tpScripts.map((s,i)=>`
+    <div onclick="tpLoadScript(${i})" style="background:var(--surface);border:1px solid ${i===tpActiveIdx?'var(--v1)':'var(--border)'};border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .15s">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="background:${COLS[i%COLS.length]};color:white;font-size:10px;font-weight:800;padding:2px 8px;border-radius:12px;letter-spacing:1px">SCRIPT ${i+1}</span>
+        <span style="font-size:12px;color:var(--text2);font-weight:600">${s.title}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3)">${s.lines.length} líneas</div>
+    </div>`).join('');
+}
+
+function tpLoadScript(idx){
+  if(idx>=tpScripts.length)return;
+  tpStop(); tpActiveIdx=idx; tpScrollY=0;
+  renderTPCards();
+  const n=document.getElementById('tp-name');
+  if(n)n.textContent=`Script ${idx+1}: ${tpScripts[idx].title}`;
+}
+
+function tpPlayPause(){
+  if(!tpScripts.length){showToast('⚠️ Cargá un script primero');return;}
+  tpPlaying=!tpPlaying;
+  const b=document.getElementById('tp-btn-play');
+  if(b)b.textContent=tpPlaying?'⏸ Pause':'▶ Play';
+}
+
+function tpStop(){
+  tpPlaying=false; tpScrollY=0;
+  const b=document.getElementById('tp-btn-play');
+  if(b)b.textContent='▶ Play';
+  if(tpRecording)tpStopRec();
+}
+
+function tpToggleRec(){
+  if(!tpScripts.length){showToast('⚠️ Cargá un script primero');return;}
+  if(tpRecording)tpStopRec();else tpStartRec();
+}
+
+function tpStartRec(){
+  if(tpRecording)return;
+  if(location.protocol==='file:'){showToast('⚠️ Grabación solo funciona en Vercel/localhost');return;}
+  tpChunks=[];tpBlob=null;
+  const dl=document.getElementById('tp-btn-dl');if(dl)dl.disabled=true;
+  const stream=tpCv.captureStream(30);
+  const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m))||'video/webm';
+  try{tpMediaRec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5000000});}catch(e){tpMediaRec=new MediaRecorder(stream);}
+  tpMediaRec.ondataavailable=e=>{if(e.data.size>0)tpChunks.push(e.data);};
+  tpMediaRec.onstop=()=>{
+    tpBlob=new Blob(tpChunks,{type:mime});
+    const dl=document.getElementById('tp-btn-dl');if(dl)dl.disabled=false;
+    showToast(`🎬 Video listo (${(tpBlob.size/1024/1024).toFixed(1)}MB) — descargalo`);
+  };
+  tpMediaRec.start(100);tpRecording=true;tpRecSecs=0;
+  tpScrollY=0;tpPlaying=true;
+  const pb=document.getElementById('tp-btn-play');if(pb)pb.textContent='⏸ Pause';
+  const br=document.getElementById('tp-btn-rec');if(br)br.textContent='⏹ Detener';
+  const rd=document.getElementById('tp-recdot');if(rd){rd.style.display='block';}
+  const rt=document.getElementById('tp-rectimer');if(rt){rt.style.display='block';}
+  tpRecInt=setInterval(()=>{tpRecSecs++;const m=Math.floor(tpRecSecs/60).toString().padStart(2,'0'),s=(tpRecSecs%60).toString().padStart(2,'0');const rt=document.getElementById('tp-rectimer');if(rt)rt.textContent=m+':'+s;},1000);
+}
+
+function tpStopRec(){
+  if(!tpRecording)return;
+  tpRecording=false;tpPlaying=false;clearInterval(tpRecInt);
+  if(tpMediaRec&&tpMediaRec.state!=='inactive')tpMediaRec.stop();
+  const rd=document.getElementById('tp-recdot');if(rd)rd.style.display='none';
+  const rt=document.getElementById('tp-rectimer');if(rt)rt.style.display='none';
+  const br=document.getElementById('tp-btn-rec');if(br)br.textContent='⏺ Grabar';
+  const pb=document.getElementById('tp-btn-play');if(pb)pb.textContent='▶ Play';
+}
+
+function tpDownload(){
+  if(!tpBlob){showToast('⚠️ Grabá un video primero');return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(tpBlob);
+  a.download=`reel-${(tpScripts[tpActiveIdx]?.title||'script').toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25)}.webm`;
+  a.click();URL.revokeObjectURL(a.href);
+  setTimeout(()=>window.open('https://cloudconvert.com/webm-to-mp4','_blank'),800);
+  showToast('✅ Descargado. Se abre CloudConvert para convertir a MP4.');
+}
+
+function updateTPTheme(){tpTheme=TP_THEMES[document.getElementById('tp-bg').value]||TP_THEMES.purple;}
+
+// Keyboard en step 14
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+  const s14=document.getElementById('s14-teleprompter');
+  if(!s14||s14.style.display==='none')return;
+  if(e.code==='Space'){e.preventDefault();tpPlayPause();}
+  if(e.code==='KeyR'){e.preventDefault();tpToggleRec();}
+  if(e.code==='KeyS'){e.preventDefault();tpStop();}
+  if(e.code==='ArrowUp'){tpSpeed=Math.min(10,tpSpeed+1);const sl=document.getElementById('tp-speed');if(sl)sl.value=tpSpeed;const sv=document.getElementById('tp-speed-v');if(sv)sv.textContent=tpSpeed;}
+  if(e.code==='ArrowDown'){tpSpeed=Math.max(1,tpSpeed-1);const sl=document.getElementById('tp-speed');if(sl)sl.value=tpSpeed;const sv=document.getElementById('tp-speed-v');if(sv)sv.textContent=tpSpeed;}
+});
+
+// ══════════════════════════════════════════
+// ★ GENERADOR DE BANNERS
+// ══════════════════════════════════════════
+const BN_COLORS = {
+  purple:  {bg:['#1a0a3a','#7c3aed'],text:'#f1eeff',acc:'#e879f9',btn:'#7c3aed'},
+  blue:    {bg:['#0a0a2e','#2563eb'],text:'#dbeafe',acc:'#60a5fa',btn:'#2563eb'},
+  green:   {bg:['#021209','#059669'],text:'#d1fae5',acc:'#10b981',btn:'#059669'},
+  orange:  {bg:['#1a0800','#d97706'],text:'#fef3c7',acc:'#f59e0b',btn:'#d97706'},
+  red:     {bg:['#1a0000','#dc2626'],text:'#fee2e2',acc:'#ef4444',btn:'#dc2626'},
+  dark:    {bg:['#09070f','#1a1200'],text:'#fef3c7',acc:'#d97706',btn:'#7c3aed'},
+};
+
+const BN_FORMATS = {
+  sq: {w:1080,h:1080,label:'Cuadrado'},
+  st: {w:1080,h:1920,label:'Story'},
+  fb: {w:1200,h:628,label:'Facebook'},
+};
+
+function generateBanners() {
+  const title = document.getElementById('bn-title').value || state.data.topic || 'Mi Producto';
+  const sub   = document.getElementById('bn-sub').value   || state.data.result || 'Método probado paso a paso';
+  const price = document.getElementById('bn-price').value || ('$'+state.data.price+' USD') || '$27 USD';
+  const color = document.getElementById('bn-color').value || 'purple';
+  const btn   = document.getElementById('btn-banners');
+  btn.disabled=true; btn.textContent='⏳ Generando banners...';
+
+  const output = document.getElementById('banners-output');
+  const grid   = document.getElementById('banners-grid');
+  grid.innerHTML='';
+
+  const formats = ['sq','st','fb'].filter(f => {
+    const chip = document.getElementById('bn-'+f);
+    return !chip || chip.classList.contains('selected');
+  });
+
+  let done=0;
+  formats.forEach(fmt=>{
+    const f=BN_FORMATS[fmt]||BN_FORMATS.sq;
+    const cv=document.createElement('canvas');
+    cv.width=f.w; cv.height=f.h;
+    const cx=cv.getContext('2d');
+    const th=BN_COLORS[color]||BN_COLORS.purple;
+
+    // Background gradient
+    const g=cx.createLinearGradient(0,0,f.w,f.h);
+    g.addColorStop(0,th.bg[0]); g.addColorStop(1,th.bg[1]);
+    cx.fillStyle=g; cx.fillRect(0,0,f.w,f.h);
+
+    // Glow circle
+    const rg=cx.createRadialGradient(f.w*.5,f.h*.35,0,f.w*.5,f.h*.35,f.w*.55);
+    rg.addColorStop(0,th.bg[1]+'55'); rg.addColorStop(1,'transparent');
+    cx.fillStyle=rg; cx.fillRect(0,0,f.w,f.h);
+
+    const pad=Math.round(f.w*.07);
+    const cx2=f.w/2;
+    const fs=fmt==='fb'?f.w*.042:f.w*.058;
+
+    // InfoForge badge
+    cx.fillStyle=th.acc+'33';
+    cx.beginPath(); cx.roundRect(cx2-f.w*.2,pad,f.w*.4,fs*1.6,fs*.4); cx.fill();
+    cx.fillStyle=th.acc;
+    cx.font=`700 ${Math.round(fs*.55)}px Syne,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.fillText('✦ INFOPRODUCTO DIGITAL ✦',cx2,pad+fs*.8);
+
+    // Main title
+    const titleY=fmt==='fb'?f.h*.28:f.h*.28;
+    cx.fillStyle=th.text;
+    cx.font=`800 ${Math.round(fs*1.1)}px Syne,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    // Word wrap
+    const words=title.split(' '),maxW=f.w-pad*2;
+    let line='',lines2=[],y=titleY;
+    words.forEach(w=>{const t=line?line+' '+w:w;if(cx.measureText(t).width>maxW&&line){lines2.push(line);line=w;}else line=t;});
+    if(line)lines2.push(line);
+    const lh2=fs*1.45;
+    const totalTH=lines2.length*lh2;
+    let ty=y-totalTH/2+lh2/2;
+    lines2.forEach(l=>{cx.fillText(l,cx2,ty);ty+=lh2;});
+    const afterTitle=ty-lh2/2+f.h*.04;
+
+    // Divider
+    cx.strokeStyle=th.acc; cx.lineWidth=2; cx.globalAlpha=0.6;
+    cx.beginPath(); cx.moveTo(cx2-f.w*.15,afterTitle); cx.lineTo(cx2+f.w*.15,afterTitle); cx.stroke();
+    cx.globalAlpha=1;
+
+    // Subtitle
+    cx.fillStyle=th.text+'cc';
+    cx.font=`400 ${Math.round(fs*.62)}px DM Sans,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    const subY=afterTitle+f.h*.055;
+    const subWords=sub.split(' '); let sLine='',sLines=[],sY=subY;
+    subWords.forEach(w=>{const t=sLine?sLine+' '+w:w;if(cx.measureText(t).width>maxW*.85&&sLine){sLines.push(sLine);sLine=w;}else sLine=t;});
+    if(sLine)sLines.push(sLine);
+    sLines.slice(0,2).forEach(l=>{cx.fillText(l,cx2,sY);sY+=fs*.9;});
+
+    // Price badge
+    const priceY=fmt==='fb'?f.h*.72:f.h*.68;
+    const bw=f.w*.42, bh=f.h*.1;
+    cx.fillStyle=th.btn;
+    cx.beginPath(); cx.roundRect(cx2-bw/2,priceY-bh/2,bw,bh,bh/3); cx.fill();
+    cx.fillStyle='white';
+    cx.font=`800 ${Math.round(fs*1.1)}px Syne,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.fillText(price,cx2,priceY);
+
+    // CTA bottom
+    const ctaY=fmt==='fb'?f.h*.88:f.h*.82;
+    cx.fillStyle=th.acc;
+    cx.font=`700 ${Math.round(fs*.6)}px Syne,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.fillText('→ ACCESO INMEDIATO · GARANTÍA 30 DÍAS ←',cx2,ctaY);
+
+    // Watermark
+    cx.globalAlpha=0.2; cx.fillStyle=th.text;
+    cx.font=`500 ${Math.round(fs*.4)}px DM Sans,sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='bottom';
+    cx.fillText('InfoForge',cx2,f.h-Math.round(f.h*.02));
+    cx.globalAlpha=1;
+
+    // Show preview
+    const wrapper=document.createElement('div');
+    wrapper.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;';
+    const preview=document.createElement('canvas');
+    const maxPW=300,ratio=f.w/f.h;
+    let pw=maxPW,ph=maxPW/ratio;
+    if(ph>300){ph=300;pw=300*ratio;}
+    preview.width=pw; preview.height=ph;
+    preview.style.display='block';
+    preview.getContext('2d').drawImage(cv,0,0,pw,ph);
+    const info=document.createElement('div');
+    info.style.cssText='padding:10px 14px;display:flex;align-items:center;justify-content:space-between;';
+    info.innerHTML=`<span style="font-size:12px;font-weight:700;color:var(--text2)">${f.label} · ${f.w}×${f.h}</span>`;
+    const dlBtn=document.createElement('button');
+    dlBtn.textContent='⬇️ PNG';
+    dlBtn.style.cssText='background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:Syne,sans-serif';
+    dlBtn.onclick=()=>{const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download=`banner-${f.label.toLowerCase()}-${color}.png`;a.click();showToast('✅ Banner descargado');};
+    info.appendChild(dlBtn);
+    wrapper.appendChild(preview);
+    wrapper.appendChild(info);
+    grid.appendChild(wrapper);
+    done++;
+    if(done===formats.length){
+      output.style.display='block';
+      btn.disabled=false;btn.textContent='🖼️ Regenerar banners';
+      showToast(`✅ ${done} banner${done>1?'s':''} generados`);
+    }
+  });
+  if(formats.length===0){showToast('⚠️ Seleccioná al menos un formato');btn.disabled=false;btn.textContent='🖼️ Generar banners';}
+}
+
+function downloadAllBanners(){
+  document.querySelectorAll('#banners-grid button').forEach(b=>b.click());
+}
+
+</script>
 function showMobileStepMenu() {
   let menu = document.getElementById('mob-step-menu');
   if (menu) { menu.remove(); return; }
