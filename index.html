@@ -117,12 +117,13 @@ body::before {
 /* ── TOP BAR ── */
 .topbar {
   position: sticky; top: 0; z-index: 40;
-  background: rgba(9,7,15,0.85); backdrop-filter: blur(20px);
+  background: rgba(9,7,15,0.92); backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 14px 32px; display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 24px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; min-height: 52px;
 }
-.topbar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
-.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; flex-shrink: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .progress-ring { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
 .progress-bar-wrap { width: 120px; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--v1), var(--accent2)); border-radius: 4px; transition: width .5s; }
@@ -377,12 +378,14 @@ select { appearance: none; cursor: pointer; }
   .export-grid { grid-template-columns: 1fr; }
   .export-grid-v4 { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; }
-  .topbar-right { gap: 6px; }
-  .topbar-title { font-size: 13px; }
+  .topbar-right { gap: 4px; flex-wrap: nowrap; }
+  .topbar-title { font-size: 12px; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .autopilot-btn { font-size: 11px; padding: 6px 10px; }
   .mode-toggle { display: none; }
-  .btn-reset { font-size: 11px; padding: 5px 10px; }
-  .progress-bar-wrap { width: 70px; }
+  .btn-reset:not(#apikey-btn) { display: none; }
+  #apikey-btn { font-size: 10px; padding: 4px 8px; }
+  .progress-bar-wrap { width: 50px; }
+  .progress-ring span { font-size: 10px; }
   .welcome { padding: 24px 16px; }
   .welcome h1 { font-size: 28px; }
 
