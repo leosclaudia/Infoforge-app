@@ -1461,6 +1461,57 @@ body.beginner .mode-toggle { border-color:var(--yellow); color:var(--yellow); ba
             <button class="btn-download" onclick="showS14Tab('teleprompter')" style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(232,121,249,0.15));border-color:var(--v1);color:var(--vb)">📱 Ir al Teleprompter →</button>
             <button class="btn-download" onclick="downloadReelHTML()" style="background:rgba(232,121,249,0.1);border-color:rgba(232,121,249,0.35);color:var(--accent)">⬇️ Pack HTML imprimible</button>
           </div>
+
+          <!-- AUTO VIDEO GENERATOR -->
+          <div style="margin-top:16px;background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(245,158,11,0.1));border:1px solid rgba(239,68,68,0.4);border-radius:14px;padding:20px">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#fca5a5;margin-bottom:6px">🤖 Generador de Video Automático</div>
+            <div style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:14px">Apretás un botón y la IA genera el video sola. Sin cámara, sin micrófono. Texto animado con imagen de fondo, listo para subir a Instagram/TikTok.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <div>
+                <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:5px">ESTILO DE VIDEO</div>
+                <select id="av-style" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px;border-radius:6px;font-size:12px;outline:none">
+                  <option value="reel">📱 Reel dinámico (texto en movimiento)</option>
+                  <option value="slides">🎞️ Slides con transición</option>
+                  <option value="kinetic">✨ Texto cinético (aparece letra por letra)</option>
+                </select>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:5px">FONDO DEL VIDEO</div>
+                <select id="av-theme" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px;border-radius:6px;font-size:12px;outline:none">
+                  <option value="purple">🟣 Violeta con foto</option>
+                  <option value="black">⚫ Negro dorado con foto</option>
+                  <option value="green">🟢 Verde naturaleza</option>
+                  <option value="red">🔴 Rojo dramático</option>
+                  <option value="blue">🔵 Azul noche</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="autoGenerateVideo()" id="btn-autovideo" style="width:100%;background:linear-gradient(135deg,#ef4444,#f59e0b);border:none;font-size:15px">
+              🎬 Generar video automáticamente
+            </button>
+          </div>
+
+          <!-- PROGRESO DEL VIDEO -->
+          <div id="av-progress" style="display:none;margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--va);margin-bottom:10px">🎬 Generando tu video...</div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:10px">
+              <div id="av-prog-bar" style="height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b);border-radius:3px;width:0%;transition:width .3s"></div>
+            </div>
+            <div id="av-prog-text" style="font-size:12px;color:var(--text3)">Preparando...</div>
+            <canvas id="av-canvas" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;margin-top:10px;display:block"></canvas>
+          </div>
+
+          <!-- VIDEO LISTO -->
+          <div id="av-ready" style="display:none;margin-top:12px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">🎉</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--green);margin-bottom:6px">¡Video generado!</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Descargalo como .webm y convertilo a MP4 gratis</div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button onclick="downloadAutoVideo()" style="background:linear-gradient(135deg,#34d399,#059669);color:white;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;padding:11px 24px;border:none;border-radius:9px;cursor:pointer">⬇️ Descargar .webm</button>
+              <button onclick="window.open('https://cloudconvert.com/webm-to-mp4','_blank')" style="background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.35);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:11px 24px;border-radius:9px;cursor:pointer">🔄 Convertir a MP4</button>
+              <button onclick="autoGenerateVideo()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:11px 24px;border-radius:9px;cursor:pointer">🔁 Regenerar</button>
+            </div>
+          </div>
         </div>
         <div id="reel-cards-section" style="display:none;margin-top:20px">
           <div class="card-title" style="color:var(--va);margin-bottom:12px;font-family:'Syne',sans-serif;font-weight:700">📱 CARDS DE TELEPROMPTER</div>
@@ -1493,12 +1544,12 @@ body.beginner .mode-toggle { border-color:var(--yellow); color:var(--yellow); ba
                 <div>
                   <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;margin-bottom:5px">FONDO</div>
                   <select id="tp-bg" onchange="updateTPTheme()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px;border-radius:6px;font-size:12px;outline:none">
-                    <option value="purple">🟣 Violeta</option>
-                    <option value="black">⚫ Negro</option>
-                    <option value="green">🟢 Verde</option>
-                    <option value="red">🔴 Rojo</option>
-                    <option value="blue">🔵 Azul</option>
-                    <option value="white">⬜ Blanco</option>
+                    <option value="purple">🟣 Violeta + foto</option>
+                    <option value="black">⚫ Dorado + foto</option>
+                    <option value="green">🟢 Verde + foto</option>
+                    <option value="red">🔴 Rojo + foto</option>
+                    <option value="blue">🔵 Azul + foto</option>
+                    <option value="white">⬜ Blanco + foto</option>
                   </select>
                 </div>
                 <div>
@@ -4078,14 +4129,47 @@ let tpRafId=null, tpScrollY=0, tpTotalH=0, tpSpeed=4, tpFontSize=50;
 let tpBgOff=0, tpFontsOk=false, tpInited=false;
 
 const TP_THEMES = {
-  purple:{bg:['#09070f','#1a0a3a','#0a0a1a'],text:'#f1eeff',hook:'#f0abfc',cta:'#34d399',acc:'#7c3aed',hi:'#c4b5fd'},
-  black:{bg:['#0a0800','#1a1200','#0d0c00'],text:'#fef3c7',hook:'#f59e0b',cta:'#34d399',acc:'#d97706',hi:'#fcd34d'},
-  green:{bg:['#021209','#031a0c','#010e07'],text:'#d1fae5',hook:'#10b981',cta:'#f0abfc',acc:'#059669',hi:'#6ee7b7'},
-  red:{bg:['#150303','#1f0505','#100202'],text:'#fee2e2',hook:'#ef4444',cta:'#34d399',acc:'#dc2626',hi:'#fca5a5'},
-  blue:{bg:['#030a1a','#05112a','#020815'],text:'#dbeafe',hook:'#60a5fa',cta:'#34d399',acc:'#2563eb',hi:'#93c5fd'},
-  white:{bg:['#ffffff','#f8faff','#f0f4ff'],text:'#1a1a2e',hook:'#7c3aed',cta:'#059669',acc:'#7c3aed',hi:'#4c1d95'},
+  purple: { bg:['#09070f','#1a0a3a','#0a0a1a'], text:'#f1eeff', hook:'#f0abfc', cta:'#34d399', acc:'#7c3aed', hi:'#c4b5fd' },
+  black:  { bg:['#0a0800','#1a1200','#0d0c00'], text:'#fef3c7', hook:'#f59e0b', cta:'#34d399', acc:'#d97706', hi:'#fcd34d' },
+  green:  { bg:['#021209','#031a0c','#010e07'], text:'#d1fae5', hook:'#10b981', cta:'#f0abfc', acc:'#059669', hi:'#6ee7b7' },
+  red:    { bg:['#150303','#1f0505','#100202'], text:'#fee2e2', hook:'#ef4444', cta:'#34d399', acc:'#dc2626', hi:'#fca5a5' },
+  blue:   { bg:['#030a1a','#05112a','#020815'], text:'#dbeafe', hook:'#60a5fa', cta:'#34d399', acc:'#2563eb', hi:'#93c5fd' },
+  white:  { bg:['#ffffff','#f8faff','#f0f4ff'], text:'#1a1a2e', hook:'#7c3aed', cta:'#059669', acc:'#7c3aed', hi:'#4c1d95' },
 };
+
+// Imágenes de fondo por tema (Unsplash)
+const TP_BG_IMGS = {
+  purple: 'https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?auto=format&fit=crop&w=1080&h=1920&q=60',
+  black:  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1080&h=1920&q=60',
+  green:  'https://images.unsplash.com/photo-1447452001526-dc96ac75aff5?auto=format&fit=crop&w=1080&h=1920&q=60',
+  red:    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1080&h=1920&q=60',
+  blue:   'https://images.unsplash.com/photo-1545389336-cf090694435e?auto=format&fit=crop&w=1080&h=1920&q=60',
+  white:  'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1080&h=1920&q=60',
+};
+
+// Cache de imágenes cargadas
+const tpImgCache = {};
+function tpLoadBgImg(theme, cb) {
+  const url = TP_BG_IMGS[theme];
+  if (!url) { cb(null); return; }
+  if (tpImgCache[theme]) { cb(tpImgCache[theme]); return; }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload  = () => { tpImgCache[theme] = img; cb(img); };
+  img.onerror = () => { tpImgCache[theme] = null; cb(null); };
+  img.src = url;
+}
 let tpTheme = TP_THEMES.purple;
+let tpBgImg = null;
+
+// Precargar imagen al cambiar tema
+function updateTPTheme() {
+  const val = document.getElementById('tp-bg').value;
+  tpTheme = TP_THEMES[val] || TP_THEMES.purple;
+  tpLoadBgImg(val, img => { tpBgImg = img; });
+}
+// Precargar imagen inicial
+tpLoadBgImg('purple', img => { tpBgImg = img; });
 let tpCv, tpCtx;
 
 function initTP() {
@@ -4130,14 +4214,19 @@ function tpLoop() {
 function tpDrawIdle() {
   const cx=tpCtx,W=1080,H=1920;
   tpBgOff+=0.003;
-  const g=cx.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,'#09070f'); g.addColorStop(0.5+Math.sin(tpBgOff)*0.2,'#1a0a3a'); g.addColorStop(1,'#0a0a1a');
-  cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  if(tpBgImg){
+    cx.drawImage(tpBgImg,0,0,W,H);
+    cx.fillStyle='rgba(0,0,0,0.65)'; cx.fillRect(0,0,W,H);
+  } else {
+    const g=cx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'#09070f'); g.addColorStop(0.5+Math.sin(tpBgOff)*0.2,'#1a0a3a'); g.addColorStop(1,'#0a0a1a');
+    cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  }
   const pulse=0.05+Math.abs(Math.sin(tpBgOff*1.5))*0.05;
   const rg=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.6);
   rg.addColorStop(0,`rgba(124,58,237,${pulse})`); rg.addColorStop(1,'transparent');
   cx.fillStyle=rg; cx.fillRect(0,0,W,H);
-  cx.globalAlpha=0.2; cx.fillStyle='#a78bfa';
+  cx.globalAlpha=0.25; cx.fillStyle='#a78bfa';
   cx.font=`800 ${Math.round(W*.07)}px Syne,sans-serif`;
   cx.textAlign='center'; cx.textBaseline='middle';
   cx.fillText('InfoForge',W/2,H/2-60);
@@ -4149,11 +4238,18 @@ function tpDrawIdle() {
 function tpDrawScript(s) {
   const cx=tpCtx,W=1080,H=1920,t=tpTheme;
   tpBgOff+=0.002;
-  const g=cx.createLinearGradient(W/2+Math.sin(tpBgOff)*W*.25,0,W/2+Math.cos(tpBgOff*.7)*W*.25,H);
-  g.addColorStop(0,t.bg[0]); g.addColorStop(.5,t.bg[1]); g.addColorStop(1,t.bg[2]);
-  cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  // Background: imagen si está disponible, sino gradiente
+  if(tpBgImg){
+    cx.drawImage(tpBgImg,0,0,W,H);
+    cx.fillStyle='rgba(0,0,0,0.6)'; cx.fillRect(0,0,W,H);
+  } else {
+    const g=cx.createLinearGradient(W/2+Math.sin(tpBgOff)*W*.25,0,W/2+Math.cos(tpBgOff*.7)*W*.25,H);
+    g.addColorStop(0,t.bg[0]); g.addColorStop(.5,t.bg[1]); g.addColorStop(1,t.bg[2]);
+    cx.fillStyle=g; cx.fillRect(0,0,W,H);
+  }
+  // Color tint overlay
   const rg=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.6);
-  rg.addColorStop(0,tpHA(t.acc,.12)); rg.addColorStop(1,'transparent');
+  rg.addColorStop(0,tpHA(t.acc,.18)); rg.addColorStop(1,'transparent');
   cx.fillStyle=rg; cx.fillRect(0,0,W,H);
   const lh=tpFontSize*1.6, px=Math.round(W*.08), tw=W-px*2;
   let cum=0; const rows=[];
@@ -4172,7 +4268,7 @@ function tpDrawScript(s) {
     const sc=.72+.28*(1-d/md);
     const col=r.type==='hook'?t.hook:r.type==='cta'?t.cta:t.text;
     cx.save(); cx.translate(W/2,r.y); cx.scale(sc,sc); cx.globalAlpha=a;
-    if(d<lh*.7){cx.shadowColor=r.type==='hook'?t.hook:r.type==='cta'?t.cta:t.acc;cx.shadowBlur=28;}
+    if(d<lh*.7){cx.shadowColor=r.type==='hook'?t.hook:r.type==='cta'?t.cta:t.acc;cx.shadowBlur=35;}
     cx.font=`${r.type==='hook'?'800':r.type==='cta'?'700':'600'} ${tpFontSize}px 'Syne',sans-serif`;
     cx.fillStyle=col; cx.textAlign='center'; cx.textBaseline='middle';
     cx.fillText(r.text,0,0); cx.shadowBlur=0; cx.restore();
@@ -4580,6 +4676,254 @@ function restoreFormFields() {
     setTimeout(()=>{ if(snap.data?.topic) showToast(`💾 Sesión restaurada: "${snap.data.topic}"`); },1800);
   } catch(e){}
 })();
+
+// ═══════════════════════════════════════════════
+// ★ AUTO VIDEO GENERATOR
+// ═══════════════════════════════════════════════
+let avBlob = null;
+let avMediaRec = null;
+let avChunks = [];
+
+const AV_THEMES = {
+  purple: { bg:['#09070f','#1a0a3a'], hook:'#f0abfc', cta:'#34d399', acc:'#7c3aed', text:'#f1eeff', hi:'#c4b5fd',
+    img:'https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?auto=format&fit=crop&w=1080&h=1920&q=60' },
+  black:  { bg:['#0a0800','#1a1200'], hook:'#f59e0b', cta:'#34d399', acc:'#d97706', text:'#fef3c7', hi:'#fcd34d',
+    img:'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1080&h=1920&q=60' },
+  green:  { bg:['#021209','#031a0c'], hook:'#10b981', cta:'#f0abfc', acc:'#059669', text:'#d1fae5', hi:'#6ee7b7',
+    img:'https://images.unsplash.com/photo-1447452001526-dc96ac75aff5?auto=format&fit=crop&w=1080&h=1920&q=60' },
+  red:    { bg:['#150303','#1f0505'], hook:'#ef4444', cta:'#34d399', acc:'#dc2626', text:'#fee2e2', hi:'#fca5a5',
+    img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1080&h=1920&q=60' },
+  blue:   { bg:['#030a1a','#05112a'], hook:'#60a5fa', cta:'#34d399', acc:'#2563eb', text:'#dbeafe', hi:'#93c5fd',
+    img:'https://images.unsplash.com/photo-1545389336-cf090694435e?auto=format&fit=crop&w=1080&h=1920&q=60' },
+};
+
+function avHA(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
+
+async function autoGenerateVideo() {
+  // Leer script
+  const scriptText = document.getElementById('scripts-result')?.textContent || state.results.scripts || '';
+  if (!scriptText.trim()) { showToast('⚠️ Primero generá los scripts'); return; }
+
+  // Parsear líneas
+  const rawLines = scriptText.split('\n').filter(l => l.trim() && l.trim().length > 5);
+  const lines = rawLines.map(l => {
+    const clean = l.replace(/^(SCRIPT\s*\d+[^:]*:|hook:|gancho:|cta:|body:|📱|📖|🎬|[*#—\-])\s*/i,'').trim();
+    if (!clean) return null;
+    const low = l.toLowerCase();
+    let type = 'body';
+    if (low.includes('hook') || low.includes('gancho') || rawLines.indexOf(l) === 0) type = 'hook';
+    else if (low.includes('cta') || low.includes('link en bio') || low.includes('guardá') || low.includes('seguime')) type = 'cta';
+    return { text: clean, type };
+  }).filter(l => l && l.text.length > 3).slice(0, 12);
+
+  if (!lines.length) { showToast('⚠️ No se pudo parsear el script'); return; }
+
+  const style  = document.getElementById('av-style')?.value || 'reel';
+  const theme  = AV_THEMES[document.getElementById('av-theme')?.value || 'purple'];
+  const W = 1080, H = 1920;
+  const SEC_PER_LINE = style === 'slides' ? 4 : style === 'kinetic' ? 3.5 : 3;
+  const FPS = 30;
+
+  // UI
+  document.getElementById('av-progress').style.display = 'block';
+  document.getElementById('av-ready').style.display = 'none';
+  document.getElementById('btn-autovideo').disabled = true;
+  document.getElementById('btn-autovideo').textContent = '⏳ Generando...';
+
+  const progBar  = document.getElementById('av-prog-bar');
+  const progText = document.getElementById('av-prog-text');
+  const previewCv = document.getElementById('av-canvas');
+
+  // Setup canvas
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d');
+
+  // Load background image
+  let bgImg = null;
+  if (theme.img) {
+    bgImg = await new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload  = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = theme.img;
+      setTimeout(() => resolve(null), 5000);
+    });
+  }
+
+  progText.textContent = 'Iniciando grabación...';
+
+  // Setup recorder
+  avChunks = []; avBlob = null;
+  const stream = cv.captureStream(FPS);
+  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  try { avMediaRec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 }); }
+  catch(e) { avMediaRec = new MediaRecorder(stream); }
+  avMediaRec.ondataavailable = e => { if(e.data.size>0) avChunks.push(e.data); };
+  avMediaRec.onstop = () => {
+    avBlob = new Blob(avChunks, {type: mime});
+    document.getElementById('av-progress').style.display = 'none';
+    document.getElementById('av-ready').style.display = 'block';
+    document.getElementById('btn-autovideo').disabled = false;
+    document.getElementById('btn-autovideo').textContent = '🎬 Generar video automáticamente';
+    showToast('🎉 ¡Video listo! Descargalo abajo');
+  };
+
+  avMediaRec.start(100);
+
+  // Dibujar frame a frame con requestAnimationFrame
+  let lineIdx = 0;
+  let lineStart = performance.now();
+  let totalFrames = lines.length * SEC_PER_LINE * FPS;
+  let frame = 0;
+  let bgOff = 0;
+
+  // Preview canvas
+  previewCv.width  = Math.min(400, W);
+  previewCv.height = Math.round(H * previewCv.width / W);
+  const previewCtx = previewCv.getContext('2d');
+
+  function drawFrame(ts) {
+    bgOff += 0.003;
+    const now = ts;
+    const lineElapsed = (now - lineStart) / 1000;
+    if (lineElapsed >= SEC_PER_LINE) {
+      lineIdx++;
+      lineStart = now;
+      if (lineIdx >= lines.length) {
+        avMediaRec.stop();
+        return;
+      }
+    }
+
+    const line  = lines[lineIdx];
+    const pct   = lineElapsed / SEC_PER_LINE; // 0→1 within current line
+    const totalPct = (lineIdx + pct) / lines.length;
+
+    // ── BACKGROUND ──
+    if (bgImg) {
+      cx.drawImage(bgImg, 0, 0, W, H);
+      cx.fillStyle = 'rgba(0,0,0,0.58)'; cx.fillRect(0,0,W,H);
+    } else {
+      const g = cx.createLinearGradient(W/2+Math.sin(bgOff)*W*.3,0,W/2+Math.cos(bgOff*.6)*W*.3,H);
+      g.addColorStop(0,theme.bg[0]); g.addColorStop(1,theme.bg[1]);
+      cx.fillStyle = g; cx.fillRect(0,0,W,H);
+    }
+
+    // Color tint
+    const rg = cx.createRadialGradient(W/2,H*.4,0,W/2,H*.4,W*.7);
+    rg.addColorStop(0, avHA(theme.acc, 0.22)); rg.addColorStop(1,'transparent');
+    cx.fillStyle = rg; cx.fillRect(0,0,W,H);
+
+    // ── LOGO TOP ──
+    cx.globalAlpha = 0.55;
+    cx.fillStyle = theme.hi;
+    cx.font = `700 ${Math.round(W*.038)}px Syne,sans-serif`;
+    cx.textAlign = 'center'; cx.textBaseline = 'top';
+    cx.fillText('InfoForge', W/2, Math.round(H*.045));
+    cx.globalAlpha = 1;
+
+    // ── LINE LABEL ──
+    const lbl = {hook:'🔥 HOOK',body:'📖 BODY',cta:'📣 CTA'}[line.type]||'';
+    const lblColor = line.type==='hook'?theme.hook:line.type==='cta'?theme.cta:theme.hi;
+    cx.fillStyle = lblColor;
+    cx.font = `800 ${Math.round(W*.048)}px Syne,sans-serif`;
+    cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.globalAlpha = 0.8;
+    cx.fillText(lbl, W/2, H*.33);
+    cx.globalAlpha = 1;
+
+    // ── MAIN TEXT with entrance animation ──
+    const enterAnim = Math.min(1, pct * 4);    // 0→1 in first 25% of duration
+    const exitAnim  = Math.max(0, 1 - (pct - 0.75) * 4); // 1→0 in last 25%
+    const alpha     = enterAnim * exitAnim;
+    const slideY    = (1 - enterAnim) * 80;    // slides up on entry
+
+    const fs   = Math.round(W * (style==='kinetic' ? 0.072 : 0.068));
+    const lh   = fs * 1.55;
+    const padX = Math.round(W * 0.09);
+    const maxW = W - padX * 2;
+
+    cx.font = `${line.type==='hook'?'800':'600'} ${fs}px Syne,sans-serif`;
+    const words = line.text.split(' ');
+    let cur = '', wrapped = [];
+    words.forEach(w => {
+      const t = cur ? cur+' '+w : w;
+      if (cx.measureText(t).width > maxW && cur) { wrapped.push(cur); cur = w; }
+      else cur = t;
+    });
+    if (cur) wrapped.push(cur);
+
+    const textBlockH = wrapped.length * lh;
+    const startTextY = H/2 - textBlockH/2 + slideY;
+    const textColor  = line.type==='hook'?theme.hook:line.type==='cta'?theme.cta:theme.text;
+
+    cx.globalAlpha = alpha;
+    cx.fillStyle   = textColor;
+    cx.textAlign   = 'center';
+    cx.textBaseline= 'middle';
+
+    // Text shadow for readability
+    cx.shadowColor  = 'rgba(0,0,0,0.8)';
+    cx.shadowBlur   = 20;
+    cx.shadowOffsetX= 0; cx.shadowOffsetY= 2;
+
+    wrapped.forEach((wl, wi) => {
+      // Kinetic: reveal letter by letter
+      if (style === 'kinetic' && pct < 0.5) {
+        const revealPct = Math.min(1, pct * 3);
+        const charsToShow = Math.floor(wl.length * revealPct);
+        cx.fillText(wl.slice(0, charsToShow) + (charsToShow < wl.length ? '|' : ''), W/2, startTextY + wi*lh);
+      } else {
+        cx.fillText(wl, W/2, startTextY + wi*lh);
+      }
+    });
+
+    cx.shadowBlur = 0; cx.globalAlpha = 1;
+
+    // ── PROGRESS BAR ──
+    const barH = Math.round(H * 0.006);
+    cx.fillStyle = avHA(theme.acc, 0.25); cx.fillRect(0, H-barH, W, barH);
+    cx.fillStyle = theme.acc; cx.fillRect(0, H-barH, W*totalPct, barH);
+
+    // ── LINE DOTS (which line we're on) ──
+    const dotR = Math.round(W*0.012);
+    const dotGap = dotR*3;
+    const dotsTotal = lines.length;
+    const dotsW = dotsTotal * dotGap;
+    const dotStartX = W/2 - dotsW/2 + dotR;
+    lines.forEach((_, di) => {
+      cx.beginPath();
+      cx.arc(dotStartX + di*dotGap, H*0.92, di===lineIdx?dotR:dotR*0.55, 0, Math.PI*2);
+      cx.fillStyle = di===lineIdx ? theme.acc : avHA(theme.acc, 0.3);
+      cx.fill();
+    });
+
+    // Update UI
+    frame++;
+    progBar.style.width = (totalPct*100) + '%';
+    progText.textContent = `Generando... ${Math.round(totalPct*100)}% — ${line.type.toUpperCase()}: "${line.text.slice(0,40)}..."`;
+
+    // Preview
+    previewCtx.drawImage(cv, 0, 0, previewCv.width, previewCv.height);
+
+    requestAnimationFrame(drawFrame);
+  }
+
+  requestAnimationFrame(drawFrame);
+}
+
+function downloadAutoVideo() {
+  if (!avBlob) { showToast('⚠️ Primero generá el video'); return; }
+  const d = state.data;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(avBlob);
+  a.download = `video-auto-${(d.topic||'infoforge').toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,25)}.webm`;
+  a.click(); URL.revokeObjectURL(a.href);
+  setTimeout(() => window.open('https://cloudconvert.com/webm-to-mp4','_blank'), 800);
+  showToast('✅ Video descargado — se abre CloudConvert para convertir a MP4');
+}
 
 // ── MOBILE STEP MENU ──
 function showMobileStepMenu() {
