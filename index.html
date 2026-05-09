@@ -59,17 +59,20 @@ body::before {
   width: 100%; display: flex; flex-direction: column;
   align-items: center; gap: 4px; padding: 8px 0;
   scrollbar-width: none;
+  min-height: 0;
 }
 .sidebar-nav-scroll::-webkit-scrollbar { display: none; }
 
 /* Sección inferior — siempre visible */
 .sidebar-bottom {
-  width: 100%; padding: 8px 0 12px;
+  width: 100%; padding: 6px 0 8px;
   border-top: 1px solid var(--border);
   display: flex; flex-direction: column;
   align-items: center; gap: 2px;
   flex-shrink: 0;
   background: var(--bg2);
+  position: sticky;
+  bottom: 0;
 }
 
 .logo-mark {
@@ -669,6 +672,14 @@ body.beginner .mode-toggle { border-color:var(--yellow); color:var(--yellow); ba
     <div class="nav-item" onclick="openAutomation()">
       <span class="nav-icon">⚙️</span>
       <span class="nav-label">Automatización</span>
+    </div>
+    <div class="nav-item" onclick="saveBackupJSON()" style="border:1px solid rgba(52,211,153,0.3);background:rgba(52,211,153,0.05)">
+      <span class="nav-icon">💾</span>
+      <span class="nav-label" style="color:var(--green)">Guardar proyecto</span>
+    </div>
+    <div class="nav-item" onclick="loadBackupJSON()">
+      <span class="nav-icon">📂</span>
+      <span class="nav-label">Cargar proyecto</span>
     </div>
     <div class="nav-item" onclick="exportAll()">
       <span class="nav-icon">📦</span>
@@ -4486,8 +4497,91 @@ function rrect(cx,x,y,w,h,r){
   cx.closePath();
 }
 
-</script>
-<script>
+// ═══════════════════════════════════════════════
+// ★ GUARDAR / CARGAR PROYECTO (JSON)
+// ═══════════════════════════════════════════════
+function autoSave() {
+  try { localStorage.setItem('if_autosave', JSON.stringify({ data:state.data, results:state.results, step:state.currentStep, ts:Date.now() })); } catch(e) {}
+}
+
+function saveBackupJSON() {
+  const d=state.data, r=state.results;
+  if (!d.topic && !Object.keys(r).some(k=>r[k])) { showToast('⚠️ Todavía no generaste contenido para guardar'); return; }
+  const snap = { version:'1.0', savedAt:new Date().toLocaleString('es-AR'), topic:d.topic||'Sin título', data:state.data, results:state.results, step:state.currentStep };
+  const blob = new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `infoforge-${(d.topic||'proyecto').toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,30)}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  autoSave();
+  showToast('✅ Proyecto guardado como .json');
+}
+
+function loadBackupJSON() {
+  const input = document.createElement('input');
+  input.type='file'; input.accept='.json,application/json';
+  input.onchange = (e) => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const snap = JSON.parse(ev.target.result);
+        if (!snap.data && !snap.results) { showToast('⚠️ Archivo inválido'); return; }
+        if (snap.data)    Object.assign(state.data, snap.data);
+        if (snap.results) Object.assign(state.results, snap.results);
+        restoreFormFields();
+        updateProgress();
+        const count = Object.keys(snap.results||{}).filter(k=>snap.results[k]).length;
+        showToast(`✅ "${snap.topic||'Proyecto'}" cargado — ${count} contenidos restaurados`);
+        if (snap.step) goToStep(snap.step);
+      } catch(err) { showToast('⚠️ Error al leer el archivo'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function restoreFormFields() {
+  const d=state.data;
+  const fields = {
+    'topic-input':d.topic,'price-input':d.price,'result-input':d.result,
+    'guarantee-input':d.guarantee,'meta-pixel-id':d.metaPixelId,
+    'tiktok-pixel-id':d.tiktokPixelId,'checkout-link':d.checkoutLink,
+    'countdown-hours':d.countdownHours,'bn-title':d.topic,
+    'bn-price':d.price?'$'+d.price+' USD':'',
+  };
+  Object.entries(fields).forEach(([id,val])=>{ const el=document.getElementById(id); if(el&&val) el.value=val; });
+  const outputMap = {
+    'market-result':'marketResearch','competitive-result':'competitiveAnalysis',
+    'avatar-result':'avatar','pain-result':'painPoints','offer-result':'offer',
+    'pricing-result':'pricing','ebook-struct-result':'ebookStruct',
+    'ebook-content-result':'ebookContent','landing-result':'landing',
+    'ads-result':'ads','scripts-result':'scripts','emails-result':'emails',
+  };
+  Object.entries(outputMap).forEach(([elId,key])=>{
+    const el=document.getElementById(elId);
+    if(el&&state.results[key]){
+      el.textContent=state.results[key];
+      const out=document.getElementById(elId.replace('-result','-output'));
+      if(out) out.style.display='block';
+    }
+  });
+}
+
+// Auto-restaurar desde localStorage al cargar
+(function autoRestore(){
+  try {
+    const saved=localStorage.getItem('if_autosave');
+    if(!saved) return;
+    const snap=JSON.parse(saved);
+    if(!snap||!snap.ts||Date.now()-snap.ts>48*3600*1000) return;
+    if(snap.data)    Object.assign(state.data,snap.data);
+    if(snap.results) Object.assign(state.results,snap.results);
+    setTimeout(()=>{ if(snap.data?.topic) showToast(`💾 Sesión restaurada: "${snap.data.topic}"`); },1800);
+  } catch(e){}
+})();
+
+// ── MOBILE STEP MENU ──
 function showMobileStepMenu() {
   let menu = document.getElementById('mob-step-menu');
   if (menu) { menu.remove(); return; }
@@ -4501,57 +4595,38 @@ function showMobileStepMenu() {
     {s:11,icon:'🌐',label:'Landing Page (11-12)'},{s:13,icon:'📢',label:'Ads Creativos (13-14)'},
     {s:15,icon:'🚀',label:'Lanzamiento (15-16)'},{s:16,icon:'📦',label:'Exportar Todo'},
   ];
-  menu.innerHTML = `
-    <div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px 80px;max-height:75vh;overflow-y:auto">
-      <div style="width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px"></div>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--va);margin-bottom:14px;text-align:center">📋 Ir a un paso</div>
-      ${steps.map(s => `<button onclick="goToStep(${s.s});document.getElementById('mob-step-menu').remove()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;text-align:left"><span style="font-size:18px">${s.icon}</span>${s.label}</button>`).join('')}
-    </div>`;
+  const btns = steps.map(s =>
+    `<button onclick="goToStep(${s.s});document.getElementById('mob-step-menu').remove()" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;text-align:left"><span style="font-size:18px">${s.icon}</span>${s.label}</button>`
+  ).join('');
+  menu.innerHTML = `<div style="width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px 80px;max-height:75vh;overflow-y:auto"><div style="width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px"></div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--va);margin-bottom:14px;text-align:center">📋 Ir a un paso</div>${btns}</div>`;
   menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
   document.body.appendChild(menu);
 }
 
-</script>
-
-<script>
+// ── PWA ──
 let deferredPrompt = null;
-
-// Service Worker deshabilitado para evitar caché
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  });
+  navigator.serviceWorker.getRegistrations().then(regs => { regs.forEach(r => r.unregister()); });
 }
-
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const banner = document.getElementById('install-banner');
-  if (banner) { banner.style.display = 'flex'; setTimeout(() => banner.style.opacity = '1', 100); }
+  e.preventDefault(); deferredPrompt = e;
+  const b = document.getElementById('install-banner');
+  if (b) { b.style.display = 'flex'; setTimeout(() => b.style.opacity = '1', 100); }
 });
-
 function installApp() {
-  if (!deferredPrompt) {
-    document.getElementById('install-manual').style.display = 'flex';
-    return;
-  }
+  if (!deferredPrompt) { const m = document.getElementById('install-manual'); if(m) m.style.display='flex'; return; }
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(choice => {
-    if (choice.outcome === 'accepted') dismissBanner();
-    deferredPrompt = null;
-  });
+  deferredPrompt.userChoice.then(c => { if (c.outcome === 'accepted') dismissBanner(); deferredPrompt = null; });
 }
-
 function dismissBanner() {
-  const banner = document.getElementById('install-banner');
-  if (banner) { banner.style.opacity = '0'; setTimeout(() => banner.style.display = 'none', 300); }
+  const b = document.getElementById('install-banner');
+  if (b) { b.style.opacity = '0'; setTimeout(() => b.style.display = 'none', 300); }
 }
-
 if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
   document.body.classList.add('is-pwa');
 }
-
 window.addEventListener('appinstalled', dismissBanner);
+
 </script>
 
 <!-- INSTALL BANNER -->
