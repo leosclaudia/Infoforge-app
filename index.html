@@ -1599,7 +1599,7 @@ body.beginner .mode-toggle { border-color:var(--yellow); color:var(--yellow); ba
             <div class="output-label">🖼️ Banners generados</div>
             <button class="copy-btn" onclick="downloadAllBanners()">⬇️ Descargar todos (ZIP)</button>
           </div>
-          <div id="banners-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:12px"></div>
+          <div id="banners-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:16px"></div>
         </div>
       </div>
     </div>
@@ -4367,7 +4367,7 @@ function generateBanners() {
 
     // InfoForge badge
     cx.fillStyle=th.acc+'33';
-    cx.beginPath(); cx.roundRect(cx2-f.w*.2,pad,f.w*.4,fs*1.6,fs*.4); cx.fill();
+    rrect(cx,cx2-f.w*.2,pad,f.w*.4,fs*1.6,fs*.4); cx.fill();
     cx.fillStyle=th.acc;
     cx.font=`700 ${Math.round(fs*.55)}px Syne,sans-serif`;
     cx.textAlign='center'; cx.textBaseline='middle';
@@ -4408,7 +4408,7 @@ function generateBanners() {
     const priceY=fmt==='fb'?f.h*.72:f.h*.68;
     const bw=f.w*.42, bh=f.h*.1;
     cx.fillStyle=th.btn;
-    cx.beginPath(); cx.roundRect(cx2-bw/2,priceY-bh/2,bw,bh,bh/3); cx.fill();
+    rrect(cx,cx2-bw/2,priceY-bh/2,bw,bh,bh/3); cx.fill();
     cx.fillStyle='white';
     cx.font=`800 ${Math.round(fs*1.1)}px Syne,sans-serif`;
     cx.textAlign='center'; cx.textBaseline='middle';
@@ -4428,23 +4428,35 @@ function generateBanners() {
     cx.fillText('InfoForge',cx2,f.h-Math.round(f.h*.02));
     cx.globalAlpha=1;
 
-    // Show preview
+    // Show preview — full width, large
     const wrapper=document.createElement('div');
-    wrapper.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;';
+    wrapper.style.cssText='background:#111;border:2px solid var(--border2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;';
+
+    // Scale preview to fill card width
+    const cardW=280;
+    const ratio=f.w/f.h;
+    const previewW=cardW;
+    const previewH=Math.round(cardW/ratio);
+
     const preview=document.createElement('canvas');
-    const maxPW=300,ratio=f.w/f.h;
-    let pw=maxPW,ph=maxPW/ratio;
-    if(ph>300){ph=300;pw=300*ratio;}
-    preview.width=pw; preview.height=ph;
-    preview.style.display='block';
-    preview.getContext('2d').drawImage(cv,0,0,pw,ph);
+    preview.width=previewW;
+    preview.height=previewH;
+    preview.style.cssText=`display:block;width:100%;height:auto;`;
+    preview.getContext('2d').drawImage(cv,0,0,previewW,previewH);
+
     const info=document.createElement('div');
-    info.style.cssText='padding:10px 14px;display:flex;align-items:center;justify-content:space-between;';
-    info.innerHTML=`<span style="font-size:12px;font-weight:700;color:var(--text2)">${f.label} · ${f.w}×${f.h}</span>`;
+    info.style.cssText='padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);';
+    info.innerHTML=`<span style="font-size:12px;font-weight:700;color:var(--text2);font-family:Syne,sans-serif">${f.label}<br><span style="font-size:10px;color:var(--text3);font-weight:400">${f.w}×${f.h} px</span></span>`;
     const dlBtn=document.createElement('button');
-    dlBtn.textContent='⬇️ PNG';
-    dlBtn.style.cssText='background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.35);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:Syne,sans-serif';
-    dlBtn.onclick=()=>{const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download=`banner-${f.label.toLowerCase()}-${color}.png`;a.click();showToast('✅ Banner descargado');};
+    dlBtn.innerHTML='⬇️ PNG';
+    dlBtn.style.cssText='background:linear-gradient(135deg,#34d399,#059669);border:none;color:white;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:Syne,sans-serif;letter-spacing:.5px;';
+    dlBtn.onclick=()=>{
+      const a=document.createElement('a');
+      a.href=cv.toDataURL('image/png');
+      a.download=`banner-${f.label.toLowerCase().replace(/ /g,'-')}-${color}.png`;
+      a.click();
+      showToast('✅ Banner descargado como PNG');
+    };
     info.appendChild(dlBtn);
     wrapper.appendChild(preview);
     wrapper.appendChild(info);
@@ -4463,7 +4475,19 @@ function downloadAllBanners(){
   document.querySelectorAll('#banners-grid button').forEach(b=>b.click());
 }
 
+// ── ROUNDED RECT POLYFILL (cross-browser) ──
+function rrect(cx,x,y,w,h,r){
+  cx.beginPath();
+  cx.moveTo(x+r,y);
+  cx.lineTo(x+w-r,y);cx.arcTo(x+w,y,x+w,y+r,r);
+  cx.lineTo(x+w,y+h-r);cx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  cx.lineTo(x+r,y+h);cx.arcTo(x,y+h,x,y+h-r,r);
+  cx.lineTo(x,y+r);cx.arcTo(x,y,x+r,y,r);
+  cx.closePath();
+}
+
 </script>
+<script>
 function showMobileStepMenu() {
   let menu = document.getElementById('mob-step-menu');
   if (menu) { menu.remove(); return; }
